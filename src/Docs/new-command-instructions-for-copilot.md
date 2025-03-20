@@ -748,7 +748,7 @@ should not call `RegisterArgumentChain()` and instead manage their own argument 
 
 4. Special Case Commands:
    ```csharp
-   public class CapabilitiesListCommand : BaseCommandWithoutArgs
+   public class ToolsListCommand : BaseCommandWithoutArgs
    {
        public override Command GetCommand() => 
            new Command("list", "List all available commands...");

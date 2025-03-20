@@ -24,13 +24,13 @@
             }
         },
         {
-            "name": "Debug Capabilities List",
+            "name": "Debug Tools List",
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
             "program": "${workspaceFolder}/src/bin/Debug/net9.0/azmcp.exe",
             "args": [
-                "capabilities",
+                "tools",
                 "list",
             ],
             "cwd": "${workspaceFolder}",

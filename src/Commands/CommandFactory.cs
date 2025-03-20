@@ -12,7 +12,7 @@ using System.Text.Json.Serialization;
 using System.Text.Encodings.Web;
 using System.Linq;
 using AzureMCP.Commands.Storage.Blobs.Containers;
-using AzureMCP.Commands.Capabilities;
+using AzureMCP.Commands.Tools;
 using AzureMCP.Commands.Storage.Blobs;
 using System.Text;
 
@@ -52,7 +52,7 @@ public class CommandFactory
         RegisterCosmosCommands();
         RegisterStorageCommands();
         RegisterMonitorCommands();
-        RegisterCapabilitiesCommands();
+        RegisterToolsCommands();
         RegisterSubscriptionsCommands();
         RegisterGroupsCommands();
         RegisterMcpServerCommands();
@@ -139,14 +139,14 @@ public class CommandFactory
 
     }
 
-    private void RegisterCapabilitiesCommands()
+    private void RegisterToolsCommands()
     {
-        // Create Capabilities command group
-        var capabilities = new CommandGroup("capabilities", "CLI capabilities operations - Commands for discovering and exploring the functionality available in this CLI tool.");
-        _rootGroup.AddSubGroup(capabilities);
+        // Create Tools command group
+        var tools = new CommandGroup("tools", "CLI tools operations - Commands for discovering and exploring the functionality available in this CLI tool.");
+        _rootGroup.AddSubGroup(tools);
 
-        // Register Capabilities commands
-        capabilities.AddCommand("list", new CapabilitiesListCommand());
+        // Register Tools commands
+        tools.AddCommand("list", new ToolsListCommand());
 
     }
 

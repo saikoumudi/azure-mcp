@@ -2,16 +2,16 @@ using System.CommandLine;
 using System.CommandLine.Parsing;
 using AzureMCP.Arguments;
 using AzureMCP.Models;
-using AzureMCP.Models.Capabilities;
+using AzureMCP.Models.Tools;
 
-namespace AzureMCP.Commands.Capabilities;
+namespace AzureMCP.Commands.Tools;
 
-public class CapabilitiesListCommand : BaseCommandWithoutArgs
+public class ToolsListCommand : BaseCommandWithoutArgs
 {
 
     public override Command GetCommand()
     {
-        return new Command("list", "List all available commands and their capabilities in a hierarchical structure. This command returns detailed information about each command, including its name, description, full command path, available subcommands, and all supported arguments. Use this to explore the CLI's functionality or to build interactive command interfaces.");
+        return new Command("list", "List all available commands and their tools in a hierarchical structure. This command returns detailed information about each command, including its name, description, full command path, available subcommands, and all supported arguments. Use this to explore the CLI's functionality or to build interactive command interfaces.");
     }
 
     public override Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
@@ -20,16 +20,16 @@ public class CapabilitiesListCommand : BaseCommandWithoutArgs
         {
             var factory = context.GetService<CommandFactory>();
             var allCommands = factory.AllCommands;
-            var capabilities = factory.AllCommands
+            var tools = factory.AllCommands
                 .Where(kvp =>
                 {
                     var parts = kvp.Key.Split(CommandFactory.Separator, StringSplitOptions.RemoveEmptyEntries);
-                    return !parts.Any(x => x == "capabilities" || x == "server");
+                    return !parts.Any(x => x == "tools" || x == "server");
                 })
-                .Select(kvp => CreateCapability(kvp.Key, kvp.Value))
+                .Select(kvp => CreateCommand(kvp.Key, kvp.Value))
                 .ToList();
 
-            context.Response.Results = capabilities;
+            context.Response.Results = tools;
             return Task.FromResult(context.Response);
         }
         catch (Exception ex)
@@ -39,7 +39,7 @@ public class CapabilitiesListCommand : BaseCommandWithoutArgs
         }
     }
 
-    private static CommandCapability CreateCapability(string hyphenatedName, ICommand command)
+    private static CommandInfo CreateCommand(string hyphenatedName, ICommand command)
     {
         var fullPath = hyphenatedName.Replace(CommandFactory.Separator, ' ');
         var argumentInfos = command.GetArgumentChain()
@@ -57,7 +57,7 @@ public class CapabilitiesListCommand : BaseCommandWithoutArgs
             })
             .ToList();
 
-        return new CommandCapability
+        return new CommandInfo
         {
             Name = command.GetCommand().Name,
             Description = command.GetCommand().Name ?? string.Empty,

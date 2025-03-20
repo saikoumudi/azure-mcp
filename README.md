@@ -24,9 +24,9 @@ Start the MCP server:
 azmcp server start
 ```
 
-## Capabilities
+## Tools
 
-`azmcp capabilities list`
+`azmcp tools list`
 
 ## Commands
 
@@ -250,6 +250,6 @@ azmcp groups list --subscription-id <subscription-id> [--tenant-id <tenant-id>]
 
 #### CLI Utilities
 ```bash
-# List all available commands and capabilities
-azmcp capabilities list
+# List all available commands and tools
+azmcp tools list
 ```

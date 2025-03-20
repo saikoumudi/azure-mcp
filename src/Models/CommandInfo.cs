@@ -1,9 +1,9 @@
 using System.Text.Json.Serialization;
 using AzureMCP.Models;
 
-namespace AzureMCP.Models.Capabilities;
+namespace AzureMCP.Models.Tools;
 
-public class CommandCapability
+public class CommandInfo
 {
     [JsonPropertyName("name")]
     public string Name { get; set; } = string.Empty;
@@ -16,7 +16,7 @@ public class CommandCapability
     
     [JsonPropertyName("subcommands")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public List<CommandCapability>? Subcommands { get; set; }
+    public List<CommandInfo>? Subcommands { get; set; }
     
     [JsonPropertyName("args")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]

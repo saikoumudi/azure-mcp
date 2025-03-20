@@ -1,7 +1,7 @@
 ﻿using System.CommandLine.Parsing;
 using AzureMCP.Commands;
-using AzureMCP.Commands.Capabilities;
-using AzureMCP.Models.Capabilities;
+using AzureMCP.Commands.Tools;
+using AzureMCP.Models.Tools;
 using McpDotNet.Server;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
@@ -9,12 +9,12 @@ using Xunit;
 
 namespace AzureMCP.Tests.Commands
 {
-    public class CapabilitiesListCommandTests
+    public class ToolsListCommandTests
     {
         private readonly IServiceProvider _serviceProvider;
         private readonly IMcpServer _mcpServer;
 
-        public CapabilitiesListCommandTests()
+        public ToolsListCommandTests()
         {
             _mcpServer = Substitute.For<IMcpServer>();
 
@@ -46,14 +46,14 @@ namespace AzureMCP.Tests.Commands
             var provider = new ServiceCollection()
                 .AddSingleton(commandFactory)
                 .BuildServiceProvider();
-            var capabilities = new CapabilitiesListCommand();
+            var tools = new ToolsListCommand();
             var context = new Models.CommandContext(provider);
-            var actual = await capabilities.ExecuteAsync(context, default(ParseResult));
+            var actual = await tools.ExecuteAsync(context, default(ParseResult));
 
             Assert.NotNull(actual);
-            Assert.IsType<List<CommandCapability>>(actual?.Results);
+            Assert.IsType<List<CommandInfo>>(actual?.Results);
 
-            var collection = (List<CommandCapability>)actual.Results;
+            var collection = (List<CommandInfo>)actual.Results;
             var actualNames = collection.Select(x => x.FullPath).ToHashSet(StringComparer.OrdinalIgnoreCase);
 
             foreach (var ex in expected)
