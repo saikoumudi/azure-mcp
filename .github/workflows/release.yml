@@ -1,0 +1,223 @@
+name: Release Build
+
+# Add concurrency to prevent parallel runs
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - '**.md'
+      - '.github/**'
+  workflow_dispatch:
+    inputs:
+      version_increment:
+        description: 'Version increment type (major, minor, patch)'
+        required: true
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+        default: 'patch'
+
+env:
+  DOTNET_VERSION: '9.0.x'
+  ARTIFACT_PREFIX: 'azmcp'
+  PROJECT_PATH: 'src/AzureMCP'
+
+jobs:
+  version:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      version: ${{ steps.set-version.outputs.version }}
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Read version
+      id: read-version
+      run: |
+        if ! VERSION=$(grep -oP '(?<=<Version>)[^<]+' ${{ env.PROJECT_PATH }}); then
+          echo "Failed to read version from project file"
+          exit 1
+        fi
+        echo "current=$VERSION" >> $GITHUB_OUTPUT
+        
+    - name: Calculate new version
+      id: set-version
+      run: |
+        IFS='.' read -r major minor patch <<< "${{ steps.read-version.outputs.current }}"
+        
+        if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+          case "${{ inputs.version_increment }}" in
+            "major")
+              major=$((major + 1))
+              minor=0
+              patch=0
+              ;;
+            "minor")
+              minor=$((minor + 1))
+              patch=0
+              ;;
+            "patch")
+              patch=$((patch + 1))
+              ;;
+          esac
+        else
+          patch=$((patch + 1))
+        fi
+        
+        NEW_VERSION="$major.$minor.$patch"
+        echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
+        
+    - name: Update .csproj version and push changes
+      if: github.event_name == 'workflow_dispatch'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        echo "Updating .csproj version"
+        sed -i "s/<Version>.*<\/Version>/<Version>${{ steps.set-version.outputs.version }}<\/Version>/" ${{ env.PROJECT_PATH }}
+        
+        git config --global user.name 'GitHub Action'
+        git config --global user.email 'action@github.com'
+        git add ${{ env.PROJECT_PATH }}
+        git commit -m "Bump version to ${{ steps.set-version.outputs.version }}"
+        git tag "v${{ steps.set-version.outputs.version }}"
+        git push
+        git push --tags
+
+  build:
+    needs: version
+    name: Build (${{ matrix.os }})
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - os: windows
+            rid: win-x64
+            extension: .exe
+          - os: linux
+            rid: linux-x64
+            extension: ''
+          - os: osx
+            rid: osx-x64
+            extension: ''
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+        
+    - name: Restore dependencies
+      run: |
+        cd src
+        dotnet restore
+      
+    - name: Build
+      run: |
+        cd src
+        dotnet publish -c Release -r ${{ matrix.rid }} \
+        --self-contained true \
+        -p:PublishSingleFile=true \
+        -p:PublishTrimmed=false \
+        -p:IncludeNativeLibrariesForSelfExtract=true \
+        -p:Version=${{ needs.version.outputs.version }}
+        
+    - name: Zip Binary
+      run: |
+        mkdir -p artifacts
+        cd src/bin/Release/net9.0/${{ matrix.rid }}/publish
+        zip ../../../../../../artifacts/${{ env.ARTIFACT_PREFIX }}-${{ matrix.os }}.zip azmcp${{ matrix.extension }}
+        
+    - name: Upload Build Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ env.ARTIFACT_PREFIX }}-${{ matrix.os }}
+        path: artifacts/${{ env.ARTIFACT_PREFIX }}-${{ matrix.os }}.zip
+        if-no-files-found: error
+
+  release:
+    needs: [version, build]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    if: github.event_name == 'workflow_dispatch'
+    
+    steps:
+    - name: Check if Release Job is Triggered
+      run: echo "Release job triggered"
+      
+    - name: Download Artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: artifacts
+        
+    - name: List Artifacts Directory
+      run: |
+        pwd
+        ls -R artifacts/
+      
+    - name: Verify Artifact Paths
+      run: |
+        echo "Verifying artifact paths..."
+        ls -alh artifacts/${{ env.ARTIFACT_PREFIX }}-windows.zip
+        ls -alh artifacts/${{ env.ARTIFACT_PREFIX }}-linux.zip
+        ls -alh artifacts/${{ env.ARTIFACT_PREFIX }}-osx.zip
+      
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: v${{ needs.version.outputs.version }}
+        name: Release v${{ needs.version.outputs.version }}
+        files: |
+          artifacts/${{ env.ARTIFACT_PREFIX }}-windows/${{ env.ARTIFACT_PREFIX }}-windows.zip
+          artifacts/${{ env.ARTIFACT_PREFIX }}-linux/${{ env.ARTIFACT_PREFIX }}-linux.zip
+          artifacts/${{ env.ARTIFACT_PREFIX }}-osx/${{ env.ARTIFACT_PREFIX }}-osx.zip
+        generate_release_notes: true
+        prerelease: ${{ github.event.inputs.prerelease == 'true' }}
+        body: |
+          ## Changes in this Release
+          
+          ### New Features
+          - TODO: Add features
+          
+          ### Bug Fixes
+          - TODO: Add fixes
+          
+          ### Installation
+          Download the appropriate binary for your platform:
+          - Windows: azmcp-windows.zip
+          - Linux: azmcp-linux.zip
+          - macOS: azmcp-osx.zip
+
+  upload-latest:
+    needs: [version, build]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    if: github.event_name == 'push'
+    
+    steps:
+    - name: Download Artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: artifacts
+        
+    - name: Upload to Latest Build
+      uses: actions/upload-artifact@v4
+      with:
+        name: latest-build-v${{ needs.version.outputs.version }}
+        path: artifacts/**/${{ env.ARTIFACT_PREFIX }}-*.zip
+        if-no-files-found: error
+        retention-days: 5
