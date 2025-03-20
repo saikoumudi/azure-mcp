@@ -1,24 +1,24 @@
 using System.CommandLine;
 using System.CommandLine.Parsing;
-using AzureMCP.Arguments;
+using AzureMCP.Arguments.Monitor;
 using AzureMCP.Models;
 using AzureMCP.Services.Interfaces;
 
-namespace AzureMCP.Commands.Groups;
+namespace AzureMCP.Commands.Monitor.Workspace;
 
-public class GroupsListCommand : BaseCommand<BaseArgumentsWithSubscriptionId>
+public class WorkspaceListCommand : BaseCommand<WorkspaceListArguments>
 {
-    public GroupsListCommand() : base()
+    public WorkspaceListCommand() : base()
     {
-        RegisterArgumentChain();
     }
 
     public override Command GetCommand()
     {
         var command = new Command(
-            "list",
-            "List resource groups in a subscription. This command retrieves all resource groups available in the specified Azure subscription, displaying their names, IDs, and locations. Use this command to identify target resource groups for other operations.");
-
+            "list", 
+            "List Log Analytics workspaces in a subscription. This command retrieves all Log Analytics workspaces available in the specified Azure subscription, displaying their names, IDs, and other key properties. Use this command to identify workspaces before querying their logs or tables.");
+            
+        
         AddBaseOptionsToCommand(command);
         return command;
     }
@@ -34,14 +34,14 @@ public class GroupsListCommand : BaseCommand<BaseArgumentsWithSubscriptionId>
                 return context.Response;
             }
 
-            var resourceGroupService = context.GetService<IResourceGroupService>();
-            var groups = await resourceGroupService.GetResourceGroups(
+            var monitorService = context.GetService<IMonitorService>();
+            var workspaces = await monitorService.ListWorkspaces(
                 options.SubscriptionId!,
                 options.TenantId,
                 options.RetryPolicy);
 
-            context.Response.Results = groups?.Count > 0 ? 
-                new { groups } : 
+            context.Response.Results = workspaces?.Count > 0 ? 
+                new { workspaces } : 
                 null;
         }
         catch (Exception ex)

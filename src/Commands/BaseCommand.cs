@@ -6,12 +6,6 @@ using AzureMCP.Services.Interfaces;
 using Azure.Core;
 using AzureMCP.Extensions;
 using AzureMCP.Arguments;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using System;
-using System.Text.RegularExpressions;
-using System.CommandLine.Binding;
 using System.CommandLine.Parsing;
 
 namespace AzureMCP.Commands;
@@ -156,9 +150,9 @@ public abstract class BaseCommand<TArgs> : ICommand where TArgs : BaseArguments,
         if (string.IsNullOrEmpty(subscriptionId)) return [];
 
         var resourceGroupService = context.GetService<IResourceGroupService>();
-        var resourceGroups = await resourceGroupService.GetResourceGroups(subscriptionId);
+        var resourceGroup = await resourceGroupService.GetResourceGroups(subscriptionId);
 
-        return resourceGroups?.Select(rg => new ArgumentOption { Name = rg.Name, Id = rg.Id }).ToList() ?? [];
+        return resourceGroup?.Select(rg => new ArgumentOption { Name = rg.Name, Id = rg.Id }).ToList() ?? [];
     }
 
 

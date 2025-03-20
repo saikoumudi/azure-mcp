@@ -6,7 +6,7 @@ public class CommandGroup
 {
     public string Name { get; }
     public string Description { get; }
-    public List<CommandGroup> SubGroups { get; } = [];
+    public List<CommandGroup> SubGroup { get; } = [];
     public Dictionary<string, ICommand> Commands { get; } = [];
     public Command Command { get; }
 
@@ -30,10 +30,10 @@ public class CommandGroup
         else
         {
             // Find or create the subgroup
-            var subGroup = SubGroups.FirstOrDefault(g => g.Name == parts[0]);
+            var subGroup = SubGroup.FirstOrDefault(g => g.Name == parts[0]);
             if (subGroup == null)
             {
-                throw new InvalidOperationException($"Subgroup {parts[0]} not found. Groups must be registered before commands.");
+                throw new InvalidOperationException($"Subgroup {parts[0]} not found. Group must be registered before commands.");
             }
             
             // Recursively add command to subgroup
@@ -43,7 +43,7 @@ public class CommandGroup
 
     public void AddSubGroup(CommandGroup subGroup)
     {
-        SubGroups.Add(subGroup);
+        SubGroup.Add(subGroup);
         Command.Add(subGroup.Command);
     }
 
@@ -60,7 +60,7 @@ public class CommandGroup
         else
         {
             // Find the subgroup and recursively get the command
-            var subGroup = SubGroups.FirstOrDefault(g => g.Name == parts[0]);
+            var subGroup = SubGroup.FirstOrDefault(g => g.Name == parts[0]);
             if (subGroup == null)
             {
                 throw new InvalidOperationException($"Subgroup {parts[0]} not found.");

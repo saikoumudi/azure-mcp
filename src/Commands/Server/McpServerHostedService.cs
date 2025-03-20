@@ -1,9 +1,6 @@
-﻿using System.Collections.Generic;
-using System.CommandLine;
+﻿using System.CommandLine;
 using System.Text.Json;
-using AzureMCP.Commands.Tools;
 using AzureMCP.Models;
-using AzureMCP.Models.Tools;
 using McpDotNet.Protocol.Types;
 using McpDotNet.Server;
 using Microsoft.Extensions.Hosting;

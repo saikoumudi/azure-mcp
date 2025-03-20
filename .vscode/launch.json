@@ -9,7 +9,7 @@
             "program": "${workspaceFolder}/src/bin/Debug/net9.0/azmcp.exe",
             "args": [
                 "cosmos",
-                "databases",
+                "database",
                 "list",
                 "--subscription-id",
                 "${input:subscriptionId}",
@@ -41,14 +41,14 @@
             }
         },
         {
-            "name": "Debug Monitor Tables List",
+            "name": "Debug Monitor Table List",
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
             "program": "${workspaceFolder}/src/bin/Debug/net9.0/azmcp.exe",
             "args": [
                 "monitor",
-                "tables",
+                "table",
                 "list",
                 "--subscription-id",
                 "25fd0362-aa79-488b-b37b-d6e892009fdf"
@@ -61,14 +61,14 @@
             }
         },
         {
-            "name": "Debug Monitor Logs Query",
+            "name": "Debug Monitor Log Query",
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
             "program": "${workspaceFolder}/src/bin/Debug/net9.0/azmcp.exe",
             "args": [
                 "monitor",
-                "logs",
+                "log",
                 "query",
                 "--subscription-id",
                 "25fd0362-aa79-488b-b37b-d6e892009fdf",

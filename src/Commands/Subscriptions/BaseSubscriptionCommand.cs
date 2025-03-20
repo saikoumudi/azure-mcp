@@ -1,10 +1,3 @@
-using System.CommandLine;
-using AzureMCP.Models;
-using System.Linq;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using AzureMCP.Services.Interfaces;
-using AzureMCP.Arguments;
 using AzureMCP.Arguments.Subscription;
 
 namespace AzureMCP.Commands.Subscriptions;

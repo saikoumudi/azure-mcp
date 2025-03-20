@@ -1,9 +1,5 @@
-using Azure.Core;
 using Azure.Identity;
 using Azure.ResourceManager;
-using Azure.Storage.Blobs;
-using Azure.Data.Tables;
-using AzureMCP.Models;
 using AzureMCP.Arguments;
 
 namespace AzureMCP.Services.Azure;

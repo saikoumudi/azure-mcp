@@ -1,10 +1,9 @@
 using System.Text.Json.Serialization;
 using AzureMCP.Models;
-using AzureMCP.Arguments;
 
 namespace AzureMCP.Arguments.Monitor;
 
-public class TablesListArguments : BaseMonitorArguments
+public class TableListArguments : BaseMonitorArguments
 {
     [JsonPropertyName(ArgumentDefinitions.Monitor.WorkspaceNameName)]
     public string? WorkspaceName { get; set; }

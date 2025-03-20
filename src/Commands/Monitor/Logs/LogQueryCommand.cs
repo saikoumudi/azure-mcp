@@ -1,22 +1,19 @@
-using System;
 using System.CommandLine;
-using System.Threading.Tasks;
 using AzureMCP.Arguments.Monitor;
 using AzureMCP.Models;
 using AzureMCP.Services.Interfaces;
-using System.Linq.Expressions;
 using System.CommandLine.Parsing;
 
-namespace AzureMCP.Commands.Monitor.Logs;
+namespace AzureMCP.Commands.Monitor.Log;
 
-public class LogsQueryCommand : BaseMonitorCommand<LogsQueryArguments>
+public class LogQueryCommand : BaseMonitorCommand<LogQueryArguments>
 {
     protected Option<string> _tableOption;
     protected Option<string> _queryOption;
     protected Option<int> _hoursOption;
     protected Option<int> _limitOption;
 
-    public LogsQueryCommand() : base()
+    public LogQueryCommand() : base()
     {
          _tableOption = new Option<string>(
             "--table",
@@ -62,18 +59,18 @@ public class LogsQueryCommand : BaseMonitorCommand<LogsQueryArguments>
     }
 
 
-    protected ArgumentChain<LogsQueryArguments> CreateTableArgument()
+    protected ArgumentChain<LogQueryArguments> CreateTableArgument()
     {
-        return ArgumentChain<LogsQueryArguments>
+        return ArgumentChain<LogQueryArguments>
             .Create("table", "The name of the Log Analytics table to query")
             .WithCommandExample($"{GetCommandPath()} --table \"MyTable\"")
             .WithValueAccessor(args => args.Table ?? string.Empty)
             .WithIsRequired(true);
     }
 
-    protected ArgumentChain<LogsQueryArguments> CreateQueryArgument()
+    protected ArgumentChain<LogQueryArguments> CreateQueryArgument()
     {
-        return ArgumentChain<LogsQueryArguments>
+        return ArgumentChain<LogQueryArguments>
             .Create(
                 ArgumentDefinitions.Monitor.QueryTextName, 
                 ArgumentDefinitions.Monitor.Query.Description)
@@ -82,9 +79,9 @@ public class LogsQueryCommand : BaseMonitorCommand<LogsQueryArguments>
             .WithIsRequired(true);
     }
 
-    protected ArgumentChain<LogsQueryArguments> CreateHoursArgument()
+    protected ArgumentChain<LogQueryArguments> CreateHoursArgument()
     {
-        return ArgumentChain<LogsQueryArguments>
+        return ArgumentChain<LogQueryArguments>
             .Create(
                 ArgumentDefinitions.Monitor.HoursName, 
                 ArgumentDefinitions.Monitor.Hours.Description)
@@ -94,9 +91,9 @@ public class LogsQueryCommand : BaseMonitorCommand<LogsQueryArguments>
             .WithIsRequired(false);
     }
 
-    protected ArgumentChain<LogsQueryArguments> CreateLimitArgument()
+    protected ArgumentChain<LogQueryArguments> CreateLimitArgument()
     {
-        return ArgumentChain<LogsQueryArguments>
+        return ArgumentChain<LogQueryArguments>
             .Create(
                 ArgumentDefinitions.Monitor.LimitName, 
                 ArgumentDefinitions.Monitor.Limit.Description)
@@ -107,7 +104,7 @@ public class LogsQueryCommand : BaseMonitorCommand<LogsQueryArguments>
     }
 
 
-    protected override LogsQueryArguments BindArguments(ParseResult parseResult)
+    protected override LogQueryArguments BindArguments(ParseResult parseResult)
     {
         var args = base.BindArguments(parseResult);
         args.WorkspaceId = parseResult.GetValueForOption(_workspaceIdOption);

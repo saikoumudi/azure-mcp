@@ -2,19 +2,14 @@ using System.CommandLine;
 using System.CommandLine.Invocation;
 using AzureMCP.Commands.Cosmos;
 using AzureMCP.Commands.Server;
-using AzureMCP.Commands.Storage;
 using AzureMCP.Commands.Subscriptions;
 
 using AzureMCP.Models;
-using Microsoft.Extensions.DependencyInjection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.Encodings.Web;
-using System.Linq;
-using AzureMCP.Commands.Storage.Blobs.Containers;
 using AzureMCP.Commands.Tools;
-using AzureMCP.Commands.Storage.Blobs;
-using System.Text;
+using AzureMCP.Commands.Storage.Blob;
 
 namespace AzureMCP.Commands;
 
@@ -46,15 +41,15 @@ public class CommandFactory
 
     public IReadOnlyDictionary<string, ICommand> AllCommands => _commandMap;
 
-    private void RegisterCommandGroups()
+    private void RegisterCommandGroup()
     {
         // Register top-level command groups
         RegisterCosmosCommands();
         RegisterStorageCommands();
         RegisterMonitorCommands();
         RegisterToolsCommands();
-        RegisterSubscriptionsCommands();
-        RegisterGroupsCommands();
+        RegisterSubscriptionCommands();
+        RegisterGroupCommands();
         RegisterMcpServerCommands();
     }
 
@@ -65,24 +60,24 @@ public class CommandFactory
         _rootGroup.AddSubGroup(cosmos);
 
         // Create Cosmos subgroups
-        var databases = new CommandGroup("databases", "Cosmos DB databases operations - Commands for listing, creating, and managing databases within your Cosmos DB accounts.");
+        var databases = new CommandGroup("database", "Cosmos DB database operations - Commands for listing, creating, and managing database within your Cosmos DB accounts.");
         cosmos.AddSubGroup(databases);
 
-        var cosmosContainers = new CommandGroup("containers", "Cosmos DB containers operations - Commands for listing, creating, and managing containers (collections) within your Cosmos DB databases.");
-        databases.AddSubGroup(cosmosContainers);
+        var cosmosContainer = new CommandGroup("container", "Cosmos DB container operations - Commands for listing, creating, and managing container (collection) within your Cosmos DB databases.");
+        databases.AddSubGroup(cosmosContainer);
 
-        var cosmosAccounts = new CommandGroup("accounts", "Cosmos DB accounts operations - Commands for listing and managing Cosmos DB accounts in your Azure subscription.");
-        cosmos.AddSubGroup(cosmosAccounts);
+        var cosmosAccount = new CommandGroup("account", "Cosmos DB account operations - Commands for listing and managing Cosmos DB account in your Azure subscription.");
+        cosmos.AddSubGroup(cosmosAccount);
 
         // Create items subgroup for Cosmos
-        var cosmosItems = new CommandGroup("items", "Cosmos DB items operations - Commands for querying, creating, updating, and deleting documents within your Cosmos DB containers.");
-        cosmosContainers.AddSubGroup(cosmosItems);
+        var cosmosItem = new CommandGroup("item", "Cosmos DB item operations - Commands for querying, creating, updating, and deleting document within your Cosmos DB containers.");
+        cosmosContainer.AddSubGroup(cosmosItem);
 
         // Register Cosmos commands
-        databases.AddCommand("list", new DatabasesListCommand());
-        cosmosContainers.AddCommand("list", new Cosmos.ContainersListCommand());
-        cosmosAccounts.AddCommand("list", new Cosmos.AccountsListCommand());
-        cosmosItems.AddCommand("query", new ItemsQueryCommand());
+        databases.AddCommand("list", new DatabaseListCommand());
+        cosmosContainer.AddCommand("list", new Cosmos.ContainerListCommand());
+        cosmosAccount.AddCommand("list", new Cosmos.AccountListCommand());
+        cosmosItem.AddCommand("query", new ItemQueryCommand());
 
 
     }
@@ -94,25 +89,25 @@ public class CommandFactory
         _rootGroup.AddSubGroup(storage);
 
         // Create Storage subgroups
-        var storageAccounts = new CommandGroup("accounts", "Storage accounts operations - Commands for listing and managing Storage accounts in your Azure subscription.");
-        storage.AddSubGroup(storageAccounts);
+        var storageAccount = new CommandGroup("account", "Storage account operations - Commands for listing and managing Storage account in your Azure subscription.");
+        storage.AddSubGroup(storageAccount);
 
-        var tables = new CommandGroup("tables", "Storage tables operations - Commands for working with Azure Table Storage, including listing and querying tables.");
+        var tables = new CommandGroup("table", "Storage table operations - Commands for working with Azure Table Storage, including listing and querying table.");
         storage.AddSubGroup(tables);
 
-        var blobs = new CommandGroup("blobs", "Storage blobs operations - Commands for uploading, downloading, and managing blobs in your Azure Storage accounts.");
+        var blobs = new CommandGroup("blob", "Storage blob operations - Commands for uploading, downloading, and managing blob in your Azure Storage accounts.");
         storage.AddSubGroup(blobs);
 
         // Create a containers subgroup under blobs
-        var blobContainers = new CommandGroup("containers", "Storage blob containers operations - Commands for managing blob containers in your Azure Storage accounts.");
-        blobs.AddSubGroup(blobContainers);
+        var blobContainer = new CommandGroup("container", "Storage blob container operations - Commands for managing blob container in your Azure Storage accounts.");
+        blobs.AddSubGroup(blobContainer);
 
         // Register Storage commands
-        storageAccounts.AddCommand("list", new Storage.Accounts.AccountsListCommand());
-        tables.AddCommand("list", new Storage.Tables.TablesListCommand());
-        blobs.AddCommand("list", new BlobsListCommand());
-        blobContainers.AddCommand("list", new Storage.Blobs.Containers.ContainersListCommand());
-        blobContainers.AddCommand("details", new Storage.Blobs.Containers.ContainersDetailsCommand());
+        storageAccount.AddCommand("list", new Storage.Account.AccountListCommand());
+        tables.AddCommand("list", new Storage.Table.TableListCommand());
+        blobs.AddCommand("list", new BlobListCommand());
+        blobContainer.AddCommand("list", new Storage.Blob.Container.ContainerListCommand());
+        blobContainer.AddCommand("details", new Storage.Blob.Container.ContainerDetailsCommand());
     }
 
     private void RegisterMonitorCommands()
@@ -122,19 +117,19 @@ public class CommandFactory
         _rootGroup.AddSubGroup(monitor);
 
         // Create Monitor subgroups
-        var logs = new CommandGroup("logs", "Azure Monitor logs operations - Commands for querying Log Analytics workspaces using KQL.");
+        var logs = new CommandGroup("log", "Azure Monitor logs operations - Commands for querying Log Analytics workspaces using KQL.");
         monitor.AddSubGroup(logs);
 
-        var workspaces = new CommandGroup("workspaces", "Log Analytics workspace operations - Commands for managing Log Analytics workspaces.");
+        var workspaces = new CommandGroup("workspace", "Log Analytics workspace operations - Commands for managing Log Analytics workspaces.");
         monitor.AddSubGroup(workspaces);
 
-        var monitorTables = new CommandGroup("tables", "Log Analytics workspace table operations - Commands for listing tables in Log Analytics workspaces.");
-        monitor.AddSubGroup(monitorTables);
+        var monitorTable = new CommandGroup("table", "Log Analytics workspace table operations - Commands for listing tables in Log Analytics workspaces.");
+        monitor.AddSubGroup(monitorTable);
 
         // Register Monitor commands
-        logs.AddCommand("query", new Monitor.Logs.LogsQueryCommand());
-        workspaces.AddCommand("list", new Monitor.Workspaces.WorkspacesListCommand());
-        monitorTables.AddCommand("list", new Monitor.Tables.TablesListCommand());
+        logs.AddCommand("query", new Monitor.Log.LogQueryCommand());
+        workspaces.AddCommand("list", new Monitor.Workspace.WorkspaceListCommand());
+        monitorTable.AddCommand("list", new Monitor.Table.TableListCommand());
 
 
     }
@@ -150,25 +145,24 @@ public class CommandFactory
 
     }
 
-    private void RegisterSubscriptionsCommands()
+    private void RegisterSubscriptionCommands()
     {
-        // Create Subscriptions command group
-        var subscriptions = new CommandGroup("subscriptions", "Azure subscription operations - Commands for listing and managing Azure subscriptions accessible to your account.");
-        _rootGroup.AddSubGroup(subscriptions);
+        // Create Subscription command group
+        var subscription = new CommandGroup("subscription", "Azure subscription operations - Commands for listing and managing Azure subscriptions accessible to your account.");
+        _rootGroup.AddSubGroup(subscription);
 
-        // Register Subscriptions commands
-        subscriptions.AddCommand("list", new SubscriptionsListCommand());
-
+        // Register Subscription commands
+        subscription.AddCommand("list", new SubscriptionsListCommand());
     }
 
-    private void RegisterGroupsCommands()
+    private void RegisterGroupCommands()
     {
-        // Create Groups command group
-        var groups = new CommandGroup("groups", "Resource group operations - Commands for listing and managing Azure resource groups in your subscriptions.");
-        _rootGroup.AddSubGroup(groups);
+        // Create Group command group
+        var group = new CommandGroup("group", "Resource group operations - Commands for listing and managing Azure resource groups in your subscriptions.");
+        _rootGroup.AddSubGroup(group);
 
-        // Register Groups commands
-        groups.AddCommand("list", new Groups.GroupsListCommand());
+        // Register Group commands
+        group.AddCommand("list", new Group.GroupListCommand());
     }
 
     private void RegisterMcpServerCommands()
@@ -199,7 +193,7 @@ public class CommandFactory
         }
 
         // Recursively configure subgroup commands
-        foreach (var subGroup in group.SubGroups)
+        foreach (var subGroup in group.SubGroup)
         {
             ConfigureCommands(subGroup);
         }
@@ -209,10 +203,10 @@ public class CommandFactory
     {
         var rootCommand = new RootCommand("Azure AI Data Plane CLI - A comprehensive command-line interface for interacting with Azure data services. This CLI provides direct access to Azure data plane operations, allowing you to manage and query your Azure resources efficiently without switching between multiple tools.");
 
-        RegisterCommandGroups();
+        RegisterCommandGroup();
 
         // Copy the root group's subcommands to the RootCommand
-        foreach (var subGroup in _rootGroup.SubGroups)
+        foreach (var subGroup in _rootGroup.SubGroup)
         {
             rootCommand.Add(subGroup.Command);
         }
@@ -257,7 +251,7 @@ public class CommandFactory
 
         // Find the next subgroup
         var groupName = nameParts.Dequeue();
-        var nextGroup = group.SubGroups.FirstOrDefault(g => g.Name == groupName);
+        var nextGroup = group.SubGroup.FirstOrDefault(g => g.Name == groupName);
 
         return nextGroup != null ? FindCommandInGroup(nextGroup, nameParts) : null;
     }
@@ -282,12 +276,12 @@ public class CommandFactory
             }
         }
 
-        if (node.SubGroups == null)
+        if (node.SubGroup == null)
         {
             return aggregated;
         }
         
-        foreach (var command in node.SubGroups)
+        foreach (var command in node.SubGroup)
         {
             var childPrefix = GetPrefix(updatedPrefix, command.Name);
             var subcommandsDictionary = CreateCommmandDictionary(command, updatedPrefix);

@@ -1,9 +1,6 @@
 using System.CommandLine;
 using AzureMCP.Models;
 using Microsoft.Azure.Cosmos;
-using System.Linq;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using AzureMCP.Services.Interfaces;
 using AzureMCP.Arguments;
 
@@ -24,7 +21,7 @@ public abstract class BaseCosmosCommand<TArgs> : BaseCommand<TArgs> where TArgs 
 
     protected override string GetCommandPath()
     {
-        // Extract the command name from the class name (e.g., ContainersListCommand -> cosmos containers list)
+        // Extract the command name from the class name (e.g., ContainerListCommand -> cosmos containers list)
         string commandName = GetType().Name.Replace("Command", "");
         
         // Insert spaces before capital letters and convert to lowercase

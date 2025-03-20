@@ -1,11 +1,9 @@
 using Azure.Core;
-using Azure.Identity;
 using Azure.ResourceManager;
 using Azure.ResourceManager.CosmosDB;
 using Microsoft.Azure.Cosmos;
 using AzureMCP.Services.Interfaces;
 using System.Text.Json;
-using AzureMCP.Models;
 using AzureMCP.Arguments;
 
 namespace AzureMCP.Services.Azure.Cosmos;
@@ -129,7 +127,7 @@ public class CosmosService : BaseAzureService, ICosmosService
         return containers;
     }
 
-    public async Task<List<JsonDocument>> ItemsQuery(
+    public async Task<List<JsonDocument>> QueryItems(
         string accountName,
         string databaseName,
         string containerName,

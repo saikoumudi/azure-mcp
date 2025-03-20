@@ -23,7 +23,7 @@ public interface ICosmosService
         string? tenantId = null,
         RetryPolicyArguments? retryPolicy = null);
 
-    Task<List<JsonDocument>> ItemsQuery(
+    Task<List<JsonDocument>> QueryItems(
         string accountName,
         string databaseName,
         string containerName,

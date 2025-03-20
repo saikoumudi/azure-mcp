@@ -1,6 +1,4 @@
 using System.Text.Json;
-using Azure.ResourceManager.OperationalInsights;
-using AzureMCP.Models;
 using AzureMCP.Arguments;
 using AzureMCP.Models.Monitor;
 

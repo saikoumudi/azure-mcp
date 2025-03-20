@@ -1,13 +1,8 @@
 using System.CommandLine;
 using AzureMCP.Models;
 using AzureMCP.Services.Interfaces;
-using AzureMCP.Arguments;
 using AzureMCP.Arguments.Storage;
-using System.Linq;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using System.CommandLine.Parsing;
-using AzureMCP.Arguments.Storage.Blobs;
 
 namespace AzureMCP.Commands.Storage;
 
@@ -30,7 +25,7 @@ public abstract class BaseStorageCommand<TArgs> : BaseCommand<TArgs>
     // Override to provide the correct command path for examples
     protected override string GetCommandPath()
     {
-        // Extract the command name from the class name (e.g., ContainersListCommand -> list)
+        // Extract the command name from the class name (e.g., ContainerListCommand -> list)
         string commandName = GetType().Name.Replace("Command", "");
         
         // Get the full namespace path after Commands.Storage

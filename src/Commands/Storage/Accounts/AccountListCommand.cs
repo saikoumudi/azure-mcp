@@ -4,11 +4,11 @@ using AzureMCP.Arguments.Storage;
 using AzureMCP.Models;
 using AzureMCP.Services.Interfaces;
 
-namespace AzureMCP.Commands.Storage.Accounts;
+namespace AzureMCP.Commands.Storage.Account;
 
-public class AccountsListCommand : BaseCommand<AccountsListArguments>
+public class AccountListCommand : BaseCommand<AccountListArguments>
 {
-    public AccountsListCommand() : base()
+    public AccountListCommand() : base()
     {
         RegisterArgumentChain();
     }

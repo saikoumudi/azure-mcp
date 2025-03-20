@@ -1,6 +1,5 @@
 using Azure;
 using Azure.Core;
-using Azure.ResourceManager;
 using Azure.ResourceManager.Storage;
 using Azure.ResourceManager.Storage.Models;
 using Azure.ResourceManager.Resources;
@@ -8,7 +7,6 @@ using Azure.Storage.Blobs;
 using AzureMCP.Services.Interfaces;
 using Azure.Data.Tables;
 using AzureMCP.Models;
-using AzureMCP.Commands;
 using AzureMCP.Arguments;
 using Azure.Storage.Blobs.Models;  // Add this import
 

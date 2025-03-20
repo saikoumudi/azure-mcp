@@ -3,7 +3,7 @@ using AzureMCP.Models;
 
 namespace AzureMCP.Arguments.Cosmos;
 
-public class ItemsQueryArguments : BaseCosmosArguments
+public class ItemQueryArguments : BaseCosmosArguments
 {
     [JsonPropertyName(ArgumentDefinitions.Cosmos.DatabaseName)]
     public string? Database { get; set; }

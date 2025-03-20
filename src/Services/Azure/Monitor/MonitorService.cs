@@ -1,16 +1,9 @@
-using System.Linq;
 using Azure.Monitor.Query;
-using Azure.ResourceManager;
 using Azure.ResourceManager.OperationalInsights;
 using Azure.Core;
 using Azure;
-using Azure.Core.Extensions;
 using System.Text.Json;
 using AzureMCP.Services.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Azure.Identity;
 using AzureMCP.Arguments;
 using AzureMCP.Models.Monitor;
 

@@ -1,4 +1,3 @@
-using Azure.Core;
 using AzureMCP.Models;
 using System.Text.Json.Serialization;
 

@@ -1,19 +1,17 @@
-using System;
 using System.CommandLine;
 using System.CommandLine.Parsing;
-using System.Threading.Tasks;
 using AzureMCP.Arguments.Monitor;
 using AzureMCP.Models;
 using AzureMCP.Services.Interfaces;
 
-namespace AzureMCP.Commands.Monitor.Tables;
+namespace AzureMCP.Commands.Monitor.Table;
 
-public class TablesListCommand : BaseMonitorCommand<TablesListArguments>
+public class TableListCommand : BaseMonitorCommand<TableListArguments>
 {
     private readonly Option<string> _tableTypeOption;
 
 
-    public TablesListCommand() : base()
+    public TableListCommand() : base()
     {
         _tableTypeOption = ArgumentDefinitions.Monitor.TableType.ToOption();
 
@@ -28,7 +26,7 @@ public class TablesListCommand : BaseMonitorCommand<TablesListArguments>
     {
         var command = new Command(
             "list", 
-            "List tables in a Log Analytics workspace. This command retrieves all available tables from the specified workspace, which can be used for constructing KQL queries. Tables contain different types of log data depending on the solutions and data sources configured for your workspace.");
+            "List tables in a Log Analytics workspace. This command retrieves all available tables from the specified workspace, which can be used for constructing KQL queries. Table contain different types of log data depending on the solutions and data sources configured for your workspace.");
             
         AddBaseOptionsToCommand(command);
         command.AddOption(_workspaceNameOption);
@@ -37,7 +35,7 @@ public class TablesListCommand : BaseMonitorCommand<TablesListArguments>
         return command;
     }
 
-    protected override TablesListArguments BindArguments(ParseResult parseResult)
+    protected override TableListArguments BindArguments(ParseResult parseResult)
     {
         var args = base.BindArguments(parseResult);
         args.WorkspaceName = parseResult.GetValueForOption(_workspaceNameOption);
@@ -79,9 +77,9 @@ public class TablesListCommand : BaseMonitorCommand<TablesListArguments>
     }
 
 
-    protected ArgumentChain<TablesListArguments> CreateTableTypeArgument()
+    protected ArgumentChain<TableListArguments> CreateTableTypeArgument()
     {
-        return ArgumentChain<TablesListArguments>
+        return ArgumentChain<TableListArguments>
             .Create(ArgumentDefinitions.Monitor.TableTypeName, ArgumentDefinitions.Monitor.TableType.Description)
             .WithCommandExample($"{GetCommandPath()} --table-type <table-type>")
             .WithValueAccessor(args => args.TableType ?? string.Empty)

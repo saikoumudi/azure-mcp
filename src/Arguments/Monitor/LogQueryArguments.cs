@@ -1,10 +1,9 @@
 using System.Text.Json.Serialization;
-using AzureMCP.Arguments;
 using AzureMCP.Models;
 
 namespace AzureMCP.Arguments.Monitor;
 
-public class LogsQueryArguments : BaseMonitorArguments
+public class LogQueryArguments : BaseMonitorArguments
 {
     [JsonPropertyName(ArgumentDefinitions.Monitor.WorkspaceIdName)]
     public string? WorkspaceId { get; set; }

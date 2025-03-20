@@ -1,17 +1,14 @@
 using System.CommandLine;
-using Azure;
-using Azure.Identity;
-using AzureMCP.Arguments.Storage;
 using AzureMCP.Models;
 using AzureMCP.Services.Interfaces;
 using System.CommandLine.Parsing;
-using AzureMCP.Arguments.Storage.Tables;
+using AzureMCP.Arguments.Storage.Table;
 
-namespace AzureMCP.Commands.Storage.Tables;
+namespace AzureMCP.Commands.Storage.Table;
 
-public class TablesListCommand : BaseStorageCommand<TablesListArguments>
+public class TableListCommand : BaseStorageCommand<TableListArguments>
 {
-    public TablesListCommand() : base()
+    public TableListCommand() : base()
     {
         RegisterArgumentChain(
             CreateAccountArgument(GetAccountOptions)
@@ -26,7 +23,7 @@ public class TablesListCommand : BaseStorageCommand<TablesListArguments>
         return command;
     }
 
-    protected override TablesListArguments BindArguments(ParseResult parseResult)
+    protected override TableListArguments BindArguments(ParseResult parseResult)
     {
         var args = base.BindArguments(parseResult);
         args.Account = parseResult.GetValueForOption(_accountOption);

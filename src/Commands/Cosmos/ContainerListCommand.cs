@@ -6,9 +6,9 @@ using System.CommandLine.Parsing;
 
 namespace AzureMCP.Commands.Cosmos;
 
-public class ContainersListCommand : BaseCosmosCommand<ContainersListArguments>
+public class ContainerListCommand : BaseCosmosCommand<ContainerListArguments>
 {
-    public ContainersListCommand() : base()
+    public ContainerListCommand() : base()
     {
         RegisterArgumentChain(
             CreateAccountArgument(),
@@ -28,7 +28,7 @@ public class ContainersListCommand : BaseCosmosCommand<ContainersListArguments>
         return command;
     }
 
-    protected override ContainersListArguments BindArguments(ParseResult parseResult)
+    protected override ContainerListArguments BindArguments(ParseResult parseResult)
     {
         var args = base.BindArguments(parseResult);
         args.Account = parseResult.GetValueForOption(_accountOption);

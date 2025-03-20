@@ -6,9 +6,9 @@ using System.CommandLine.Parsing;
 
 namespace AzureMCP.Commands.Cosmos;
 
-public class AccountsListCommand : BaseCosmosCommand<AccountsListArguments>
+public class AccountListCommand : BaseCosmosCommand<AccountListArguments>
 {
-    public AccountsListCommand() : base()
+    public AccountListCommand() : base()
     {
         // Register only required base arguments since no account-specific args needed
         RegisterArgumentChain();

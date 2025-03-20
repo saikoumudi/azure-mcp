@@ -6,9 +6,9 @@ using System.CommandLine.Parsing;
 
 namespace AzureMCP.Commands.Cosmos;
 
-public class ItemsQueryCommand : BaseCosmosCommand<ItemsQueryArguments>
+public class ItemQueryCommand : BaseCosmosCommand<ItemQueryArguments>
 {
-    public ItemsQueryCommand() : base()
+    public ItemQueryCommand() : base()
     {
         RegisterArgumentChain(
             CreateAccountArgument(),
@@ -32,7 +32,7 @@ public class ItemsQueryCommand : BaseCosmosCommand<ItemsQueryArguments>
         return command;
     }
 
-    protected override ItemsQueryArguments BindArguments(ParseResult parseResult)
+    protected override ItemQueryArguments BindArguments(ParseResult parseResult)
     {
         var args = base.BindArguments(parseResult);
         args.Account = parseResult.GetValueForOption(_accountOption);
@@ -54,7 +54,7 @@ public class ItemsQueryCommand : BaseCosmosCommand<ItemsQueryArguments>
             }
 
             var cosmosService = context.GetService<ICosmosService>();
-            var items = await cosmosService.ItemsQuery(
+            var items = await cosmosService.QueryItems(
                 options.Account!, 
                 options.Database!, 
                 options.Container!, 

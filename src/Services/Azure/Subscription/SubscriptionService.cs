@@ -1,5 +1,3 @@
-using Azure.ResourceManager;
-using Azure.Core.Extensions;
 using AzureMCP.Models;
 using AzureMCP.Services.Interfaces;
 using AzureMCP.Arguments;

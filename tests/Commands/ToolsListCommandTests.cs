@@ -28,19 +28,20 @@ namespace AzureMCP.Tests.Commands
         public async Task GetsExpectedFullNames()
         {
             var expected = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            expected.Add("azmcp cosmos databases containers items query");
-            expected.Add("azmcp cosmos databases containers list");
-            expected.Add("azmcp cosmos databases list");
-            expected.Add("azmcp cosmos accounts list");
-            expected.Add("azmcp storage accounts list");
-            expected.Add("azmcp storage tables list");
-            expected.Add("azmcp storage blobs list");
-            expected.Add("azmcp storage blobs containers list");
-            expected.Add("azmcp storage blobs containers details");
-            expected.Add("azmcp monitor logs query");
-            expected.Add("azmcp monitor workspaces list");
-            expected.Add("azmcp monitor tables list");
-            expected.Add("azmcp subscriptions list");
+            expected.Add("azmcp cosmos database container item query");
+            expected.Add("azmcp cosmos database container list");
+            expected.Add("azmcp cosmos database list");
+            expected.Add("azmcp cosmos account list");
+            expected.Add("azmcp storage account list");
+            expected.Add("azmcp storage table list");
+            expected.Add("azmcp storage blob list");
+            expected.Add("azmcp storage blob container list");
+            expected.Add("azmcp storage blob container details");
+            expected.Add("azmcp monitor log query");
+            expected.Add("azmcp monitor workspace list");
+            expected.Add("azmcp monitor table list");
+            expected.Add("azmcp subscription list");
+            expected.Add("azmcp group list");
 
             var commandFactory = new CommandFactory(_serviceProvider);
             var provider = new ServiceCollection()

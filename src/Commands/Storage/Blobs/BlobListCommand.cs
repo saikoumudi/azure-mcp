@@ -1,17 +1,14 @@
 using System.CommandLine;
-using Azure;
-using Azure.Identity;
 using AzureMCP.Models;
 using AzureMCP.Services.Interfaces;
-using AzureMCP.Arguments.Storage;
-using AzureMCP.Arguments.Storage.Blobs;
+using AzureMCP.Arguments.Storage.Blob;
 using System.CommandLine.Parsing;
 
-namespace AzureMCP.Commands.Storage.Blobs;
+namespace AzureMCP.Commands.Storage.Blob;
 
-public class BlobsListCommand : BaseStorageCommand<BlobsListArguments>
+public class BlobListCommand : BaseStorageCommand<BlobListArguments>
 {
-    public BlobsListCommand()
+    public BlobListCommand()
         : base()
     {
         RegisterArgumentChain(
@@ -29,7 +26,7 @@ public class BlobsListCommand : BaseStorageCommand<BlobsListArguments>
         return command;
     }
 
-    protected override BlobsListArguments BindArguments(ParseResult parseResult)
+    protected override BlobListArguments BindArguments(ParseResult parseResult)
     {
         var args = base.BindArguments(parseResult);
         args.Account = parseResult.GetValueForOption(_accountOption);

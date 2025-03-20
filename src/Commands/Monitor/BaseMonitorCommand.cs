@@ -1,11 +1,7 @@
-using System;
 using System.CommandLine;
-using System.Threading.Tasks;
 using AzureMCP.Arguments;
-using AzureMCP.Arguments.Monitor;
 using AzureMCP.Models;
 using AzureMCP.Services.Interfaces;
-using Azure;
 
 namespace AzureMCP.Commands.Monitor;
 

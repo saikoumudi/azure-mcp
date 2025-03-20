@@ -19,7 +19,7 @@ Example: `azmcp cosmos databases list`
 A complete command implementation requires the following files in this exact structure:
 
 1. Arguments class: `src/Arguments/{Service}/{SubService}/{Resource}/{Resource}{Operation}Arguments.cs`
-   Example: `src/Arguments/Storage/Blobs/Containers/ContainersDetailsArguments.cs`
+   Example: `src/Arguments/Storage/Blob/Containers/ContainersDetailsArguments.cs`
 
 2. Service interface method: `src/Services/Interfaces/I{Service}Service.cs`
    Example: `src/Services/Interfaces/IStorageService.cs`
@@ -28,7 +28,7 @@ A complete command implementation requires the following files in this exact str
    Example: `src/Services/Azure/Storage/StorageService.cs`
 
 4. Command class: `src/Commands/{Service}/{SubService}/{Resource}/{Resource}{Operation}Command.cs`
-   Example: `src/Commands/Storage/Blobs/Containers/ContainersDetailsCommand.cs`
+   Example: `src/Commands/Storage/Blob/Containers/ContainersDetailsCommand.cs`
 
 5. Registration in: `src/Commands/CommandFactory.cs`
 
@@ -38,8 +38,8 @@ A complete command implementation requires the following files in this exact str
    ```
    azmcp storage blobs containers list
    ↓
-   src/Arguments/Storage/Blobs/Containers/ContainersListArguments.cs
-   src/Commands/Storage/Blobs/Containers/ContainersListCommand.cs
+   src/Arguments/Storage/Blob/Containers/ContainersListArguments.cs
+   src/Commands/Storage/Blob/Containers/ContainersListCommand.cs
    ```
 
 2. Services are flat with standardized locations:
@@ -50,8 +50,8 @@ A complete command implementation requires the following files in this exact str
 
 3. Namespaces must exactly match the folder structure:
    ```csharp
-   namespace AzureMCP.Commands.Storage.Blobs.Containers;
-   namespace AzureMCP.Arguments.Storage.Blobs.Containers;
+   namespace AzureMCP.Commands.Storage.Blob.Containers;
+   namespace AzureMCP.Arguments.Storage.Blob.Containers;
    ```
 
 ## Step 1: Create Arguments Class
@@ -218,7 +218,7 @@ public class {Resource}{Operation}Command : Base{Service}Command<{Resource}{Oper
 > 
 > Example for a command that only uses base arguments:
 > ```csharp
-> public AccountsListCommand() : base()
+> public AccountListCommand() : base()
 > {
 >     RegisterArgumentChain();
 > }
@@ -247,7 +247,7 @@ private void Register{Service}Commands()
         new {Resource}{Operation}Command());
 }
 
-private void RegisterCommandGroups()
+private void RegisterCommandGroup()
 {
     RegisterStorageCommands();
     RegisterCosmosCommands();
@@ -271,7 +271,7 @@ private void RegisterKeyVaultCommands()
     secrets.AddCommand("list", new Secrets.SecretsListCommand());
 }
 
-private void RegisterCommandGroups()
+private void RegisterCommandGroup()
 {
     RegisterStorageCommands();
     RegisterCosmosCommands();
@@ -409,9 +409,9 @@ public abstract class BaseServiceCommand<TArgs> : BaseCommand<TArgs>
     }
 }
 
-public class AccountsListCommand : BaseServiceCommand<AccountsListArguments>
+public class AccountListCommand : BaseServiceCommand<AccountListArguments>
 {
-    public AccountsListCommand() : base()
+    public AccountListCommand() : base()
     {
         RegisterArgumentChain();
     }
@@ -643,7 +643,7 @@ public class ContainersListCommand : BaseStorageCommand
 
 ### CommandFactory Registration
 ```csharp
-private void RegisterCommandGroups()
+private void RegisterCommandGroup()
 {
     var storage = new CommandGroup("storage", "Storage operations");
     _rootGroup.AddSubGroup(storage);
@@ -790,7 +790,7 @@ protected override int GetStatusCode(Exception ex) => ex switch
 ## CommandFactory Guidelines
 
 ```csharp
-private void RegisterCommandGroups()
+private void RegisterCommandGroup()
 {
     var cosmos = new CommandGroup("cosmos", 
         "Cosmos DB operations - Commands for managing and querying Azure Cosmos DB resources. " + 
@@ -802,7 +802,7 @@ private void RegisterCommandGroups()
     _rootGroup.AddSubGroup(cosmos);
     cosmos.AddSubGroup(databases);
     
-    databases.AddCommand("list", new DatabasesListCommand());
+    databases.AddCommand("list", new DatabaseListCommand());
 }
 
 ## Code Style Requirements

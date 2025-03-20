@@ -2,7 +2,6 @@ using System.Text.Json;
 using System.CommandLine;
 using AzureMCP.Commands;
 using AzureMCP.Models;
-using AzureMCP.Services.Azure;
 using AzureMCP.Services.Azure.Cosmos;
 using AzureMCP.Services.Azure.Storage;
 using AzureMCP.Services.Azure.Monitor;
