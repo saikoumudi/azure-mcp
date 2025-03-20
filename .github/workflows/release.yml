@@ -27,7 +27,7 @@ on:
 env:
   DOTNET_VERSION: '9.0.x'
   ARTIFACT_PREFIX: 'azmcp'
-  PROJECT_PATH: 'src/AzureMCP'
+  PROJECT_PATH: 'src/AzureMCP.csproj'
 
 jobs:
   version:
@@ -42,7 +42,7 @@ jobs:
     - name: Read version
       id: read-version
       run: |
-        if ! VERSION=$(grep -oP '(?<=<Version>)[^<]+' ${{ env.PROJECT_PATH }}); then
+        if ! VERSION=$(grep -oP '(?<=<Version>)[^<]+' "${{ env.PROJECT_PATH }}"); then
           echo "Failed to read version from project file"
           exit 1
         fi

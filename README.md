@@ -242,6 +242,12 @@ azmcp monitor logs query --subscription-id <subscription-id> \
                         --query "recent"
 ```
 
+#### Resource Group Operations
+```bash
+# List resource groups in a subscription
+azmcp groups list --subscription-id <subscription-id> [--tenant-id <tenant-id>]
+```
+
 #### CLI Utilities
 ```bash
 # List all available commands and capabilities

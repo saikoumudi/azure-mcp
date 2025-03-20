@@ -15,10 +15,5 @@ public class BaseArguments
     [JsonPropertyName(ArgumentDefinitions.Common.AuthMethodName)]
     public AuthMethod? AuthMethod { get; set; }
 
-    public RetryPolicyArguments? RetryPolicy { get; set; }
-
-
-
-
-    
+    public RetryPolicyArguments? RetryPolicy { get; set; }    
 }

@@ -34,16 +34,21 @@ A complete command implementation requires the following files in this exact str
 
 ### File Organization Rules
 
-1. Arguments and Commands should mirror the command structure:
-   - `azmcp storage blobs containers list` → 
-     - `src/Arguments/Storage/Blobs/Containers/ContainersListArguments.cs`
-     - `src/Commands/Storage/Blobs/Containers/ContainersListCommand.cs`
+1. Commands and Arguments must follow exact hierarchical structure:
+   ```
+   azmcp storage blobs containers list
+   ↓
+   src/Arguments/Storage/Blobs/Containers/ContainersListArguments.cs
+   src/Commands/Storage/Blobs/Containers/ContainersListCommand.cs
+   ```
 
-2. Services are flat (not nested):
-   - `src/Services/Interfaces/IStorageService.cs`
-   - `src/Services/Azure/Storage/StorageService.cs`
+2. Services are flat with standardized locations:
+   ```
+   src/Services/Interfaces/IStorageService.cs
+   src/Services/Azure/Storage/StorageService.cs
+   ```
 
-3. Command namespaces should match folder structure:
+3. Namespaces must exactly match the folder structure:
    ```csharp
    namespace AzureMCP.Commands.Storage.Blobs.Containers;
    namespace AzureMCP.Arguments.Storage.Blobs.Containers;
@@ -51,49 +56,44 @@ A complete command implementation requires the following files in this exact str
 
 ## Step 1: Create Arguments Class
 
-Location: `src/Arguments/{Service}/{Resource}{Operation}Arguments.cs`
+Location: `src/Arguments/{Service}/{SubService}/{Resource}/{Resource}{Operation}Arguments.cs`
 
 Template:
-```csharp
-namespace AzureMCP.Arguments.{Service};
+```csharp 
+namespace AzureMCP.Arguments.{Service}.{SubService}.{Resource};
 
-public class {Resource}{Operation}Arguments : Base{Service}Arguments
+public class {Resource}{Operation}Arguments : BaseArgumentsWithSubscriptionId 
 {
-    // IMPORTANT: When adding properties that already exist in the base class,
-    // you must use the 'new' keyword to explicitly indicate property hiding
-    public new string? Account { get; set; }
-    
-    // Add other command-specific properties here
     public string? {SpecificParam} { get; set; }
 }
 ```
 
-Notes:
-- Inherit from the appropriate base arguments class (`Base{Service}Arguments`)
-- Base classes already include common properties like `SubscriptionId`, `TenantId`, and `AuthMethod`
-- Use nullable properties with `?` for all properties
+IMPORTANT: 
+1. Do not redefine properties from base classes
+2. Use `BaseArgumentsWithSubscriptionId` for commands that require subscription ID
+3. Use `BaseAzureArguments` only for commands that don't need subscription ID (rare)
 
 ## Step 2: Define Service Interface Method
 
 Location: `src/Services/Interfaces/I{Service}Service.cs`
 
+IMPORTANT: Before adding new methods:
+1. Check existing service interface for similar methods that could be reused
+2. Look for patterns in existing method signatures
+3. Check if base service classes already provide the functionality
+4. Only add new methods if existing ones cannot be reused
+
 Template:
 ```csharp
 public interface I{Service}Service
 {
-    // IMPORTANT: Add your interface method before implementing in the service
-    Task<TResult> {Operation}{Resource}(
-        string {requiredParam1}, 
+    Task<List<string>> {Operation}{Resource}(
+        string {requiredParam1},
         string subscriptionId,
         string? tenantId = null,
         RetryPolicyArguments? retryPolicy = null);
 }
 ```
-
-Notes:
-- Use verb + resource name for method naming (e.g., `ListContainers`)
-- Always include `subscriptionId` and `tenantId` parameters
-- Return types are typically `Task<List<string>>` or `Task<object>`
 
 ## Step 3: Implement Service Method
 
@@ -103,32 +103,26 @@ Template:
 ```csharp
 public class {Service}Service : Base{Service}Service, I{Service}Service
 {
-    // Add your implementation
     public async Task<List<string>> {Operation}{Resource}(
         string {requiredParam1}, 
         string subscriptionId, 
         string? tenantId = null)
     {
-        // Get credential for authentication
         var credential = await GetCredential(tenantId);
         
         try
         {
-            // Create client
             var client = new {ServiceClient}(
                 endpoint, 
                 credential);
             
-            // Call Azure SDK method
             var response = await client.{SdkMethod}Async();
             
-            // Transform and return response
             return response.Value.Select(item => item.Name).ToList();
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "{OperationName} failed", nameof({Operation}{Resource}));
-            throw;
+            throw new Exception($"Error in {nameof({Operation}{Resource})}: {ex.Message}", ex);
         }
     }
 }
@@ -141,96 +135,69 @@ Notes:
 
 ## Step 4: Create Command Class
 
-Location: `src/Commands/{Service}/{Resource}{Operation}Command.cs`
+Location: `src/Commands/{Service}/{SubService}/{Resource}/{Resource}{Operation}Command.cs`
 
 Template:
 ```csharp
 using System.CommandLine;
+using System.CommandLine.Parsing;
 using AzureMCP.Models;
 using AzureMCP.Services.Interfaces;
-using AzureMCP.Arguments.{Service};
+using AzureMCP.Arguments.{Service}.{SubService}.{Resource};
 
-namespace AzureMCP.Commands.{Service};
+namespace AzureMCP.Commands.{Service}.{SubService}.{Resource};
 
-public class {Resource}{Operation}Command : Base{Service}Command
+public class {Resource}{Operation}Command : Base{Service}Command<{Resource}{Operation}Arguments>
 {
     public {Resource}{Operation}Command() : base()
     {
-        // Register argument chain using CreateBaseArgument method
-        RegisterArgumentChain<{Resource}{Operation}Arguments>(
-            // Required arguments - use CreateBaseArgument for custom arguments
-            CreateBaseArgument<{Resource}{Operation}Arguments>(
-                "account",
-                "Account name",
-                args => args.Account),
-            CreateBaseArgument<{Resource}{Operation}Arguments>(
-
-                "resource",
-                "Resource name",
-                args => args.Resource)
+        RegisterArgumentChain(
+            CreateAccountArgument(GetAccountOptions),
+            CreateContainerArgument(GetContainerOptions)
         );
     }
 
-> **IMPORTANT**: Even if your command only needs base arguments (like `SubscriptionId`, `TenantId`, or `AuthMethod`), 
-> you **must** call `RegisterArgumentChain<TArgs>()` with no arguments to ensure proper argument registration and validation.
-> 
-> Example for a command that only uses base arguments:
-> ```csharp
-> public AccountsListCommand() : base()
-> {
->     // Register the argument chain with no additional arguments
->     // This ensures base arguments like SubscriptionId are properly required
->     RegisterArgumentChain<AccountsListArguments>();
-> }
-> ```
-> 
-> Failing to register the argument chain will cause the command to skip validation of base arguments,
-> potentially resulting in runtime errors with messages like "SubscriptionId cannot be null or empty".
-
     public override Command GetCommand()
     {
-        // Create command with name and description
         var command = new Command(
-            "{operation}", 
-            "{Description of what this command does, its requirements, and its output format.}");
-        
-        // Add common options
+            "{operation}",
+            "{Detailed description of what the command does, its requirements, and output format}");
+
         AddBaseOptionsToCommand(command);
-        
-        // Add command-specific options WITHOUT setting IsRequired - this is handled by the argument chain
         command.AddOption(_accountOption);
-        command.AddOption(_resourceOption);
-        
+        command.AddOption(_containerOption);
+
         return command;
     }
 
-    public override async Task<CommandResponse> ExecuteAsync(CommandContext context, object commandOptions)
+    protected override {Resource}{Operation}Arguments BindArguments(ParseResult parseResult)
     {
-        // Parse command options
-        var parseResult = (System.CommandLine.Parsing.ParseResult)commandOptions;
-        var options = ParseOptions<{Resource}{Operation}Arguments>(parseResult);
+        var args = base.BindArguments(parseResult);
+        args.Account = parseResult.GetValueForOption(_accountOption);
+        args.Container = parseResult.GetValueForOption(_containerOption);
+        return args;
+    }
+
+    public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
+    {
+        var options = BindArguments(parseResult);
 
         try
         {
-            // Process argument chain and return early if required arguments are missing
             if (!await ProcessArgumentChain(context, options))
             {
                 return context.Response;
             }
 
-            // Get service from DI
             var service = context.GetService<I{Service}Service>();
-            
-            // Call service method with required arguments
             var results = await service.{Operation}{Resource}(
-                options.{RequiredParam1}!,
+                options.Account!,
                 options.SubscriptionId!,
-                options.TenantId
-            );
-                
-            // Set results in response
+                options.TenantId,
+                options.RetryPolicy);
+
             context.Response.Results = results?.Count > 0 ? 
-                new { {resultName} = results } : 
+                new { results } : 
                 null;
         }
         catch (Exception ex)
@@ -247,53 +214,138 @@ public class {Resource}{Operation}Command : Base{Service}Command
 > 1. Do not set `IsRequired = true` on System.CommandLine.Option instances in commands. The required status 
 >    is handled by the argument chain system through `CreateBaseArgument` or other argument creation methods.
 > 2. Even if your command only needs base arguments (like `SubscriptionId`, `TenantId`, or `AuthMethod`), 
->    you **must** call `RegisterArgumentChain<TArgs>()` with no arguments to ensure proper argument registration and validation.
+>    you **must** call `RegisterArgumentChain()` (without type parameter) to ensure proper argument registration and validation.
 > 
 > Example for a command that only uses base arguments:
 > ```csharp
 > public AccountsListCommand() : base()
 > {
->     // Register the argument chain with no additional arguments
->     // This ensures base arguments like SubscriptionId are properly required
->     RegisterArgumentChain<AccountsListArguments>();
+>     RegisterArgumentChain();
 > }
 > ```
-> 
-> Failing to register the argument chain will cause the command to skip validation of base arguments,
-> potentially resulting in runtime errors with messages like "SubscriptionId cannot be null or empty".
 
 ## Step 5: Register Command in CommandFactory
 
 Location: `src/Commands/CommandFactory.cs`
 
-Add your command to the `RegisterCommandGroups` method:
+Commands must be registered in service-specific helper methods:
 
 ```csharp
+using AzureMCP.Commands.{Service};
+
+private void Register{Service}Commands()
+{
+    var service = new CommandGroup("{service}", "{Service} operations - {Description}");
+    _rootGroup.AddSubGroup(service);
+
+    var resource = new CommandGroup(
+        "{resource}", 
+        "{Resource} operations - {Description}");
+    service.AddSubGroup(resource);
+
+    resource.AddCommand("{operation}", 
+        new {Resource}{Operation}Command());
+}
+
 private void RegisterCommandGroups()
 {
-    // Find or create the appropriate command group
-    var resourceGroup = new CommandGroup(
-        "{resource}", 
-        "{Resource} operations - Description");
-    serviceGroup.AddSubGroup(resourceGroup);
-    
-    // Register your command
-    resourceGroup.AddCommand("{operation}", new {Resource}{Operation}Command());
+    RegisterStorageCommands();
+    RegisterCosmosCommands();
+    RegisterMonitorCommands();
+    Register{Service}Commands();
 }
 ```
+
+Example for a new service:
+```csharp
+private void RegisterKeyVaultCommands()
+{
+    var keyvault = new CommandGroup("keyvault", 
+        "Key Vault operations - Commands for managing secrets, keys, and certificates");
+    _rootGroup.AddSubGroup(keyvault);
+
+    var secrets = new CommandGroup("secrets",
+        "Key Vault secrets operations");
+    keyvault.AddSubGroup(secrets);
+
+    secrets.AddCommand("list", new Secrets.SecretsListCommand());
+}
+
+private void RegisterCommandGroups()
+{
+    RegisterStorageCommands();
+    RegisterCosmosCommands();
+    RegisterMonitorCommands();
+    RegisterKeyVaultCommands();
+}
+```
+
+After registering the command, update the MCP server service registration:
+
+Location: `src/Commands/Server/McpStartServerCommand.cs`
+
+Check if your service is registered in the `CreateHostBuilder` method. Look for a line like:
+```csharp
+services.AddSingleton(provider => 
+    _rootServiceProvider.GetRequiredService<I{Service}Service>());
+```
+
+If not found, add it alongside the other service registrations:
+```csharp
+private IHostBuilder CreateHostBuilder()
+{
+    // ...existing code...
+    .ConfigureServices(services =>
+    {
+        // ...existing code...
+        services.AddSingleton(provider =>
+            _rootServiceProvider.GetRequiredService<IStorageService>());
+        services.AddSingleton(provider =>
+            _rootServiceProvider.GetRequiredService<IYourService>()); // Add your service here
+        // ...existing code...
+    });
+}
+```
+
+This ensures your service is available when the MCP server is running.
 
 ## Step 6: Update README.md Documentation
 
 Location: `README.md`
 
-After implementing a new command, update the "Available Commands" section in the README.md file:
-
-1. Find the appropriate service section (e.g., "Storage Operations", "Cosmos DB Operations")
-2. Add your new command in the bash codeblock using this format:
+1. Identify or create the appropriate service section in the "Available Commands" section.
+   If a new section is needed, follow this format:
    ```bash
-   # Brief description of what the command does
+   #### {Service} Operations
+   ```
+
+2. Add your command under the section using this format:
+   ```bash
+   # {Description of what the command does}
    azmcp {service} {resource} {operation} --required-arg <required-arg> [--optional-arg <optional-arg>]
    ```
+
+Example:
+```bash
+#### Resource Group Operations
+```bash
+# List resource groups in a subscription
+azmcp groups list --subscription-id <subscription-id> [--tenant-id <tenant-id>]
+```
+
+3. Place new sections in alphabetical order, but keep these sections in fixed positions:
+   - "Server Operations" always first
+   - "CLI Utilities" always last 
+   - Everything else alphabetically in between
+
+4. For commands that support multiple output formats or have complex options, include example usages:
+```bash
+# Query logs from a specific table
+azmcp monitor logs query --subscription-id <subscription-id> \
+                        --workspace-id <workspace-id> \
+                        --table "AppEvents_CL" \
+                        --query "| order by TimeGenerated desc"
+```
 
 ## Argument Chain System Reference
 
@@ -303,7 +355,6 @@ There are two ways to create arguments:
 
 1. Using base command helper methods (preferred):
 ```csharp
-// In derived commands:
 RegisterArgumentChain(
     CreateAccountArgument(GetAccountOptions),
     CreateContainerArgument(GetContainerOptions)
@@ -324,23 +375,19 @@ ArgumentChain<TArgs>
 Base command classes provide these argument creation methods:
 
 ```csharp
-// In BaseCommand<TArgs>:
 CreateAuthMethodArgument()
 CreateTenantIdArgument() 
 CreateSubscriptionIdArgument()
 
-// In BaseStorageCommand<TArgs>:
 CreateAccountArgument(accountOptionsLoader)
 CreateContainerArgument(containerOptionsLoader)
 CreateTableArgument(tableOptionsLoader)
 
-// In BaseCosmosCommand<TArgs>:
 CreateAccountArgument()
 CreateDatabaseArgument()
 CreateContainerArgument()
 CreateQueryArgument()
 
-// In BaseMonitorCommand<TArgs>:
 CreateWorkspaceIdArgument(workspaceOptionsLoader)
 ```
 
@@ -354,26 +401,22 @@ The RegisterArgumentChain method:
 
 Key rules:
 ```csharp
-// 1. Base commands should NOT register arguments:
 public abstract class BaseServiceCommand<TArgs> : BaseCommand<TArgs> 
 {
     protected BaseServiceCommand() 
     {
-        // ONLY initialize options, do not call RegisterArgumentChain
         _accountOption = ArgumentDefinitions.Service.Account.ToOption();
     }
 }
 
-// 2. Commands using only base arguments MUST register empty chain:
 public class AccountsListCommand : BaseServiceCommand<AccountsListArguments>
 {
     public AccountsListCommand() : base()
     {
-        RegisterArgumentChain(); // Required!
+        RegisterArgumentChain();
     }
 }
 
-// 3. Commands with custom arguments add them to chain:
 public class ContainersListCommand : BaseServiceCommand<ContainersListArguments>
 {
     public ContainersListCommand() : base()
@@ -385,14 +428,116 @@ public class ContainersListCommand : BaseServiceCommand<ContainersListArguments>
     }
 }
 
-// 4. Special case - excluding base arguments:
 public class SubscriptionsListCommand : BaseCommand<SubscriptionListArguments>
 {
     public SubscriptionsListCommand() : base()
     {
-        // Do NOT call RegisterArgumentChain
-        // Instead manage argument chain manually if needed
     }
+}
+```
+
+## Using ArgumentDefinitions
+
+ArgumentDefinitions provide centralized definitions for all command arguments. They are used in three key ways:
+
+1. Creating Command Options:
+```csharp
+protected BaseStorageCommand() : base()
+{
+    _accountOption = ArgumentDefinitions.Storage.Account.ToOption();
+    _containerOption = ArgumentDefinitions.Storage.Container.ToOption();
+}
+```
+
+2. Creating Argument Chains:
+```csharp
+protected ArgumentChain<TArgs> CreateAccountArgument()
+{
+    return ArgumentChain<TArgs>
+        .Create(
+            ArgumentDefinitions.Storage.Account.Name,
+            ArgumentDefinitions.Storage.Account.Description)
+        .WithValueAccessor(args => ((dynamic)args).Account ?? string.Empty)
+        .WithIsRequired(true);
+}
+```
+
+3. JSON Property Names:
+```csharp
+public class StorageArguments
+{
+    [JsonPropertyName(ArgumentDefinitions.Storage.AccountName)]
+    public string? Account { get; set; }
+}
+```
+
+### Available Argument Definitions
+
+The system provides these predefined argument sets:
+
+```csharp
+ArgumentDefinitions.Common
+    .TenantId
+    .SubscriptionId
+    .ResourceGroup
+    .AuthMethod
+
+ArgumentDefinitions.RetryPolicy
+    .Delay
+    .MaxDelay
+    .MaxRetries
+    .Mode
+    .NetworkTimeout
+
+ArgumentDefinitions.Storage
+    .Account
+    .Container
+    .Table
+
+ArgumentDefinitions.Cosmos
+    .Account
+    .Database
+    .Container
+    .Query
+
+ArgumentDefinitions.Monitor
+    .WorkspaceId
+    .WorkspaceName
+    .TableType
+    .Query
+    .Hours
+    .Limit
+```
+
+### Best Practices for ArgumentDefinitions
+
+1. Always use ArgumentDefinitions instead of hardcoding names:
+```csharp
+protected Option<string> _accountOption = ArgumentDefinitions.Storage.Account.ToOption();
+```
+
+2. Keep JSON property names consistent:
+```csharp
+[JsonPropertyName(ArgumentDefinitions.Storage.AccountName)]
+public string? Account { get; set; }
+```
+
+3. Use constants for dynamic access:
+```csharp
+var accountName = args.GetType().GetProperty(ArgumentDefinitions.Storage.AccountName)?.GetValue(args);
+```
+
+4. Creating new ArgumentDefinitions:
+```csharp
+public static class YourService
+{
+    public const string ResourceName = "resource-name";
+    
+    public static readonly ArgumentDefinition<string> Resource = new(
+        ResourceName,
+        "Detailed description of the resource argument.",
+        required: true
+    );
 }
 ```
 
@@ -449,7 +594,6 @@ public class ContainersListCommand : BaseStorageCommand
     public ContainersListCommand() : base()
     {
         RegisterArgumentChain<ContainersListArguments>(
-            // Note: Use service-specific option loaders
             CreateAccountArgument<ContainersListArguments>(GetAccountOptions)
         );
     }
@@ -511,7 +655,6 @@ private void RegisterCommandGroups()
     
     containers.AddCommand("list", new Storage.ContainersListCommand());
 }
-```
 
 ## Service-Specific Base Commands
 
@@ -522,7 +665,7 @@ When creating a new base command class for a service:
 using System.CommandLine;
 using AzureMCP.Models;
 using AzureMCP.Services.Interfaces;
-using AzureMCP.Arguments;  // Required for BaseArguments
+using AzureMCP.Arguments;
 ```
 
 2. Always add proper type constraints:
@@ -530,9 +673,8 @@ using AzureMCP.Arguments;  // Required for BaseArguments
 public abstract class Base{Service}Command : BaseCommand
 {
     protected ArgumentChain<TArgs> Create{Resource}Argument<TArgs>() 
-        where TArgs : BaseArguments  // Required type constraint
+        where TArgs : BaseArguments
     {
-        // Implementation
     }
 }
 ```
@@ -543,114 +685,205 @@ This ensures proper type checking and inheritance from BaseArguments.
 
 1. **Wrong Option Loader**: Always use service-specific option loaders:
    ```csharp
-   // INCORRECT
-   CreateAccountArgument<TArgs>(GetAccountOptions)
-   
-   // CORRECT for Storage
    CreateAccountArgument<TArgs>(GetStorageAccountOptions)
-   
-   // CORRECT for Cosmos
-   CreateAccountArgument<TArgs>(GetCosmosAccountOptions)
    ```
 
 2. **Base Arguments Properties**: Don't redefine properties that exist in base classes:
    ```csharp
-   // INCORRECT - Account already exists in BaseStorageArguments
    public class ContainersListArguments : BaseStorageArguments
    {
-       public string? Account { get; set; }  // Wrong! This hides base property
-   }
-   
-   // CORRECT - Only add new properties
-   public class ContainersListArguments : BaseStorageArguments
-   {
-       public string? Container { get; set; }  // Only add properties not in base
+       public string? Container { get; set; }
    }
    ```
 
 3. **Option IsRequired Property**: Never set IsRequired directly on System.CommandLine.Option instances:
    ```csharp
-   // INCORRECT - Setting IsRequired on the option
-   protected Option<string> _workspaceOption = new Option<string>(
-       "--workspace-id",
-       "The Log Analytics workspace ID to query") 
-       { IsRequired = true };
-   
-   // CORRECT - Let the argument chain handle required status
-   protected Option<string> _workspaceOption = new Option<string>(
-       "--workspace-id",
-       "The Log Analytics workspace ID to query");
+   protected Option<string> _workspaceOption = ArgumentDefinitions.Storage.Account.ToOption();
    ```
 
 4. **Argument Chain Registration**: Always register the chain even if only using base arguments:
    ```csharp
-   // INCORRECT - Missing registration
    public YourCommand() : base()
    {
-   }
-   
-   // CORRECT - Empty registration for base args
-   public YourCommand() : base()
-   {
-       RegisterArgumentChain<YourArguments>();
+       RegisterArgumentChain();  // Do not specify type parameter when using only base arguments
    }
    ```
-
-## IMPORTANT: Base Command Methods Reference
-
-The following methods are available in base commands for argument creation:
-
-```csharp
-// For custom arguments:
-protected ArgumentChain<TArgs> CreateBaseArgument<TArgs>(
-
-    string name,
-    string description,
-    Expression<Func<TArgs, string?>> valueAccessor,
-    bool isRequired = true) where TArgs : BaseArguments
-
-// For standard resource arguments:
-protected ArgumentChain<TArgs> CreateAccountArgument<TArgs>()
-protected ArgumentChain<TArgs> CreateDatabaseArgument<TArgs>()
-protected ArgumentChain<TArgs> CreateContainerArgument<TArgs>()
-protected ArgumentChain<TArgs> CreateTableArgument<TArgs>()
-protected ArgumentChain<TArgs> CreateSubscriptionIdArgument<TArgs>()
-protected ArgumentChain<TArgs> CreateTenantIdArgument<TArgs>()
-```
-
-## Implementation Order Best Practices
-
-To avoid dependency errors, implement files in this order:
-
-1. Interface method in `I{Service}Service.cs`
-2. Service implementation in `{Service}Service.cs`
-3. Arguments class
-4. Command class
-5. CommandFactory registration
-
-This ensures all dependencies exist before they're referenced.
-
-## Registering Arguments
-
-Every command must call `RegisterArgumentChain()` to ensure proper argument validation:
-
-```csharp
-public YourCommand() : base()
-{
-    // For commands that only need base arguments (auth, tenant, subscription):
-    RegisterArgumentChain();
-    
-    // For commands that need additional arguments:
-    RegisterArgumentChain(
-        CreateAccountArgument(),
-        CreateContainerArgument()
-    );
-}
-```
 
 Exception: Commands that explicitly don't want certain base arguments (like `SubscriptionsListCommand`) 
 should not call `RegisterArgumentChain()` and instead manage their own argument chain.
 
 > **IMPORTANT**: Base command classes should not call `RegisterArgumentChain()` in their constructor
 > since it would prevent derived classes from registering their specific arguments.
-````
+
+## Additional Command Implementation Rules
+
+1. Command Description Guidelines:
+   ```csharp
+   var command = new Command("list", 
+       "List all blobs in a Storage container. This command retrieves and " + 
+       "displays all blobs available in the specified container and Storage account. " +
+       "Results include blob names, sizes, and content types, returned as a JSON array. " +
+       "You must specify both an account name and a container name. " + 
+       "Use this command to explore your container contents or to verify blob existence " +
+       "before performing operations on specific blobs.");
+   ```
+
+2. Command Hierarchy Rules:
+   - Storage pattern: `storage -> blobs -> containers -> {command}`
+   - Cosmos pattern: `cosmos -> databases -> containers -> {command}`
+   - Monitor pattern: `monitor -> logs/workspaces -> {command}`
+
+3. Base Command Behavior:
+   ```csharp
+   - Authentication method handling
+   - Tenant ID handling
+   - Subscription ID handling (for BaseArgumentsWithSubscriptionId)
+   - Retry policy options
+   - Argument chain infrastructure
+   
+   - Service-specific option handling (_accountOption, etc)
+   - GetPath() implementation for proper command paths
+   - Service-specific argument creation methods
+   ```
+
+4. Special Case Commands:
+   ```csharp
+   public class CapabilitiesListCommand : BaseCommandWithoutArgs
+   {
+       public override Command GetCommand() => 
+           new Command("list", "List all available commands...");
+   }
+
+   public class SubscriptionsListCommand : BaseSubscriptionsCommand<SubscriptionListArguments>
+   {
+       public SubscriptionsListCommand() : base()
+       {
+           _argumentChain.Clear();
+           _argumentChain.Add(CreateTenantIdArgument());
+       }
+   }
+   ```
+
+## Error Handling Updates
+
+```csharp
+protected override string GetErrorMessage(Exception ex) => ex switch
+{
+    CosmosException cosmosEx => cosmosEx.Message,
+    RequestFailedException rfEx => rfEx.Message,
+    HttpRequestException httpEx =>
+        $"Service unavailable or network connectivity issues. Details: {httpEx.Message}",
+    AuthenticationFailedException authEx =>
+        $"Authentication failed. Please run 'az login' to sign in to Azure. Details: {authEx.Message}",
+    _ => base.GetErrorMessage(ex)
+};
+
+protected override int GetStatusCode(Exception ex) => ex switch
+{
+    AuthenticationFailedException => 401,
+    RequestFailedException rfEx => rfEx.Status,
+    HttpRequestException => 503,
+    _ => 500
+};
+```
+
+## CommandFactory Guidelines
+
+```csharp
+private void RegisterCommandGroups()
+{
+    var cosmos = new CommandGroup("cosmos", 
+        "Cosmos DB operations - Commands for managing and querying Azure Cosmos DB resources. " + 
+        "Includes operations for databases, containers, and document queries.");
+
+    var databases = new CommandGroup("databases", 
+        "Cosmos DB databases operations - Commands for listing, creating, and managing databases.");
+    
+    _rootGroup.AddSubGroup(cosmos);
+    cosmos.AddSubGroup(databases);
+    
+    databases.AddCommand("list", new DatabasesListCommand());
+}
+
+## Code Style Requirements
+
+1. Comments Policy:
+   - NO COMMENTS in implementation code
+   - Code must be self-documenting through clear naming and structure
+   - Even "helpful" or "clarifying" comments should be avoided
+   - Convert would-be comments into well-named methods or variables
+   - Only exception: XML documentation for public APIs
+   
+   Examples:
+   ```csharp
+   // BAD - uses comments
+   // Get the storage account client
+   var client = new StorageAccountClient(endpoint, credential);
+   
+   // GOOD - self-documenting code
+   var storageClient = new StorageAccountClient(endpoint, credential);
+   
+   // BAD - commented steps
+   // First validate the input
+   if (string.IsNullOrEmpty(accountName)) return false;
+   // Then check permissions
+   if (!await HasPermissions()) return false;
+   
+   // GOOD - extracted to meaningful method
+   if (!await ValidateAccountAccess(accountName)) return false;
+   ```
+
+2. Example of proper code style:
+```csharp
+public class ContainersListCommand : BaseStorageCommand<ContainersListArguments>
+{
+    public ContainersListCommand() : base()
+    {
+        RegisterArgumentChain(
+            CreateAccountArgument(GetStorageAccountOptions),
+            CreateContainerArgument(GetContainerOptions)
+        );
+    }
+
+    public override Command GetCommand()
+    {
+        var command = new Command(
+            "list",
+            "List all containers in a storage account. Returns an array of container names.");
+
+        AddBaseOptionsToCommand(command);
+        command.AddOption(_accountOption);
+        return command;
+    }
+
+    public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
+    {
+        var options = BindArguments(parseResult);
+
+        try
+        {
+            if (!await ProcessArgumentChain(context, options))
+            {
+                return context.Response;
+            }
+
+            var service = context.GetService<IStorageService>();
+            var containers = await service.ListContainers(
+                options.Account!,
+                options.SubscriptionId!,
+                options.TenantId,
+                options.RetryPolicy);
+
+            context.Response.Results = containers?.Count > 0 ? 
+                new { containers } : 
+                null;
+        }
+        catch (Exception ex)
+        {
+            HandleException(context.Response, ex);
+        }
+
+        return context.Response;
+    }
+}
+```

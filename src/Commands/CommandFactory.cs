@@ -54,6 +54,7 @@ public class CommandFactory
         RegisterMonitorCommands();
         RegisterCapabilitiesCommands();
         RegisterSubscriptionsCommands();
+        RegisterGroupsCommands();
         RegisterMcpServerCommands();
     }
 
@@ -158,6 +159,16 @@ public class CommandFactory
         // Register Subscriptions commands
         subscriptions.AddCommand("list", new SubscriptionsListCommand());
 
+    }
+
+    private void RegisterGroupsCommands()
+    {
+        // Create Groups command group
+        var groups = new CommandGroup("groups", "Resource group operations - Commands for listing and managing Azure resource groups in your subscriptions.");
+        _rootGroup.AddSubGroup(groups);
+
+        // Register Groups commands
+        groups.AddCommand("list", new Groups.GroupsListCommand());
     }
 
     private void RegisterMcpServerCommands()
