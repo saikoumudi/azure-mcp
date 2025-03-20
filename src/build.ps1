@@ -1,5 +1,5 @@
 $currentDirectory = $PSScriptRoot
-$projectFile = Join-Path $currentDirectory "AzureMCP"
+$projectFile = Join-Path $currentDirectory "AzureMCP.csproj"
 
 # Create .dist directory if it doesn't exist
 New-Item -ItemType Directory -Force -Path .dist | Out-Null
