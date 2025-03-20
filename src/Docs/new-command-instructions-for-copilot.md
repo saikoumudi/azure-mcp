@@ -9,10 +9,10 @@ azmcp <service> <resource> <operation>
 
 Where:
 - `<service>` - Azure service name (lowercase)
-- `<resource>` - Resource type (plural noun, lowercase)
+- `<resource>` - Resource type (singular noun, lowercase)
 - `<operation>` - Action to perform (verb, lowercase)
 
-Example: `azmcp cosmos databases list`
+Example: `azmcp cosmos database list`
 
 ## File Structure
 
@@ -36,10 +36,10 @@ A complete command implementation requires the following files in this exact str
 
 1. Commands and Arguments must follow exact hierarchical structure:
    ```
-   azmcp storage blobs containers list
+   azmcp storage blob container list
    ↓
-   src/Arguments/Storage/Blob/Containers/ContainersListArguments.cs
-   src/Commands/Storage/Blob/Containers/ContainersListCommand.cs
+   src/Arguments/Storage/Blob/Container/ContainerListArguments.cs
+   src/Commands/Storage/Blob/Container/ContainerListCommand.cs
    ```
 
 2. Services are flat with standardized locations:
@@ -648,12 +648,12 @@ private void RegisterCommandGroup()
     var storage = new CommandGroup("storage", "Storage operations");
     _rootGroup.AddSubGroup(storage);
     
-    var containers = new CommandGroup(
-        "containers", 
+    var container = new CommandGroup(
+        "container", 
         "Storage container operations");
-    storage.AddSubGroup(containers);
+    storage.AddSubGroup(container);
     
-    containers.AddCommand("list", new Storage.ContainersListCommand());
+    container.AddCommand("list", new Storage.ContainerListCommand());
 }
 
 ## Service-Specific Base Commands

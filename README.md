@@ -30,8 +30,7 @@ azmcp server start
 
 ## Commands
 
-
-`azmcp cosmos databases list --subscription-id <subscription-id> --account-name <account-name>`
+`azmcp cosmos database list --subscription-id <subscription-id> --account-name <account-name>`
 
 ```json
 {
@@ -41,13 +40,13 @@ azmcp server start
     {
       "name": "subscription-id",
       "description": "Azure Subscription ID",
-      "command": "azmcp cosmos databases list --subscription-id <subscription-id>",
+      "command": "azmcp cosmos database list --subscription-id <subscription-id>",
       "value": "25fd0362-aa79-488b-b37b-d6e892009fdf"
     },
     {
       "name": "account-name",
       "description": "Cosmos DB Account Name",
-      "command": "azmcp cosmos databases list --account-name <account-name>",
+      "command": "azmcp cosmos database list --account-name <account-name>",
       "value": "jongcosmostrash"
     }
   ],
@@ -62,7 +61,7 @@ azmcp server start
 
 ## Example Schema with Missing Arg and Suggested Values
 
-`azmcp cosmos databases list --subscription-id <subscription-id>`
+`azmcp cosmos database list --subscription-id <subscription-id>`
 
 ```json
 {
@@ -72,14 +71,14 @@ azmcp server start
     {
       "name": "subscription-id",
       "description": "Azure Subscription ID",
-      "command": "azmcp cosmos databases list --subscription-id <subscription-id>",
+      "command": "azmcp cosmos database list --subscription-id <subscription-id>",
       "value": "25fd0362-aa79-488b-b37b-d6e892009fdf",
       "values": []
     },
     {
       "name": "account-name",
       "description": "Cosmos DB Account Name",
-      "command": "azmcp cosmos databases list --account-name <account-name>",
+      "command": "azmcp cosmos database list --account-name <account-name>",
       "value": "",
       "values": [
         {
@@ -93,7 +92,7 @@ azmcp server start
 }
 ```
 
-`azmcp cosmos databases list`
+`azmcp cosmos database list`
 
 ```json
 {
@@ -103,7 +102,7 @@ azmcp server start
     {
       "name": "subscription-id",
       "description": "Azure Subscription ID",
-      "command": "azmcp cosmos databases list --subscription-id <subscription-id>",
+      "command": "azmcp cosmos database list --subscription-id <subscription-id>",
       "value": "",
       "values": [
         {
@@ -115,7 +114,7 @@ azmcp server start
     {
       "name": "account-name",
       "description": "Cosmos DB Account Name",
-      "command": "azmcp cosmos databases list --account-name <account-name>",
+      "command": "azmcp cosmos database list --account-name <account-name>",
       "value": ""
     }
   ],
@@ -172,22 +171,22 @@ azmcp server start
 #### Subscription Management
 ```bash
 # List available Azure subscriptions
-azmcp subscriptions list [--tenant-id <tenant-id>]
+azmcp subscription list [--tenant-id <tenant-id>]
 ```
 
 #### Cosmos DB Operations
 ```bash
 # List Cosmos DB accounts in a subscription
-azmcp cosmos accounts list --subscription-id <subscription-id>
+azmcp cosmos account list --subscription-id <subscription-id>
 
 # List databases in a Cosmos DB account
-azmcp cosmos databases list --subscription-id <subscription-id> --account-name <account-name>
+azmcp cosmos database list --subscription-id <subscription-id> --account-name <account-name>
 
 # List containers in a Cosmos DB database
-azmcp cosmos databases containers list --subscription-id <subscription-id> --account-name <account-name> --database-name <database-name>
+azmcp cosmos database container list --subscription-id <subscription-id> --account-name <account-name> --database-name <database-name>
 
 # Query items in a Cosmos DB container
-azmcp cosmos databases containers items query --subscription-id <subscription-id> \
+azmcp cosmos database container item query --subscription-id <subscription-id> \
                        --account-name <account-name> \
                        --database-name <database-name> \
                        --container-name <container-name> \
@@ -197,31 +196,31 @@ azmcp cosmos databases containers items query --subscription-id <subscription-id
 #### Storage Operations
 ```bash
 # List Storage accounts in a subscription
-azmcp storage accounts list --subscription-id <subscription-id>
+azmcp storage account list --subscription-id <subscription-id>
 
 # List tables in a Storage account
-azmcp storage tables list --subscription-id <subscription-id> --account-name <account-name>
+azmcp storage table list --subscription-id <subscription-id> --account-name <account-name>
 
 # List blobs in a Storage account
-azmcp storage blobs list --subscription-id <subscription-id> --account-name <account-name>
+azmcp storage blob list --subscription-id <subscription-id> --account-name <account-name>
 
 # List containers in a Storage blob service
-azmcp storage blobs containers list --subscription-id <subscription-id> --account-name <account-name>
+azmcp storage blob container list --subscription-id <subscription-id> --account-name <account-name>
 
 # Get detailed properties of a storage container
-azmcp storage blobs containers details --subscription-id <subscription-id> --account-name <account-name> --container-name <container-name>
+azmcp storage blob container details --subscription-id <subscription-id> --account-name <account-name> --container-name <container-name>
 ```
 
 #### Monitor Operations
 ```bash
 # List Log Analytics workspaces in a subscription
-azmcp monitor workspaces list --subscription-id <subscription-id> [--tenant-id <tenant-id>]
+azmcp monitor workspace list --subscription-id <subscription-id> [--tenant-id <tenant-id>]
 
 # List tables in a Log Analytics workspace
-azmcp monitor tables list --workspace-id <workspace-id> [--tenant-id <tenant-id>]
+azmcp monitor table list --workspace-id <workspace-id> [--tenant-id <tenant-id>]
 
 # Query logs from Azure Monitor using KQL
-azmcp monitor logs query --subscription-id <subscription-id> \
+azmcp monitor log query --subscription-id <subscription-id> \
                         --workspace-id <workspace-id> \
                         --table <table-name> \
                         --query "<kql-query>" \
@@ -230,13 +229,13 @@ azmcp monitor logs query --subscription-id <subscription-id> \
 
 # Examples:
 # Query logs from a specific table
-azmcp monitor logs query --subscription-id <subscription-id> \
+azmcp monitor log query --subscription-id <subscription-id> \
                         --workspace-id <workspace-id> \
                         --table "AppEvents_CL" \
                         --query "| order by TimeGenerated desc"
 
 # Use a predefined query type with a specific table
-azmcp monitor logs query --subscription-id <subscription-id> \
+azmcp monitor log query --subscription-id <subscription-id> \
                         --workspace-id <workspace-id> \
                         --table "AppEvents_CL" \
                         --query "recent"
@@ -245,7 +244,7 @@ azmcp monitor logs query --subscription-id <subscription-id> \
 #### Resource Group Operations
 ```bash
 # List resource groups in a subscription
-azmcp groups list --subscription-id <subscription-id> [--tenant-id <tenant-id>]
+azmcp group list --subscription-id <subscription-id> [--tenant-id <tenant-id>]
 ```
 
 #### CLI Utilities
