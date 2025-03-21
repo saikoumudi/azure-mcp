@@ -3,3 +3,4 @@ obj
 .dist
 tests/test-cmds.txt
 .vs
+tests/TestResults

@@ -8,7 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
 using Xunit;
 
-namespace AzureMCP.Tests.Commands
+namespace AzureMCP.Tests.Commands.Tools
 {
     public class ToolsListCommandTests
     {
@@ -28,21 +28,23 @@ namespace AzureMCP.Tests.Commands
         [Fact]
         public async Task GetsExpectedFullNames()
         {
-            var expected = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            expected.Add("azmcp cosmos database container item query");
-            expected.Add("azmcp cosmos database container list");
-            expected.Add("azmcp cosmos database list");
-            expected.Add("azmcp cosmos account list");
-            expected.Add("azmcp storage account list");
-            expected.Add("azmcp storage table list");
-            expected.Add("azmcp storage blob list");
-            expected.Add("azmcp storage blob container list");
-            expected.Add("azmcp storage blob container details");
-            expected.Add("azmcp monitor log query");
-            expected.Add("azmcp monitor workspace list");
-            expected.Add("azmcp monitor table list");
-            expected.Add("azmcp subscription list");
-            expected.Add("azmcp group list");
+            var expected = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+            {
+                "azmcp cosmos database container item query",
+                "azmcp cosmos database container list",
+                "azmcp cosmos database list",
+                "azmcp cosmos account list",
+                "azmcp storage account list",
+                "azmcp storage table list",
+                "azmcp storage blob list",
+                "azmcp storage blob container list",
+                "azmcp storage blob container details",
+                "azmcp monitor log query",
+                "azmcp monitor workspace list",
+                "azmcp monitor table list",
+                "azmcp subscription list",
+                "azmcp group list"
+            };
 
             var commandFactory = new CommandFactory(_serviceProvider);
             var provider = new ServiceCollection()

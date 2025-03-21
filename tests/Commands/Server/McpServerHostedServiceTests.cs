@@ -6,7 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
 using Xunit;
 
-namespace AzureMCP.Tests.Commands
+namespace AzureMCP.Tests.Commands.Server
 {
     public class McpStartServerCommandTests : IAsyncDisposable
     {
