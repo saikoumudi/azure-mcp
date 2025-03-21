@@ -1,12 +1,17 @@
 name: Release Build
 
-# Add concurrency to prevent parallel runs
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 on:
   push:
+    branches:
+      - main
+    paths-ignore:
+      - '**.md'
+      - '.github/**'
+  pull_request:
     branches:
       - main
     paths-ignore:
@@ -68,11 +73,10 @@ jobs:
               patch=$((patch + 1))
               ;;
           esac
+          NEW_VERSION="$major.$minor.$patch"
         else
-          patch=$((patch + 1))
+          NEW_VERSION="${{ steps.read-version.outputs.current }}"
         fi
-        
-        NEW_VERSION="$major.$minor.$patch"
         echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
         
     - name: Update .csproj version and push changes
@@ -91,8 +95,24 @@ jobs:
         git push
         git push --tags
 
-  build:
+  test:
     needs: version
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+        
+    - name: Test
+      run: |
+        cd tests
+        dotnet test -c Release
+
+  build:
+    needs: [test, version]
     name: Build (${{ matrix.os }})
     runs-on: ubuntu-latest
     permissions:
@@ -110,7 +130,6 @@ jobs:
           - os: osx
             rid: osx-x64
             extension: ''
-
     steps:
     - uses: actions/checkout@v4
     
@@ -131,49 +150,51 @@ jobs:
         --self-contained true \
         -p:PublishSingleFile=true \
         -p:PublishTrimmed=false \
+        -p:UseAppHost=true \
         -p:IncludeNativeLibrariesForSelfExtract=true \
         -p:Version=${{ needs.version.outputs.version }}
-        
-    - name: Zip Binary
+
+    - name: Package Artifacts
       run: |
         mkdir -p artifacts
         cd src/bin/Release/net9.0/${{ matrix.rid }}/publish
-        zip ../../../../../../artifacts/${{ env.ARTIFACT_PREFIX }}-${{ matrix.os }}.zip azmcp${{ matrix.extension }}
-        
+        if [ "${{ github.event_name }}" = "pull_request" ]; then
+          # For PR builds, just copy the binary with PR number in name
+          cp azmcp${{ matrix.extension }} ../../../../../../artifacts/${{ env.ARTIFACT_PREFIX }}-pr${{ github.event.pull_request.number }}-${{ matrix.os }}${{ matrix.extension }}
+        else
+          # For releases and main pushes, create zip package
+          zip ../../../../../../artifacts/${{ env.ARTIFACT_PREFIX }}-${{ matrix.os }}.zip azmcp${{ matrix.extension }}
+        fi
+
     - name: Upload Build Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ env.ARTIFACT_PREFIX }}-${{ matrix.os }}
-        path: artifacts/${{ env.ARTIFACT_PREFIX }}-${{ matrix.os }}.zip
+        name: ${{ github.event_name == 'pull_request' && format('pr{0}-{1}', github.event.pull_request.number, matrix.os) || format('{0}-{1}', env.ARTIFACT_PREFIX, matrix.os) }}
+        path: artifacts/*
         if-no-files-found: error
+        retention-days: ${{ github.event_name == 'pull_request' && 5 || 90 }}
 
   release:
     needs: [version, build]
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     permissions:
       contents: write
-    if: github.event_name == 'workflow_dispatch'
     
     steps:
-    - name: Check if Release Job is Triggered
-      run: echo "Release job triggered"
-      
     - name: Download Artifacts
       uses: actions/download-artifact@v4
       with:
+        pattern: ${{ env.ARTIFACT_PREFIX }}-*
+        merge-multiple: true
         path: artifacts
         
     - name: List Artifacts Directory
       run: |
+        echo "Current directory:"
         pwd
-        ls -R artifacts/
-      
-    - name: Verify Artifact Paths
-      run: |
-        echo "Verifying artifact paths..."
-        ls -alh artifacts/${{ env.ARTIFACT_PREFIX }}-windows.zip
-        ls -alh artifacts/${{ env.ARTIFACT_PREFIX }}-linux.zip
-        ls -alh artifacts/${{ env.ARTIFACT_PREFIX }}-osx.zip
+        echo "Artifacts directory structure:"
+        find artifacts -type f
       
     - name: Create Release
       uses: softprops/action-gh-release@v1
@@ -181,32 +202,16 @@ jobs:
         tag_name: v${{ needs.version.outputs.version }}
         name: Release v${{ needs.version.outputs.version }}
         files: |
-          artifacts/${{ env.ARTIFACT_PREFIX }}-windows/${{ env.ARTIFACT_PREFIX }}-windows.zip
-          artifacts/${{ env.ARTIFACT_PREFIX }}-linux/${{ env.ARTIFACT_PREFIX }}-linux.zip
-          artifacts/${{ env.ARTIFACT_PREFIX }}-osx/${{ env.ARTIFACT_PREFIX }}-osx.zip
-        generate_release_notes: true
-        prerelease: ${{ github.event.inputs.prerelease == 'true' }}
-        body: |
-          ## Changes in this Release
-          
-          ### New Features
-          - TODO: Add features
-          
-          ### Bug Fixes
-          - TODO: Add fixes
-          
-          ### Installation
-          Download the appropriate binary for your platform:
-          - Windows: azmcp-windows.zip
-          - Linux: azmcp-linux.zip
-          - macOS: azmcp-osx.zip
+          artifacts/${{ env.ARTIFACT_PREFIX }}-windows.zip
+          artifacts/${{ env.ARTIFACT_PREFIX }}-linux.zip
+          artifacts/${{ env.ARTIFACT_PREFIX }}-osx.zip
 
   upload-latest:
     needs: [version, build]
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     permissions:
       contents: write
-    if: github.event_name == 'push'
     
     steps:
     - name: Download Artifacts

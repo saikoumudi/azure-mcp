@@ -1,4 +1,5 @@
-﻿using System.CommandLine.Parsing;
+﻿using System.CommandLine;
+using System.CommandLine.Parsing;
 using AzureMCP.Commands;
 using AzureMCP.Commands.Tools;
 using AzureMCP.Models.Tools;
@@ -48,8 +49,9 @@ namespace AzureMCP.Tests.Commands
                 .AddSingleton(commandFactory)
                 .BuildServiceProvider();
             var tools = new ToolsListCommand();
+            var args = tools.GetCommand().Parse([]);
             var context = new Models.CommandContext(provider);
-            var actual = await tools.ExecuteAsync(context, default(ParseResult));
+            var actual = await tools.ExecuteAsync(context, args);
 
             Assert.NotNull(actual);
             Assert.IsType<List<CommandInfo>>(actual?.Results);
