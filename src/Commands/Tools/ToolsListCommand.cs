@@ -60,7 +60,7 @@ public class ToolsListCommand : BaseCommandWithoutArgs
         return new CommandInfo
         {
             Name = command.GetCommand().Name,
-            Description = command.GetCommand().Name ?? string.Empty,
+            Description = command.GetCommand().Description ?? string.Empty,
             FullPath = hyphenatedName.Replace('-', ' '),
             Arguments = argumentInfos,
         };
