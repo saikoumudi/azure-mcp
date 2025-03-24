@@ -1,25 +1,18 @@
-﻿using System.CommandLine;
-using System.Text.Json;
-using AzureMCP.Models;
+﻿using AzureMCP.Models;
 using McpDotNet.Protocol.Types;
 using McpDotNet.Server;
 using Microsoft.Extensions.Hosting;
+using System.CommandLine;
+using System.Text.Json;
 
 namespace AzureMCP.Commands.Server
 {
-    public class McpServerHostedService : BackgroundService
+    public class McpServerHostedService(IMcpServer mcpServer, IServiceProvider serviceProvider,
+        CommandFactory commandFactory) : BackgroundService
     {
-        private readonly IServiceProvider _serviceProvider;
-        private readonly IMcpServer _mcpServer;
-        private readonly CommandFactory _commandFactory;
-
-        public McpServerHostedService(IMcpServer mcpServer, IServiceProvider serviceProvider,
-            CommandFactory commandFactory)
-        {
-            _serviceProvider = serviceProvider;
-            _mcpServer = mcpServer;
-            _commandFactory = commandFactory;
-        }
+        private readonly IServiceProvider _serviceProvider = serviceProvider;
+        private readonly IMcpServer _mcpServer = mcpServer;
+        private readonly CommandFactory _commandFactory = commandFactory;
 
         public override async Task StartAsync(CancellationToken cancellationToken)
         {

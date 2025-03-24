@@ -1,8 +1,8 @@
-using System.CommandLine;
-using System.CommandLine.Parsing;
 using AzureMCP.Arguments.Monitor;
 using AzureMCP.Models;
 using AzureMCP.Services.Interfaces;
+using System.CommandLine;
+using System.CommandLine.Parsing;
 
 namespace AzureMCP.Commands.Monitor.Workspace;
 
@@ -15,10 +15,10 @@ public class WorkspaceListCommand : BaseCommand<WorkspaceListArguments>
     public override Command GetCommand()
     {
         var command = new Command(
-            "list", 
+            "list",
             "List Log Analytics workspaces in a subscription. This command retrieves all Log Analytics workspaces available in the specified Azure subscription, displaying their names, IDs, and other key properties. Use this command to identify workspaces before querying their logs or tables.");
-            
-        
+
+
         AddBaseOptionsToCommand(command);
         return command;
     }
@@ -40,8 +40,8 @@ public class WorkspaceListCommand : BaseCommand<WorkspaceListArguments>
                 options.TenantId,
                 options.RetryPolicy);
 
-            context.Response.Results = workspaces?.Count > 0 ? 
-                new { workspaces } : 
+            context.Response.Results = workspaces?.Count > 0 ?
+                new { workspaces } :
                 null;
         }
         catch (Exception ex)

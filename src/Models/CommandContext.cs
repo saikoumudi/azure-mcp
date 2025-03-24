@@ -1,5 +1,5 @@
-using System.Text.Json;
 using Microsoft.Extensions.DependencyInjection;
+using System.Text.Json;
 
 namespace AzureMCP.Models;
 
@@ -12,12 +12,12 @@ public class CommandContext
     /// The service provider for dependency injection
     /// </summary>
     private readonly IServiceProvider _serviceProvider;
-    
+
     /// <summary>
     /// JSON serialization options for command output
     /// </summary>
     public JsonSerializerOptions JsonOptions { get; }
-    
+
     /// <summary>
     /// The response object that will be returned to the client
     /// </summary>

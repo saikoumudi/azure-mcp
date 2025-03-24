@@ -91,7 +91,7 @@ public static class ArgumentDefinitions
             AccountName,
             "The name of the Azure Storage account. This is the unique name you chose for your storage account (e.g., 'mystorageaccount').",
             required: true
-            
+
         );
 
         public static readonly ArgumentDefinition<string> Container = new(
@@ -129,7 +129,7 @@ public static class ArgumentDefinitions
         public static readonly ArgumentDefinition<string> Container = new(
             ContainerName,
             "The name of the container to query (e.g., my-container).",
-            required: true      
+            required: true
         );
 
         public static readonly ArgumentDefinition<string> Query = new(

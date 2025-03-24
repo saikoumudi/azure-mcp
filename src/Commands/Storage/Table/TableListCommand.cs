@@ -1,8 +1,8 @@
-using System.CommandLine;
+using AzureMCP.Arguments.Storage.Table;
 using AzureMCP.Models;
 using AzureMCP.Services.Interfaces;
+using System.CommandLine;
 using System.CommandLine.Parsing;
-using AzureMCP.Arguments.Storage.Table;
 
 namespace AzureMCP.Commands.Storage.Table;
 
@@ -43,37 +43,37 @@ public class TableListCommand : BaseStorageCommand<TableListArguments>
 
             var storageService = context.GetService<IStorageService>();
             var tables = await storageService.ListTables(
-                options.Account!, 
-                options.SubscriptionId!, 
+                options.Account!,
+                options.SubscriptionId!,
                 options.AuthMethod ?? AuthMethod.Credential,
                 null,
                 options.TenantId,
                 options.RetryPolicy);
-                
+
             context.Response.Results = tables?.Count > 0 ? new { tables } : null;
 
             // Only show warning if we actually had to fall back to a different auth method
             if (context.Response.Results != null && !string.IsNullOrEmpty(context.Response.Message))
             {
                 var authMethod = options.AuthMethod ?? AuthMethod.Credential;
-                
+
                 if (authMethod == AuthMethod.Credential)
                 {
                     if (context.Response.Message.Contains("connection string"))
                     {
-                        context.Response.Message = 
+                        context.Response.Message =
                             "Warning: Credential and key auth failed, succeeded using connection string. " +
                             "Consider using --auth-method connectionString for future calls.";
                     }
                 }
                 else if (authMethod == AuthMethod.Key && context.Response.Message.Contains("connection string"))
                 {
-                    context.Response.Message = 
+                    context.Response.Message =
                         "Warning: Key auth failed, succeeded using connection string. " +
                         "Consider using --auth-method connectionString for future calls.";
                 }
             }
-            else 
+            else
             {
                 // Clear any warning message if auth succeeded directly
                 context.Response.Message = string.Empty;

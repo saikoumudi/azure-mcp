@@ -1,11 +1,11 @@
-﻿using System.CommandLine;
-using System.CommandLine.Parsing;
-using AzureMCP.Commands;
+﻿using AzureMCP.Commands;
 using AzureMCP.Commands.Tools;
 using AzureMCP.Models.Tools;
 using McpDotNet.Server;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
+using System.CommandLine;
+using System.CommandLine.Parsing;
 using Xunit;
 
 namespace AzureMCP.Tests.Commands.Tools

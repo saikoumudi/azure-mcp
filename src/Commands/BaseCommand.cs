@@ -1,11 +1,11 @@
-using System.CommandLine;
 using Azure;
+using Azure.Core;
 using Azure.Identity;
+using AzureMCP.Arguments;
+using AzureMCP.Extensions;
 using AzureMCP.Models;
 using AzureMCP.Services.Interfaces;
-using Azure.Core;
-using AzureMCP.Extensions;
-using AzureMCP.Arguments;
+using System.CommandLine;
 using System.CommandLine.Parsing;
 
 namespace AzureMCP.Commands;
@@ -96,7 +96,7 @@ public abstract class BaseCommand<TArgs> : ICommand where TArgs : BaseArguments,
             .Create(ArgumentDefinitions.Common.ResourceGroup.Name, ArgumentDefinitions.Common.ResourceGroup.Description)
             .WithCommandExample($"{GetCommandPath()} --resource-group <resource-group>")
             .WithValueAccessor(args => (args as BaseArgumentsWithSubscriptionId)?.ResourceGroup ?? string.Empty)
-            .WithValueLoader(async (context, args) => 
+            .WithValueLoader(async (context, args) =>
             {
                 var subArgs = args as BaseArgumentsWithSubscriptionId;
                 if (subArgs?.SubscriptionId == null)

@@ -1,6 +1,6 @@
 namespace AzureMCP.Arguments;
 
-public static class ParseResultExtensions 
+public static class ParseResultExtensions
 {
     public static bool HasAnyRetryOptions(this System.CommandLine.Parsing.ParseResult parseResult)
     {

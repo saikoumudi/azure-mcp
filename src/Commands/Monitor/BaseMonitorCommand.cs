@@ -1,7 +1,7 @@
-using System.CommandLine;
 using AzureMCP.Arguments;
 using AzureMCP.Models;
 using AzureMCP.Services.Interfaces;
+using System.CommandLine;
 
 namespace AzureMCP.Commands.Monitor;
 
@@ -9,7 +9,7 @@ public abstract class BaseMonitorCommand<TArgs> : BaseCommand<TArgs> where TArgs
 {
     protected readonly Option<string> _workspaceIdOption;
     protected readonly Option<string> _workspaceNameOption;
-    
+
     protected BaseMonitorCommand()
         : base()
     {

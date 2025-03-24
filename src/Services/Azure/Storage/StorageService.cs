@@ -1,14 +1,14 @@
 using Azure;
 using Azure.Core;
+using Azure.Data.Tables;
+using Azure.ResourceManager.Resources;
 using Azure.ResourceManager.Storage;
 using Azure.ResourceManager.Storage.Models;
-using Azure.ResourceManager.Resources;
 using Azure.Storage.Blobs;
-using AzureMCP.Services.Interfaces;
-using Azure.Data.Tables;
-using AzureMCP.Models;
-using AzureMCP.Arguments;
 using Azure.Storage.Blobs.Models;  // Add this import
+using AzureMCP.Arguments;
+using AzureMCP.Models;
+using AzureMCP.Services.Interfaces;
 
 namespace AzureMCP.Services.Azure.Storage;
 
@@ -41,7 +41,7 @@ public class StorageService : BaseAzureService, IStorageService
         {
             throw new Exception($"Error retrieving Storage accounts: {ex.Message}", ex);
         }
-        
+
         return accounts;
     }
 
@@ -89,11 +89,11 @@ public class StorageService : BaseAzureService, IStorageService
         {
             // First attempt with requested auth method
             var tableServiceClient = await CreateTableServiceClientWithAuth(
-                accountName, 
-                subscriptionId, 
-                authMethod, 
+                accountName,
+                subscriptionId,
+                authMethod,
                 connectionString,
-                tenantId, 
+                tenantId,
                 retryPolicy);
 
             await foreach (var table in tableServiceClient.QueryAsync())
@@ -103,8 +103,8 @@ public class StorageService : BaseAzureService, IStorageService
             return tables;
         }
         catch (Exception ex) when (
-            authMethod == AuthMethod.Credential && 
-            ex is RequestFailedException rfEx && 
+            authMethod == AuthMethod.Credential &&
+            ex is RequestFailedException rfEx &&
             (rfEx.Status == 403 || rfEx.Status == 401))
         {
             try
@@ -112,7 +112,7 @@ public class StorageService : BaseAzureService, IStorageService
                 // If credential auth fails with 403/401, try key auth
                 var keyClient = await CreateTableServiceClientWithAuth(
                     accountName, subscriptionId, AuthMethod.Key, connectionString, tenantId, retryPolicy);
-                
+
                 tables.Clear(); // Reset the list for reuse
                 await foreach (var table in keyClient.QueryAsync())
                 {
@@ -125,7 +125,7 @@ public class StorageService : BaseAzureService, IStorageService
                 // If key auth fails with 403, try connection string
                 var connStringClient = await CreateTableServiceClientWithAuth(
                     accountName, subscriptionId, AuthMethod.ConnectionString, connectionString, tenantId, retryPolicy);
-                
+
                 tables.Clear(); // Reset the list for reuse
                 await foreach (var table in connStringClient.QueryAsync())
                 {
@@ -139,7 +139,7 @@ public class StorageService : BaseAzureService, IStorageService
             }
         }
         catch (Exception ex) when (
-            authMethod == AuthMethod.Key && 
+            authMethod == AuthMethod.Key &&
             (ex is RequestFailedException rfEx && rfEx.Status == 403))
         {
             try
@@ -147,7 +147,7 @@ public class StorageService : BaseAzureService, IStorageService
                 // If key auth fails with 403, try connection string
                 var connStringClient = await CreateTableServiceClientWithAuth(
                     accountName, subscriptionId, AuthMethod.ConnectionString, connectionString, tenantId, retryPolicy);
-                
+
                 tables.Clear(); // Reset the list for reuse
                 await foreach (var table in connStringClient.QueryAsync())
                 {
@@ -195,10 +195,10 @@ public class StorageService : BaseAzureService, IStorageService
     }
 
     public async Task<BlobContainerProperties> GetContainerDetails(
-        string accountName, 
-        string containerName, 
-        string subscriptionId, 
-        string? tenantId = null, 
+        string accountName,
+        string containerName,
+        string subscriptionId,
+        string? tenantId = null,
         RetryPolicyArguments? retryPolicy = null)
     {
         if (string.IsNullOrEmpty(accountName))
@@ -287,11 +287,11 @@ public class StorageService : BaseAzureService, IStorageService
     }
 
     protected async Task<TableServiceClient> CreateTableServiceClientWithAuth(
-        string accountName, 
+        string accountName,
         string subscriptionId,
         AuthMethod authMethod,
         string? connectionString = null,
-        string? tenantId = null, 
+        string? tenantId = null,
         RetryPolicyArguments? retryPolicy = null)
     {
         var options = new TableClientOptions();
@@ -304,17 +304,17 @@ public class StorageService : BaseAzureService, IStorageService
             options.Retry.NetworkTimeout = TimeSpan.FromSeconds(retryPolicy.NetworkTimeoutSeconds);
         }
 
-               switch (authMethod)
+        switch (authMethod)
         {
             case AuthMethod.Key:
                 var key = await GetStorageAccountKey(accountName, subscriptionId, tenantId);
                 var uri = $"https://{accountName}.table.core.windows.net";
                 return new TableServiceClient(new Uri(uri), new TableSharedKeyCredential(accountName, key), options);
-            
+
             case AuthMethod.ConnectionString:
                 var connString = await GetStorageAccountConnectionString(accountName, subscriptionId, tenantId);
                 return new TableServiceClient(connString, options);
-            
+
             case AuthMethod.Credential:
             default:
                 var defaultUri = $"https://{accountName}.table.core.windows.net";

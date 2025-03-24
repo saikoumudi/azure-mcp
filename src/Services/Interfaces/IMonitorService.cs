@@ -1,6 +1,6 @@
-using System.Text.Json;
 using AzureMCP.Arguments;
 using AzureMCP.Models.Monitor;
+using System.Text.Json;
 
 namespace AzureMCP.Services.Interfaces;
 

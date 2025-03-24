@@ -1,7 +1,7 @@
-using System.CommandLine;
+using AzureMCP.Arguments.Cosmos;
 using AzureMCP.Models;
 using AzureMCP.Services.Interfaces;
-using AzureMCP.Arguments.Cosmos;
+using System.CommandLine;
 using System.CommandLine.Parsing;
 
 namespace AzureMCP.Commands.Cosmos;
@@ -21,9 +21,9 @@ public class ItemQueryCommand : BaseCosmosCommand<ItemQueryArguments>
     public override Command GetCommand()
     {
         var command = new Command(
-            "query", 
+            "query",
             "Execute a SQL query against items in a Cosmos DB container. This command allows you to retrieve documents from a container using SQL query syntax. Results are returned as a JSON array of documents.");
-            
+
         AddBaseOptionsToCommand(command);
         command.AddOption(_accountOption);
         command.AddOption(_databaseOption);
@@ -55,16 +55,16 @@ public class ItemQueryCommand : BaseCosmosCommand<ItemQueryArguments>
 
             var cosmosService = context.GetService<ICosmosService>();
             var items = await cosmosService.QueryItems(
-                options.Account!, 
-                options.Database!, 
-                options.Container!, 
-                options.Query ?? "SELECT * FROM c", 
-                options.SubscriptionId!, 
+                options.Account!,
+                options.Database!,
+                options.Container!,
+                options.Query ?? "SELECT * FROM c",
+                options.SubscriptionId!,
                 options.TenantId,
                 options.RetryPolicy);
 
-            context.Response.Results = items?.Count > 0 ? 
-                new { items } : 
+            context.Response.Results = items?.Count > 0 ?
+                new { items } :
                 null;
         }
         catch (Exception ex)

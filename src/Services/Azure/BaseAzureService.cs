@@ -14,7 +14,7 @@ public abstract class BaseAzureService
             var credential = tenantId == null
                 ? new DefaultAzureCredential()
                 : new DefaultAzureCredential(new DefaultAzureCredentialOptions { TenantId = tenantId });
-            
+
             return credential;
         }
         catch (Exception ex)
@@ -33,9 +33,9 @@ public abstract class BaseAzureService
         try
         {
             var credential = GetCredential(tenantId);
-            
+
             var options = new ArmClientOptions();
-            
+
             // Configure retry policy if provided
             if (retryPolicy != null)
             {
@@ -46,7 +46,7 @@ public abstract class BaseAzureService
                 options.Retry.MaxDelay = TimeSpan.FromSeconds(retryPolicy.MaxDelaySeconds);
                 options.Retry.NetworkTimeout = TimeSpan.FromSeconds(retryPolicy.NetworkTimeoutSeconds);
             }
-            
+
             return new ArmClient(credential, default, options);
         }
         catch (Exception ex)

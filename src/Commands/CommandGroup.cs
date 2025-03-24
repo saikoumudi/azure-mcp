@@ -2,26 +2,19 @@ using System.CommandLine;
 
 namespace AzureMCP.Commands;
 
-public class CommandGroup
+public class CommandGroup(string name, string description)
 {
-    public string Name { get; }
-    public string Description { get; }
+    public string Name { get; } = name;
+    public string Description { get; } = description;
     public List<CommandGroup> SubGroup { get; } = [];
     public Dictionary<string, ICommand> Commands { get; } = [];
-    public Command Command { get; }
-
-    public CommandGroup(string name, string description)
-    {
-        Name = name;
-        Description = description;
-        Command = new Command(name, description);
-    }
+    public Command Command { get; } = new Command(name, description);
 
     public void AddCommand(string path, ICommand command)
     {
         // Split on first dot to get group and remaining path
         var parts = path.Split(new[] { '.' }, 2);
-        
+
         if (parts.Length == 1)
         {
             // This is a direct command for this group
@@ -35,7 +28,7 @@ public class CommandGroup
             {
                 throw new InvalidOperationException($"Subgroup {parts[0]} not found. Group must be registered before commands.");
             }
-            
+
             // Recursively add command to subgroup
             subGroup.AddCommand(parts[1], command);
         }
@@ -51,7 +44,7 @@ public class CommandGroup
     {
         // Split on first dot to get group and remaining path
         var parts = path.Split(new[] { '.' }, 2);
-        
+
         if (parts.Length == 1)
         {
             // This is a direct command for this group
@@ -65,7 +58,7 @@ public class CommandGroup
             {
                 throw new InvalidOperationException($"Subgroup {parts[0]} not found.");
             }
-            
+
             return subGroup.GetCommand(parts[1]);
         }
     }

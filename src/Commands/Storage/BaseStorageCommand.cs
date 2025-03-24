@@ -1,12 +1,12 @@
-using System.CommandLine;
+using AzureMCP.Arguments.Storage;
 using AzureMCP.Models;
 using AzureMCP.Services.Interfaces;
-using AzureMCP.Arguments.Storage;
+using System.CommandLine;
 using System.CommandLine.Parsing;
 
 namespace AzureMCP.Commands.Storage;
 
-public abstract class BaseStorageCommand<TArgs> : BaseCommand<TArgs> 
+public abstract class BaseStorageCommand<TArgs> : BaseCommand<TArgs>
     where TArgs : BaseStorageArguments, new()
 {
     protected readonly Option<string> _accountOption;
@@ -21,16 +21,16 @@ public abstract class BaseStorageCommand<TArgs> : BaseCommand<TArgs>
         _tableOption = ArgumentDefinitions.Storage.Table.ToOption();
     }
 
-   
+
     // Override to provide the correct command path for examples
     protected override string GetCommandPath()
     {
         // Extract the command name from the class name (e.g., ContainerListCommand -> list)
         string commandName = GetType().Name.Replace("Command", "");
-        
+
         // Get the full namespace path after Commands.Storage
         var nsPath = GetType().Namespace!.Split('.').SkipWhile(x => !x.Equals("Storage")).Skip(1);
-        
+
         // Combine namespace path with command
         var parts = nsPath.Concat(new[] { commandName })
             .SelectMany(x => SplitCamelCase(x))
@@ -52,7 +52,7 @@ public abstract class BaseStorageCommand<TArgs> : BaseCommand<TArgs>
 
         var storageService = context.GetService<IStorageService>();
         var accounts = await storageService.GetStorageAccounts(subscriptionId);
-        
+
         return accounts?.Select(a => new ArgumentOption { Name = a, Id = a }).ToList() ?? [];
     }
 
@@ -66,8 +66,8 @@ public abstract class BaseStorageCommand<TArgs> : BaseCommand<TArgs>
 
         var storageService = context.GetService<IStorageService>();
         var containers = await storageService.ListContainers(accountName, subscriptionId);
-        
-        return containers?.Select(c => new ArgumentOption { Name = c, Id = c }).ToList() 
+
+        return containers?.Select(c => new ArgumentOption { Name = c, Id = c }).ToList()
             ?? [];
     }
 
@@ -89,12 +89,12 @@ public abstract class BaseStorageCommand<TArgs> : BaseCommand<TArgs>
             .Create(ArgumentDefinitions.Storage.Container.Name, ArgumentDefinitions.Storage.Container.Description)
             .WithCommandExample($"{GetCommandPath()} --container-name <container-name>")
             .WithValueAccessor(args => ((dynamic)args).Container ?? string.Empty)
-            .WithValueLoader(async (context, args) => 
+            .WithValueLoader(async (context, args) =>
             {
                 dynamic dynamicArgs = args;
                 return await containerOptionsLoader(
-                    context, 
-                    dynamicArgs.Account ?? string.Empty, 
+                    context,
+                    dynamicArgs.Account ?? string.Empty,
                     dynamicArgs.SubscriptionId ?? string.Empty);
             })
             .WithIsRequired(true);
@@ -107,12 +107,12 @@ public abstract class BaseStorageCommand<TArgs> : BaseCommand<TArgs>
             .Create(ArgumentDefinitions.Storage.Table.Name, ArgumentDefinitions.Storage.Table.Description)
             .WithCommandExample($"{GetCommandPath()} --table-name <table-name>")
             .WithValueAccessor(args => ((dynamic)args).Table ?? string.Empty)
-            .WithValueLoader(async (context, args) => 
+            .WithValueLoader(async (context, args) =>
             {
                 dynamic dynamicArgs = args;
                 return await tableOptionsLoader(
-                    context, 
-                    dynamicArgs.Account ?? string.Empty, 
+                    context,
+                    dynamicArgs.Account ?? string.Empty,
                     dynamicArgs.SubscriptionId ?? string.Empty);
             })
             .WithIsRequired(true);

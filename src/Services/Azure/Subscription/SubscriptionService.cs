@@ -1,19 +1,14 @@
+using AzureMCP.Arguments;
 using AzureMCP.Models;
 using AzureMCP.Services.Interfaces;
-using AzureMCP.Arguments;
 
 namespace AzureMCP.Services.Azure.Subscription;
 
-public class SubscriptionService : BaseAzureService, ISubscriptionService
+public class SubscriptionService(ICacheService cacheService) : BaseAzureService, ISubscriptionService
 {
-    private readonly ICacheService _cacheService;
+    private readonly ICacheService _cacheService = cacheService;
     private const string CACHE_KEY = "subscriptions";
     private static readonly TimeSpan CACHE_DURATION = TimeSpan.FromHours(12);
-
-    public SubscriptionService(ICacheService cacheService)
-    {
-        _cacheService = cacheService;
-    }
 
     public async Task<List<ArgumentOption>> GetSubscriptions(string? tenantId = null, RetryPolicyArguments? retryPolicy = null)
     {
@@ -29,11 +24,11 @@ public class SubscriptionService : BaseAzureService, ISubscriptionService
         var armClient = CreateArmClient(tenantId, retryPolicy);
         var subscriptions = armClient.GetSubscriptions();
         var results = new List<ArgumentOption>();
-        
+
         foreach (var subscription in subscriptions)
         {
-            results.Add(new ArgumentOption 
-            { 
+            results.Add(new ArgumentOption
+            {
                 Name = subscription.Data.DisplayName,
                 Id = subscription.Data.SubscriptionId
             });
@@ -41,7 +36,7 @@ public class SubscriptionService : BaseAzureService, ISubscriptionService
 
         // Cache the results
         await _cacheService.SetAsync(cacheKey, results, CACHE_DURATION);
-        
+
         return results;
     }
 }

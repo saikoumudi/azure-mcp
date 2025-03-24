@@ -1,10 +1,10 @@
 using Azure.Core;
 using Azure.ResourceManager;
 using Azure.ResourceManager.CosmosDB;
-using Microsoft.Azure.Cosmos;
-using AzureMCP.Services.Interfaces;
-using System.Text.Json;
 using AzureMCP.Arguments;
+using AzureMCP.Services.Interfaces;
+using Microsoft.Azure.Cosmos;
+using System.Text.Json;
 
 namespace AzureMCP.Services.Azure.Cosmos;
 
@@ -36,7 +36,7 @@ public class CosmosService : BaseAzureService, ICosmosService
         {
             throw new Exception($"Error retrieving Cosmos DB accounts: {ex.Message}", ex);
         }
-        
+
         return accounts;
     }
 
@@ -197,8 +197,8 @@ public class CosmosService : BaseAzureService, ICosmosService
     }
 
     private async Task<CosmosDBAccountResource> GetCosmosAccountAsync(
-        ArmClient armClient, 
-        string subscriptionId, 
+        ArmClient armClient,
+        string subscriptionId,
         string accountName)
     {
         var subscription = await armClient.GetSubscriptionResource(

@@ -1,6 +1,6 @@
+using AzureMCP.Models;
 using System.CommandLine;
 using System.CommandLine.Parsing;
-using AzureMCP.Models;
 
 namespace AzureMCP.Commands;
 

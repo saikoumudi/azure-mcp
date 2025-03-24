@@ -1,8 +1,4 @@
-﻿using System.CommandLine;
-using System.CommandLine.Invocation;
-using System.CommandLine.Parsing;
-using System.Reflection;
-using AzureMCP.Models;
+﻿using AzureMCP.Models;
 using AzureMCP.Services.Interfaces;
 using McpDotNet.Protocol.Transport;
 using McpDotNet.Protocol.Types;
@@ -10,6 +6,10 @@ using McpDotNet.Server;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using System.CommandLine;
+using System.CommandLine.Invocation;
+using System.CommandLine.Parsing;
+using System.Reflection;
 
 namespace AzureMCP.Commands.Server
 {

@@ -1,8 +1,8 @@
-using System.CommandLine;
-using System.CommandLine.Parsing;
+using AzureMCP.Arguments.Storage.Blob.Container;
 using AzureMCP.Models;
 using AzureMCP.Services.Interfaces;
-using AzureMCP.Arguments.Storage.Blob.Container;
+using System.CommandLine;
+using System.CommandLine.Parsing;
 
 namespace AzureMCP.Commands.Storage.Blob.Container;
 
@@ -10,7 +10,7 @@ public class ContainerListCommand : BaseStorageCommand<ContainerListArguments>
 {
     public ContainerListCommand() : base()
     {
-        
+
         RegisterArgumentChain(
             CreateAccountArgument(GetAccountOptions)
         );
@@ -19,14 +19,14 @@ public class ContainerListCommand : BaseStorageCommand<ContainerListArguments>
     public override Command GetCommand()
     {
         var command = new Command("list", "List all containers in the specified storage account.");
-        
+
         // Add required options
         command.AddOption(_accountOption);
         command.AddOption(_subscriptionOption);
-        
+
         // Add retry options
         AddRetryOptionsToCommand(command);
-        
+
         return command;
     }
 
@@ -50,8 +50,8 @@ public class ContainerListCommand : BaseStorageCommand<ContainerListArguments>
 
             var storageService = context.GetService<IStorageService>();
             var containers = await storageService.ListContainers(options.Account!, options.SubscriptionId!, options.TenantId,
-                options.RetryPolicy);    
-            
+                options.RetryPolicy);
+
             context.Response.Results = containers?.Count > 0 ? new { containers } : null;
         }
         catch (Exception ex)

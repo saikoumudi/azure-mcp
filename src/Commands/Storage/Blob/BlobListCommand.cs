@@ -1,7 +1,7 @@
-using System.CommandLine;
+using AzureMCP.Arguments.Storage.Blob;
 using AzureMCP.Models;
 using AzureMCP.Services.Interfaces;
-using AzureMCP.Arguments.Storage.Blob;
+using System.CommandLine;
 using System.CommandLine.Parsing;
 
 namespace AzureMCP.Commands.Storage.Blob;
@@ -47,12 +47,12 @@ public class BlobListCommand : BaseStorageCommand<BlobListArguments>
 
             var storageService = context.GetService<IStorageService>();
             var blobs = await storageService.ListBlobs(
-                options.Account!, 
-                options.Container!, 
-                options.SubscriptionId!, 
+                options.Account!,
+                options.Container!,
+                options.SubscriptionId!,
                 options.TenantId,
                 options.RetryPolicy);
-                
+
             context.Response.Results = blobs?.Count > 0 ? new { blobs } : null;
         }
         catch (Exception ex)

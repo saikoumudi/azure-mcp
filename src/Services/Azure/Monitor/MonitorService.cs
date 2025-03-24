@@ -1,11 +1,11 @@
+using Azure;
+using Azure.Core;
 using Azure.Monitor.Query;
 using Azure.ResourceManager.OperationalInsights;
-using Azure.Core;
-using Azure;
-using System.Text.Json;
-using AzureMCP.Services.Interfaces;
 using AzureMCP.Arguments;
 using AzureMCP.Models.Monitor;
+using AzureMCP.Services.Interfaces;
+using System.Text.Json;
 
 namespace AzureMCP.Services.Azure.Monitor;
 
@@ -130,7 +130,7 @@ public class MonitorService : BaseAzureService, IMonitorService
 
             var workspace = await resourceGroupResource.Value.GetOperationalInsightsWorkspaceAsync(workspaceName)
                 .ConfigureAwait(false);
-            
+
             if (workspace == null || workspace.Value == null)
             {
                 throw new Exception($"Workspace {workspaceName} not found in resource group {resourceGroup}");
@@ -140,7 +140,7 @@ public class MonitorService : BaseAzureService, IMonitorService
             var tables = await tableOperations.GetAllAsync()
                 .ToListAsync()
                 .ConfigureAwait(false);
-            
+
             return [.. tables
                 .Where(table => string.IsNullOrEmpty(tableType) || table.Data.Schema.TableType.ToString() == tableType)
                 .Select(table => table.Data.Name)

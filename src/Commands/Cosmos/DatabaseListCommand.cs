@@ -1,7 +1,7 @@
-using System.CommandLine;
+using AzureMCP.Arguments.Cosmos;
 using AzureMCP.Models;
 using AzureMCP.Services.Interfaces;
-using AzureMCP.Arguments.Cosmos;
+using System.CommandLine;
 using System.CommandLine.Parsing;
 
 namespace AzureMCP.Commands.Cosmos;
@@ -18,9 +18,9 @@ public class DatabaseListCommand : BaseCosmosCommand<DatabaseListArguments>
     public override Command GetCommand()
     {
         var command = new Command(
-            "list", 
+            "list",
             "List all databases in a Cosmos DB account. This command retrieves and displays all databases available in the specified Cosmos DB account. Results include database names and are returned as a JSON array.");
-            
+
         AddBaseOptionsToCommand(command);
         command.AddOption(_accountOption);
         return command;
@@ -46,13 +46,13 @@ public class DatabaseListCommand : BaseCosmosCommand<DatabaseListArguments>
 
             var cosmosService = context.GetService<ICosmosService>();
             var databases = await cosmosService.ListDatabases(
-                options.Account!, 
-                options.SubscriptionId!, 
+                options.Account!,
+                options.SubscriptionId!,
                 options.TenantId,
                 options.RetryPolicy);
-                
-            context.Response.Results = databases?.Count > 0 ? 
-                new { databases } : 
+
+            context.Response.Results = databases?.Count > 0 ?
+                new { databases } :
                 null;
         }
         catch (Exception ex)

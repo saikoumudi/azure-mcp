@@ -1,8 +1,8 @@
-using System.CommandLine;
-using System.CommandLine.Parsing;
 using AzureMCP.Arguments;
 using AzureMCP.Models;
 using AzureMCP.Models.Tools;
+using System.CommandLine;
+using System.CommandLine.Parsing;
 
 namespace AzureMCP.Commands.Tools;
 

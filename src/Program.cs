@@ -1,15 +1,15 @@
-using System.Text.Json;
-using System.CommandLine;
 using AzureMCP.Commands;
 using AzureMCP.Models;
 using AzureMCP.Services.Azure.Cosmos;
-using AzureMCP.Services.Azure.Storage;
 using AzureMCP.Services.Azure.Monitor;
-using AzureMCP.Services.Interfaces;
-using AzureMCP.Services.Caching;
-using Microsoft.Extensions.DependencyInjection;
-using AzureMCP.Services.Azure.Subscription;
 using AzureMCP.Services.Azure.ResourceGroup;
+using AzureMCP.Services.Azure.Storage;
+using AzureMCP.Services.Azure.Subscription;
+using AzureMCP.Services.Caching;
+using AzureMCP.Services.Interfaces;
+using Microsoft.Extensions.DependencyInjection;
+using System.CommandLine;
+using System.Text.Json;
 
 namespace AzureMCP;
 
@@ -25,7 +25,7 @@ class Program
 
             var commandFactory = serviceProvider.GetRequiredService<CommandFactory>();
             var rootCommand = commandFactory.RootCommand;
-            
+
             return await rootCommand.InvokeAsync(args);
         }
         catch (Exception ex)

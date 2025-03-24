@@ -1,20 +1,15 @@
-using AzureMCP.Services.Interfaces;
+using Azure.Core;
 using AzureMCP.Arguments;
 using AzureMCP.Models.ResourceGroup;
-using Azure.Core;
+using AzureMCP.Services.Interfaces;
 
 namespace AzureMCP.Services.Azure.ResourceGroup;
 
-public class ResourceGroupService : BaseAzureService, IResourceGroupService
+public class ResourceGroupService(ICacheService cacheService) : BaseAzureService, IResourceGroupService
 {
-    private readonly ICacheService _cacheService;
+    private readonly ICacheService _cacheService = cacheService;
     private const string CACHE_KEY = "resourcegroups";
     private static readonly TimeSpan CACHE_DURATION = TimeSpan.FromHours(1);
-
-    public ResourceGroupService(ICacheService cacheService)
-    {
-        _cacheService = cacheService;
-    }
 
     public async Task<List<ResourceGroupInfo>> GetResourceGroups(string subscriptionId, string? tenantId = null, RetryPolicyArguments? retryPolicy = null)
     {
@@ -46,7 +41,7 @@ public class ResourceGroupService : BaseAzureService, IResourceGroupService
 
             // Cache the results
             await _cacheService.SetAsync(cacheKey, resourceGroups, CACHE_DURATION);
-            
+
             return resourceGroups;
         }
         catch (Exception ex)

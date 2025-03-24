@@ -1,8 +1,8 @@
-using System.CommandLine;
-using System.CommandLine.Parsing;
 using AzureMCP.Arguments.Storage.Blob.Container;
 using AzureMCP.Models;
 using AzureMCP.Services.Interfaces;
+using System.CommandLine;
+using System.CommandLine.Parsing;
 
 namespace AzureMCP.Commands.Storage.Blob.Container;
 
@@ -21,7 +21,7 @@ public class ContainerDetailsCommand : BaseStorageCommand<ContainerDetailsArgume
     {
         var command = new Command(
             "details",
-            "Get detailed properties of a storage container including metadata, lease status, and access level. " + 
+            "Get detailed properties of a storage container including metadata, lease status, and access level. " +
             "Requires storage account name and container name.");
 
         AddBaseOptionsToCommand(command);
@@ -33,11 +33,11 @@ public class ContainerDetailsCommand : BaseStorageCommand<ContainerDetailsArgume
     protected override ContainerDetailsArguments BindArguments(ParseResult parseResult)
     {
         var args = base.BindArguments(parseResult);
-        
+
         // Explicitly bind the options we care about
         args.Account = parseResult.GetValueForOption(_accountOption);
         args.Container = parseResult.GetValueForOption(_containerOption);
-        
+
         return args;
     }
 
@@ -46,7 +46,7 @@ public class ContainerDetailsCommand : BaseStorageCommand<ContainerDetailsArgume
         try
         {
             var args = BindArguments(parseResult);
-            
+
             if (!await ProcessArgumentChain(context, args))
             {
                 return context.Response;

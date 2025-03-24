@@ -1,13 +1,13 @@
-using System.CommandLine;
-using System.CommandLine.Parsing;
+using AzureMCP.Arguments;
 using AzureMCP.Commands.Subscriptions;
 using AzureMCP.Models;
 using AzureMCP.Services.Interfaces;
 using McpDotNet.Server;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
+using System.CommandLine;
+using System.CommandLine.Parsing;
 using Xunit;
-using AzureMCP.Arguments;
 
 namespace AzureMCP.Tests.Commands.Subscriptions
 {
@@ -79,7 +79,7 @@ namespace AzureMCP.Tests.Commands.Subscriptions
             Assert.NotNull(result);
             Assert.Equal(200, result.Status);
             await _subscriptionService.Received(1).GetSubscriptions(
-                Arg.Is<string>(x => x == tenantId), 
+                Arg.Is<string>(x => x == tenantId),
                 Arg.Any<RetryPolicyArguments>());
         }
 
@@ -140,7 +140,7 @@ namespace AzureMCP.Tests.Commands.Subscriptions
             Assert.NotNull(result);
             Assert.Equal(200, result.Status);
             await _subscriptionService.Received(1).GetSubscriptions(
-                Arg.Any<string>(), 
+                Arg.Any<string>(),
                 Arg.Any<RetryPolicyArguments>());
         }
     }

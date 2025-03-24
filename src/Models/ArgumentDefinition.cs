@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace AzureMCP.Models;
 
-public class ArgumentDefinition<T>(string name, string description, string? value = "", string? command = "", T? defaultValue = default,  List<ArgumentOption>? values = null, bool required = false)
+public class ArgumentDefinition<T>(string name, string description, string? value = "", string? command = "", T? defaultValue = default, List<ArgumentOption>? values = null, bool required = false)
 {
     [JsonPropertyName("name")]
     public string Name { get; set; } = name;
@@ -14,7 +14,7 @@ public class ArgumentDefinition<T>(string name, string description, string? valu
     [JsonPropertyName("value")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public string Value { get; set; } = value!;
-    
+
     [JsonPropertyName("command")]
     public string Command { get; set; } = command!;
 

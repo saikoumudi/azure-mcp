@@ -1,15 +1,14 @@
+using AzureMCP.Arguments;
+using AzureMCP.Commands.Cosmos;
+using AzureMCP.Models;
+using AzureMCP.Services.Interfaces;
+using Microsoft.Extensions.DependencyInjection;
+using NSubstitute;
+using NSubstitute.ExceptionExtensions;
 using System.CommandLine;
 using System.CommandLine.Parsing;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using AzureMCP.Commands;
-using AzureMCP.Commands.Cosmos;
-using AzureMCP.Models;
-using AzureMCP.Services.Interfaces;
-using AzureMCP.Arguments;
-using Microsoft.Extensions.DependencyInjection;
-using NSubstitute;
-using NSubstitute.ExceptionExtensions;
 using Xunit;
 
 namespace AzureMCP.Tests.Commands.Cosmos
@@ -47,10 +46,10 @@ namespace AzureMCP.Tests.Commands.Cosmos
             // Assert
             Assert.NotNull(response);
             Assert.NotNull(response.Results);
-            
+
             var json = JsonSerializer.Serialize(response.Results);
             var result = JsonSerializer.Deserialize<AccountListResult>(json);
-            
+
             Assert.NotNull(result);
             Assert.Equal(expectedAccounts, result.Accounts);
         }

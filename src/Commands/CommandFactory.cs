@@ -1,25 +1,24 @@
-using System.CommandLine;
-using System.CommandLine.Invocation;
 using AzureMCP.Commands.Cosmos;
 using AzureMCP.Commands.Server;
+using AzureMCP.Commands.Storage.Blob;
 using AzureMCP.Commands.Subscriptions;
-
+using AzureMCP.Commands.Tools;
 using AzureMCP.Models;
+using System.CommandLine;
+using System.CommandLine.Invocation;
+using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Text.Encodings.Web;
-using AzureMCP.Commands.Tools;
-using AzureMCP.Commands.Storage.Blob;
 
 namespace AzureMCP.Commands;
 
 public class CommandFactory
 {
-    
+
     private readonly IServiceProvider _serviceProvider;
     private readonly RootCommand _rootCommand;
     private readonly CommandGroup _rootGroup;
-    
+
     internal static readonly char Separator = '-';
 
     /// <summary>
@@ -280,7 +279,7 @@ public class CommandFactory
         {
             return aggregated;
         }
-        
+
         foreach (var command in node.SubGroup)
         {
             var childPrefix = GetPrefix(updatedPrefix, command.Name);

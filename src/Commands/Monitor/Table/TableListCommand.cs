@@ -1,8 +1,8 @@
-using System.CommandLine;
-using System.CommandLine.Parsing;
 using AzureMCP.Arguments.Monitor;
 using AzureMCP.Models;
 using AzureMCP.Services.Interfaces;
+using System.CommandLine;
+using System.CommandLine.Parsing;
 
 namespace AzureMCP.Commands.Monitor.Table;
 
@@ -15,19 +15,19 @@ public class TableListCommand : BaseMonitorCommand<TableListArguments>
     {
         _tableTypeOption = ArgumentDefinitions.Monitor.TableType.ToOption();
 
-         RegisterArgumentChain(
-            CreateWorkspaceNameArgument(GetWorkspaceOptions),
-            CreateResourceGroupArgument()!,
-            CreateTableTypeArgument()
-        );
+        RegisterArgumentChain(
+           CreateWorkspaceNameArgument(GetWorkspaceOptions),
+           CreateResourceGroupArgument()!,
+           CreateTableTypeArgument()
+       );
     }
 
     public override Command GetCommand()
     {
         var command = new Command(
-            "list", 
+            "list",
             "List tables in a Log Analytics workspace. This command retrieves all available tables from the specified workspace, which can be used for constructing KQL queries. Table contain different types of log data depending on the solutions and data sources configured for your workspace.");
-            
+
         AddBaseOptionsToCommand(command);
         command.AddOption(_workspaceNameOption);
         command.AddOption(_resourceGroupOption);
@@ -63,9 +63,9 @@ public class TableListCommand : BaseMonitorCommand<TableListArguments>
                 options.TableType,
                 options.TenantId,
                 options.RetryPolicy);
-                
-            context.Response.Results = tables?.Count > 0 ? 
-                new { tables } : 
+
+            context.Response.Results = tables?.Count > 0 ?
+                new { tables } :
                 null;
         }
         catch (Exception ex)

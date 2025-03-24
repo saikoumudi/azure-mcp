@@ -1,5 +1,5 @@
-using System.Text.Json;
 using AzureMCP.Services.Interfaces;
+using System.Text.Json;
 
 namespace AzureMCP.Services.Caching;
 
@@ -13,7 +13,7 @@ public class CacheService : ICacheService
     {
         _cacheDirectory = cacheDirectory ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "azmcp", "cache");
         _defaultExpiration = defaultExpiration ?? TimeSpan.FromHours(24);
-        
+
         // Ensure cache directory exists
         Directory.CreateDirectory(_cacheDirectory);
     }
@@ -83,4 +83,4 @@ public class CacheService : ICacheService
         public DateTime Timestamp { get; set; }
         public T? Data { get; set; }
     }
-} 
+}

@@ -21,12 +21,12 @@ public class AuthMethodArguments
         AuthMethod.ConnectionString => "Connection String",
         _ => authMethod.ToString()
     };
-    
+
     /// <summary>
     /// Gets the default auth method
     /// </summary>
     public static AuthMethod GetDefaultAuthMethod() => AuthMethod.Credential;
-    
+
     /// <summary>
     /// Gets all available auth methods
     /// </summary>
@@ -34,14 +34,14 @@ public class AuthMethodArguments
     {
         return Enum.GetValues<AuthMethod>();
     }
-    
+
     /// <summary>
     /// Gets all available auth methods as ArgumentOptions
     /// </summary>
     public static List<ArgumentOption> GetAuthMethodOptions()
     {
         var options = new List<ArgumentOption>();
-        
+
         foreach (AuthMethod authMethod in GetAllAuthMethods())
         {
             options.Add(new ArgumentOption
@@ -50,7 +50,7 @@ public class AuthMethodArguments
                 Id = authMethod.ToString()
             });
         }
-        
+
         return options;
     }
-} 
+}

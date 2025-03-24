@@ -1,8 +1,8 @@
-using System.CommandLine;
-using System.CommandLine.Parsing;
 using AzureMCP.Arguments;
 using AzureMCP.Models;
 using AzureMCP.Services.Interfaces;
+using System.CommandLine;
+using System.CommandLine.Parsing;
 
 namespace AzureMCP.Commands.Group;
 
@@ -40,8 +40,8 @@ public class GroupListCommand : BaseCommand<BaseArgumentsWithSubscriptionId>
                 options.TenantId,
                 options.RetryPolicy);
 
-            context.Response.Results = groups?.Count > 0 ? 
-                new { groups } : 
+            context.Response.Results = groups?.Count > 0 ?
+                new { groups } :
                 null;
         }
         catch (Exception ex)
