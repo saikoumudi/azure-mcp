@@ -10,5 +10,6 @@ public class LogQueryArguments : BaseMonitorArguments
     public string? Query { get; set; }
     public int? Hours { get; set; }
     public int? Limit { get; set; }
-    public string? Table { get; set; }
+    [JsonPropertyName(ArgumentDefinitions.Monitor.TableNameName)]
+    public string? TableName { get; set; }
 }

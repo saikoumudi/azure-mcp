@@ -12,8 +12,8 @@ public class ContainerDetailsCommand : BaseStorageCommand<ContainerDetailsArgume
     {
         // Create the argument chain with account and container arguments
         RegisterArgumentChain(
-            CreateAccountArgument(GetAccountOptions),
-            CreateContainerArgument(GetContainerOptions)
+            CreateAccountArgument(),
+            CreateContainerArgument()
         );
     }
 
@@ -22,7 +22,7 @@ public class ContainerDetailsCommand : BaseStorageCommand<ContainerDetailsArgume
         var command = new Command(
             "details",
             "Get detailed properties of a storage container including metadata, lease status, and access level. " +
-            "Requires storage account name and container name.");
+            $"Requires {ArgumentDefinitions.Storage.AccountName} and {ArgumentDefinitions.Storage.ContainerName}.");
 
         AddBaseOptionsToCommand(command);
         command.AddOption(_accountOption);

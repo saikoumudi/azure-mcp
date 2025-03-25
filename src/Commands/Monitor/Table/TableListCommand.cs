@@ -10,13 +10,12 @@ public class TableListCommand : BaseMonitorCommand<TableListArguments>
 {
     private readonly Option<string> _tableTypeOption;
 
-
     public TableListCommand() : base()
     {
         _tableTypeOption = ArgumentDefinitions.Monitor.TableType.ToOption();
 
         RegisterArgumentChain(
-           CreateWorkspaceNameArgument(GetWorkspaceOptions),
+           CreateWorkspaceNameArgument(),
            CreateResourceGroupArgument()!,
            CreateTableTypeArgument()
        );
@@ -26,7 +25,8 @@ public class TableListCommand : BaseMonitorCommand<TableListArguments>
     {
         var command = new Command(
             "list",
-            "List tables in a Log Analytics workspace. This command retrieves all available tables from the specified workspace, which can be used for constructing KQL queries. Table contain different types of log data depending on the solutions and data sources configured for your workspace.");
+            $"List all tables in a Log Analytics workspace. Requires {ArgumentDefinitions.Monitor.WorkspaceNameName}. " +
+            "Returns table names and schemas that can be used for constructing KQL queries.");
 
         AddBaseOptionsToCommand(command);
         command.AddOption(_workspaceNameOption);
@@ -76,13 +76,14 @@ public class TableListCommand : BaseMonitorCommand<TableListArguments>
         return context.Response;
     }
 
-
     protected ArgumentChain<TableListArguments> CreateTableTypeArgument()
     {
+        var defaultValue = ArgumentDefinitions.Monitor.TableType.DefaultValue ?? "CustomLog";
         return ArgumentChain<TableListArguments>
-            .Create(ArgumentDefinitions.Monitor.TableTypeName, ArgumentDefinitions.Monitor.TableType.Description)
-            .WithCommandExample($"{GetCommandPath()} --table-type <table-type>")
-            .WithValueAccessor(args => args.TableType ?? string.Empty)
-            .WithIsRequired(true);
+            .Create(ArgumentDefinitions.Monitor.TableType.Name, ArgumentDefinitions.Monitor.TableType.Description)
+            .WithCommandExample(ArgumentDefinitions.GetCommandExample(GetCommandPath(), ArgumentDefinitions.Monitor.TableType))
+            .WithValueAccessor(args => args.TableType ?? defaultValue)
+            .WithDefaultValue(defaultValue)
+            .WithIsRequired(ArgumentDefinitions.Monitor.TableType.Required);
     }
 }

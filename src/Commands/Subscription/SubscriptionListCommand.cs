@@ -24,7 +24,10 @@ public class SubscriptionsListCommand : BaseSubscriptionsCommand<SubscriptionLis
 
     public override Command GetCommand()
     {
-        var command = new Command("list", "List all Azure subscriptions accessible to your account. This command retrieves and displays all subscriptions that your authenticated identity has access to. Results include subscription names and IDs, returned as a JSON array. This command is useful for identifying available subscriptions before performing operations that require a subscription ID.");
+        var command = new Command(
+            "list", 
+            $"List all Azure subscriptions accessible to your account. Optionally specify {ArgumentDefinitions.Common.TenantIdName} " +
+            $"and {ArgumentDefinitions.Common.AuthMethodName}. Results include subscription names and IDs, returned as a JSON array.");
 
         // Add both tenant and auth method options
         command.AddOption(_tenantOption);

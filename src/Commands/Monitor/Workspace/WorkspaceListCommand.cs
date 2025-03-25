@@ -10,6 +10,7 @@ public class WorkspaceListCommand : BaseCommand<WorkspaceListArguments>
 {
     public WorkspaceListCommand() : base()
     {
+        RegisterArgumentChain();
     }
 
     public override Command GetCommand()

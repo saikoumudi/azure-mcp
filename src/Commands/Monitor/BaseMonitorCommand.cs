@@ -1,4 +1,5 @@
 using AzureMCP.Arguments;
+using AzureMCP.Arguments.Monitor;
 using AzureMCP.Models;
 using AzureMCP.Services.Interfaces;
 using System.CommandLine;
@@ -31,12 +32,11 @@ public abstract class BaseMonitorCommand<TArgs> : BaseCommand<TArgs> where TArgs
         })];
     }
 
-    protected virtual ArgumentChain<TArgs> CreateWorkspaceIdArgument(
-        Func<CommandContext, string, Task<List<ArgumentOption>>> workspaceOptionsLoader)
+    protected virtual ArgumentChain<TArgs> CreateWorkspaceIdArgument()
     {
         return ArgumentChain<TArgs>
             .Create(ArgumentDefinitions.Monitor.WorkspaceId.Name, ArgumentDefinitions.Monitor.WorkspaceId.Description)
-            .WithCommandExample($"{GetCommandPath()} --workspace-id <workspace-id>")
+            .WithCommandExample(ArgumentDefinitions.GetCommandExample(GetCommandPath(), ArgumentDefinitions.Monitor.WorkspaceId))
             .WithValueAccessor(args =>
             {
                 try
@@ -48,16 +48,15 @@ public abstract class BaseMonitorCommand<TArgs> : BaseCommand<TArgs> where TArgs
                     return string.Empty;
                 }
             })
-            .WithValueLoader(async (context, args) => await workspaceOptionsLoader(context, args.SubscriptionId ?? string.Empty))
-            .WithIsRequired(true);
+            .WithValueLoader(async (context, args) => await GetWorkspaceOptions(context, args.SubscriptionId ?? string.Empty))
+            .WithIsRequired(ArgumentDefinitions.Monitor.WorkspaceId.Required);
     }
 
-    protected virtual ArgumentChain<TArgs> CreateWorkspaceNameArgument(
-        Func<CommandContext, string, Task<List<ArgumentOption>>> workspaceOptionsLoader)
+    protected virtual ArgumentChain<TArgs> CreateWorkspaceNameArgument()
     {
         return ArgumentChain<TArgs>
             .Create(ArgumentDefinitions.Monitor.WorkspaceName.Name, ArgumentDefinitions.Monitor.WorkspaceName.Description)
-            .WithCommandExample($"{GetCommandPath()} --workspace-name <workspace-name>")
+            .WithCommandExample(ArgumentDefinitions.GetCommandExample(GetCommandPath(), ArgumentDefinitions.Monitor.WorkspaceName))
             .WithValueAccessor(args =>
             {
                 try
@@ -69,7 +68,7 @@ public abstract class BaseMonitorCommand<TArgs> : BaseCommand<TArgs> where TArgs
                     return string.Empty;
                 }
             })
-            .WithValueLoader(async (context, args) => await workspaceOptionsLoader(context, args.SubscriptionId ?? string.Empty))
-            .WithIsRequired(true);
-    }
+            .WithValueLoader(async (context, args) => await GetWorkspaceOptions(context, args.SubscriptionId ?? string.Empty))
+            .WithIsRequired(ArgumentDefinitions.Monitor.WorkspaceName.Required);
+    }   
 }

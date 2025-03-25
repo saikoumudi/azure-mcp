@@ -4,6 +4,12 @@ namespace AzureMCP.Models;
 
 public static class ArgumentDefinitions
 {
+    // Helper method to generate consistent command examples
+    public static string GetCommandExample<T>(string commandPath, ArgumentDefinition<T> argument)
+    {
+        return $"{commandPath} --{argument.Name} <{argument.Name}>";
+    }
+
     public static class Common
     {
         public const string TenantIdName = "tenant-id";
@@ -144,6 +150,7 @@ public static class ArgumentDefinitions
     {
         public const string WorkspaceIdName = "workspace-id";
         public const string WorkspaceNameName = "workspace-name";
+        public const string TableNameName = "table-name";
         public const string TableTypeName = "table-type";
         public const string QueryTextName = "query";
         public const string HoursName = "hours";
@@ -165,6 +172,12 @@ public static class ArgumentDefinitions
             TableTypeName,
             "The type of table to query. Options: 'CustomLog', 'AzureMetrics', etc.",
             defaultValue: "CustomLog",
+            required: true
+        );
+
+          public static readonly ArgumentDefinition<string> TableName = new(
+            TableNameName,
+            "The name of the table to query. This is the specific table within the workspace.",
             required: true
         );
 

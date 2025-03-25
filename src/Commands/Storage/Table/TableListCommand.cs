@@ -11,7 +11,7 @@ public class TableListCommand : BaseStorageCommand<TableListArguments>
     public TableListCommand() : base()
     {
         RegisterArgumentChain(
-            CreateAccountArgument(GetAccountOptions)
+            CreateAccountArgument()
         );
     }
 

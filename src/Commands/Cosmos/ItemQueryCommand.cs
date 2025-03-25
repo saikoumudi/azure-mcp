@@ -22,7 +22,9 @@ public class ItemQueryCommand : BaseCosmosCommand<ItemQueryArguments>
     {
         var command = new Command(
             "query",
-            "Execute a SQL query against items in a Cosmos DB container. This command allows you to retrieve documents from a container using SQL query syntax. Results are returned as a JSON array of documents.");
+            $"Execute a SQL query against items in a Cosmos DB container. Requires {ArgumentDefinitions.Cosmos.AccountName}, " +
+            $"{ArgumentDefinitions.Cosmos.DatabaseName}, and {ArgumentDefinitions.Cosmos.ContainerName}. " +
+            $"The {ArgumentDefinitions.Cosmos.QueryText} parameter accepts SQL query syntax. Results are returned as a JSON array of documents.");
 
         AddBaseOptionsToCommand(command);
         command.AddOption(_accountOption);

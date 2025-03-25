@@ -19,21 +19,6 @@ public abstract class BaseCosmosCommand<TArgs> : BaseCommand<TArgs> where TArgs 
         _containerOption = ArgumentDefinitions.Cosmos.Container.ToOption();
     }
 
-    protected override string GetCommandPath()
-    {
-        // Extract the command name from the class name (e.g., ContainerListCommand -> cosmos containers list)
-        string commandName = GetType().Name.Replace("Command", "");
-
-        // Insert spaces before capital letters and convert to lowercase
-        string formattedName = string.Concat(commandName.Select(x => char.IsUpper(x) ? " " + x : x.ToString())).Trim();
-
-        // Convert to lowercase
-        string lowerName = formattedName.ToLowerInvariant();
-
-        // Return the full command path
-        return "cosmos " + lowerName;
-    }
-
     // Common method to get account options
     protected async Task<List<ArgumentOption>> GetAccountOptions(CommandContext context, string subscriptionId)
     {
@@ -81,34 +66,34 @@ public abstract class BaseCosmosCommand<TArgs> : BaseCommand<TArgs> where TArgs 
         _ => base.GetStatusCode(ex)
     };
 
-    // Helper methods for creating Cosmos-specific arguments updated to use ArgumentChain
+    // Helper methods for creating Cosmos-specific arguments
     protected ArgumentChain<TArgs> CreateAccountArgument()
     {
         return ArgumentChain<TArgs>
             .Create(ArgumentDefinitions.Cosmos.Account.Name, ArgumentDefinitions.Cosmos.Account.Description)
-            .WithCommandExample($"{GetCommandPath()} --account-name <account-name>")
+            .WithCommandExample(ArgumentDefinitions.GetCommandExample(GetCommandPath(), ArgumentDefinitions.Cosmos.Account))
             .WithValueAccessor(args => ((dynamic)args).Account ?? string.Empty)
             .WithValueLoader(async (context, args) =>
                 await GetAccountOptions(context, args.SubscriptionId ?? string.Empty))
-            .WithIsRequired(true);
+            .WithIsRequired(ArgumentDefinitions.Cosmos.Account.Required);
     }
 
     protected ArgumentChain<TArgs> CreateDatabaseArgument()
     {
         return ArgumentChain<TArgs>
             .Create(ArgumentDefinitions.Cosmos.Database.Name, ArgumentDefinitions.Cosmos.Database.Description)
-            .WithCommandExample($"{GetCommandPath()} --database-name <database-name>")
+            .WithCommandExample(ArgumentDefinitions.GetCommandExample(GetCommandPath(), ArgumentDefinitions.Cosmos.Database))
             .WithValueAccessor(args => ((dynamic)args).Database ?? string.Empty)
             .WithValueLoader(async (context, args) =>
                 await GetDatabaseOptions(context, ((dynamic)args).Account ?? string.Empty, args.SubscriptionId ?? string.Empty))
-            .WithIsRequired(true);
+            .WithIsRequired(ArgumentDefinitions.Cosmos.Database.Required);
     }
 
     protected ArgumentChain<TArgs> CreateContainerArgument()
     {
         return ArgumentChain<TArgs>
             .Create(ArgumentDefinitions.Cosmos.Container.Name, ArgumentDefinitions.Cosmos.Container.Description)
-            .WithCommandExample($"{GetCommandPath()} --container-name <container-name>")
+            .WithCommandExample(ArgumentDefinitions.GetCommandExample(GetCommandPath(), ArgumentDefinitions.Cosmos.Container))
             .WithValueAccessor(args => ((dynamic)args).Container ?? string.Empty)
             .WithValueLoader(async (context, args) =>
                 await GetContainerOptions(
@@ -116,16 +101,17 @@ public abstract class BaseCosmosCommand<TArgs> : BaseCommand<TArgs> where TArgs 
                     ((dynamic)args).Account ?? string.Empty,
                     ((dynamic)args).Database ?? string.Empty,
                     args.SubscriptionId ?? string.Empty))
-            .WithIsRequired(true);
+            .WithIsRequired(ArgumentDefinitions.Cosmos.Container.Required);
     }
 
     protected ArgumentChain<TArgs> CreateQueryArgument()
     {
+        var defaultValue = ArgumentDefinitions.Cosmos.Query.DefaultValue ?? "SELECT * FROM c";
         return ArgumentChain<TArgs>
             .Create(ArgumentDefinitions.Cosmos.Query.Name, ArgumentDefinitions.Cosmos.Query.Description)
-            .WithCommandExample($"{GetCommandPath()} --query <query>")
+            .WithCommandExample(ArgumentDefinitions.GetCommandExample(GetCommandPath(), ArgumentDefinitions.Cosmos.Query))
             .WithValueAccessor(args => ((dynamic)args).Query ?? string.Empty)
-            .WithDefaultValue("SELECT * FROM c")
-            .WithIsRequired(true);
+            .WithDefaultValue(defaultValue)
+            .WithIsRequired(ArgumentDefinitions.Cosmos.Query.Required);
     }
 }

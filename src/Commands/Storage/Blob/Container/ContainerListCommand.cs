@@ -10,9 +10,8 @@ public class ContainerListCommand : BaseStorageCommand<ContainerListArguments>
 {
     public ContainerListCommand() : base()
     {
-
         RegisterArgumentChain(
-            CreateAccountArgument(GetAccountOptions)
+            CreateAccountArgument()
         );
     }
 
@@ -20,13 +19,9 @@ public class ContainerListCommand : BaseStorageCommand<ContainerListArguments>
     {
         var command = new Command("list", "List all containers in the specified storage account.");
 
-        // Add required options
+        // Add base options which includes subscription and auth options
+        AddBaseOptionsToCommand(command);
         command.AddOption(_accountOption);
-        command.AddOption(_subscriptionOption);
-
-        // Add retry options
-        AddRetryOptionsToCommand(command);
-
         return command;
     }
 

@@ -69,7 +69,7 @@ public abstract class BaseCommand<TArgs> : ICommand where TArgs : BaseArguments,
     {
         return ArgumentChain<TArgs>
             .Create(ArgumentDefinitions.Common.AuthMethod.Name, ArgumentDefinitions.Common.AuthMethod.Description)
-            .WithCommandExample($"{GetCommandPath()} --auth-method <auth-method>")
+            .WithCommandExample(ArgumentDefinitions.GetCommandExample(GetCommandPath(), ArgumentDefinitions.Common.AuthMethod))
             .WithValueAccessor(args => args.AuthMethod?.ToString() ?? string.Empty)
             .WithValueLoader(async (context, args) => await GetAuthMethodOptions(context))
             .WithDefaultValue(AuthMethodArguments.GetDefaultAuthMethod().ToString())
@@ -80,7 +80,7 @@ public abstract class BaseCommand<TArgs> : ICommand where TArgs : BaseArguments,
     {
         return ArgumentChain<TArgs>
             .Create(ArgumentDefinitions.Common.TenantId.Name, ArgumentDefinitions.Common.TenantId.Description)
-            .WithCommandExample($"{GetCommandPath()} --tenant-id <tenant-id>")
+            .WithCommandExample(ArgumentDefinitions.GetCommandExample(GetCommandPath(), ArgumentDefinitions.Common.TenantId))
             .WithValueAccessor(args => args.TenantId ?? string.Empty)
             .WithIsRequired(false);
     }
@@ -94,7 +94,7 @@ public abstract class BaseCommand<TArgs> : ICommand where TArgs : BaseArguments,
 
         return ArgumentChain<TArgs>
             .Create(ArgumentDefinitions.Common.ResourceGroup.Name, ArgumentDefinitions.Common.ResourceGroup.Description)
-            .WithCommandExample($"{GetCommandPath()} --resource-group <resource-group>")
+            .WithCommandExample(ArgumentDefinitions.GetCommandExample(GetCommandPath(), ArgumentDefinitions.Common.ResourceGroup))
             .WithValueAccessor(args => (args as BaseArgumentsWithSubscriptionId)?.ResourceGroup ?? string.Empty)
             .WithValueLoader(async (context, args) =>
             {
@@ -114,7 +114,7 @@ public abstract class BaseCommand<TArgs> : ICommand where TArgs : BaseArguments,
         {
             return ArgumentChain<TArgs>
             .Create(ArgumentDefinitions.Common.SubscriptionId.Name, ArgumentDefinitions.Common.SubscriptionId.Description)
-            .WithCommandExample($"{GetCommandPath()} --subscription-id <subscription-id>")
+            .WithCommandExample(ArgumentDefinitions.GetCommandExample(GetCommandPath(), ArgumentDefinitions.Common.SubscriptionId))
             .WithValueAccessor(args => (args as BaseArgumentsWithSubscriptionId)?.SubscriptionId ?? string.Empty)
             .WithValueLoader(async (context, args) => await GetSubscriptionOptions(context))
             .WithIsRequired(true);

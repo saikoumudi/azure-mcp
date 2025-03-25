@@ -17,7 +17,8 @@ public class AccountListCommand : BaseCommand<AccountListArguments>
     {
         var command = new Command(
             "list",
-            "List all Storage accounts in a subscription. This command retrieves and displays all Storage accounts available in the specified subscription. Results include account names and are returned as a JSON array. You must specify a subscription ID.");
+            $"List all Storage accounts in a subscription. This command retrieves all Storage accounts available " +
+            $"in the specified {ArgumentDefinitions.Common.SubscriptionIdName}. Results include account names and are returned as a JSON array.");
 
         // We only need auth/subscription options for list command
         AddCommonOptionsToCommand(command);

@@ -17,7 +17,9 @@ public class GroupListCommand : BaseCommand<BaseArgumentsWithSubscriptionId>
     {
         var command = new Command(
             "list",
-            "List resource groups in a subscription. This command retrieves all resource groups available in the specified Azure subscription, displaying their names, IDs, and locations. Use this command to identify target resource groups for other operations.");
+            $"List all resource groups in a subscription. This command retrieves all resource groups available " +
+            $"in the specified {ArgumentDefinitions.Common.SubscriptionIdName}. Results include resource group names and IDs, " +
+            "returned as a JSON array.");
 
         AddBaseOptionsToCommand(command);
         return command;

@@ -1,3 +1,4 @@
+using AzureMCP.Arguments;
 using AzureMCP.Arguments.Monitor;
 using AzureMCP.Models;
 using AzureMCP.Services.Interfaces;
@@ -8,34 +9,21 @@ namespace AzureMCP.Commands.Monitor.Log;
 
 public class LogQueryCommand : BaseMonitorCommand<LogQueryArguments>
 {
-    protected Option<string> _tableOption;
-    protected Option<string> _queryOption;
-    protected Option<int> _hoursOption;
-    protected Option<int> _limitOption;
+    protected readonly Option<string> _tableNameOption;
+    protected readonly Option<string> _queryOption;
+    protected readonly Option<int> _hoursOption;
+    protected readonly Option<int> _limitOption;
 
     public LogQueryCommand() : base()
     {
-        _tableOption = new Option<string>(
-           "--table",
-           "The name of the Log Analytics table to query");
-
-        _queryOption = new Option<string>(
-            $"--{ArgumentDefinitions.Monitor.QueryTextName}",
-            ArgumentDefinitions.Monitor.Query.Description);
-
-        _hoursOption = new Option<int>(
-            $"--{ArgumentDefinitions.Monitor.HoursName}",
-            () => ArgumentDefinitions.Monitor.Hours.DefaultValue,
-            ArgumentDefinitions.Monitor.Hours.Description);
-
-        _limitOption = new Option<int>(
-            $"--{ArgumentDefinitions.Monitor.LimitName}",
-            () => ArgumentDefinitions.Monitor.Limit.DefaultValue,
-            ArgumentDefinitions.Monitor.Limit.Description);
+        _tableNameOption = ArgumentDefinitions.Monitor.TableName.ToOption();
+        _queryOption = ArgumentDefinitions.Monitor.Query.ToOption();
+        _hoursOption = ArgumentDefinitions.Monitor.Hours.ToOption();
+        _limitOption = ArgumentDefinitions.Monitor.Limit.ToOption();
 
         RegisterArgumentChain(
-            CreateWorkspaceIdArgument(GetWorkspaceOptions),
-            CreateTableArgument(),
+            CreateWorkspaceIdArgument(),
+            CreateTableNameArgument(),
             CreateQueryArgument(),
             CreateHoursArgument(),
             CreateLimitArgument()
@@ -46,35 +34,61 @@ public class LogQueryCommand : BaseMonitorCommand<LogQueryArguments>
     {
         var command = new Command(
             "query",
-            "Query logs from Azure Monitor using KQL. This command allows you to execute Kusto Query Language (KQL) queries against your Log Analytics workspace to retrieve and analyze log data. You can specify the time range and limit the number of results returned.");
+            $"Execute a KQL query against a Log Analytics workspace. Requires {ArgumentDefinitions.Monitor.WorkspaceIdName}, " +
+            $"with optional {ArgumentDefinitions.Monitor.HoursName} (default: {ArgumentDefinitions.Monitor.Hours.DefaultValue}) " +
+            $"and {ArgumentDefinitions.Monitor.LimitName} (default: {ArgumentDefinitions.Monitor.Limit.DefaultValue}) parameters. " +
+            $"The {ArgumentDefinitions.Monitor.QueryTextName} parameter accepts KQL syntax.");
 
         AddBaseOptionsToCommand(command);
         command.AddOption(_workspaceIdOption);
-        command.AddOption(_tableOption);
+        command.AddOption(_tableNameOption);
         command.AddOption(_queryOption);
         command.AddOption(_hoursOption);
         command.AddOption(_limitOption);
-
         return command;
     }
 
+    
+    protected async Task<List<ArgumentOption>> GetTableNameOptions(CommandContext context, string subscriptionId, string resourceGroup, string workspaceName, string? tableType = "CustomLog", string? tenantId = null, RetryPolicyArguments? retryPolicy = null)
+    {
+        if (string.IsNullOrEmpty(subscriptionId) || string.IsNullOrEmpty(resourceGroup) || string.IsNullOrEmpty(workspaceName))
+            return [];
 
-    protected ArgumentChain<LogQueryArguments> CreateTableArgument()
+        var monitorService = context.GetService<IMonitorService>();
+        var tables = await monitorService.ListTables(subscriptionId, resourceGroup, workspaceName, tableType, tenantId, retryPolicy);
+
+        return [.. tables.Select(t => new ArgumentOption
+        {
+            Name = t,
+            Id = t
+        })];
+    }
+
+    // TODO: Consider adding a Values loader for tables
+    protected virtual ArgumentChain<LogQueryArguments> CreateTableNameArgument()
     {
         return ArgumentChain<LogQueryArguments>
-            .Create("table", "The name of the Log Analytics table to query")
-            .WithCommandExample($"{GetCommandPath()} --table \"MyTable\"")
-            .WithValueAccessor(args => args.Table ?? string.Empty)
-            .WithIsRequired(true);
+            .Create(ArgumentDefinitions.Monitor.TableName.Name, ArgumentDefinitions.Monitor.TableName.Description)
+            .WithCommandExample(ArgumentDefinitions.GetCommandExample(GetCommandPath(), ArgumentDefinitions.Monitor.TableName))
+            .WithValueAccessor(args =>
+            {
+                try
+                {
+                    return ((dynamic)args).TableName ?? string.Empty;
+                }
+                catch
+                {
+                    return string.Empty;
+                }
+            })
+            .WithIsRequired(ArgumentDefinitions.Monitor.TableName.Required);
     }
 
     protected ArgumentChain<LogQueryArguments> CreateQueryArgument()
     {
         return ArgumentChain<LogQueryArguments>
-            .Create(
-                ArgumentDefinitions.Monitor.QueryTextName,
-                ArgumentDefinitions.Monitor.Query.Description)
-            .WithCommandExample($"{GetCommandPath()} --{ArgumentDefinitions.Monitor.QueryTextName} \"<kql-query>\"")
+            .Create(ArgumentDefinitions.Monitor.Query.Name, ArgumentDefinitions.Monitor.Query.Description)
+            .WithCommandExample(ArgumentDefinitions.GetCommandExample(GetCommandPath(), ArgumentDefinitions.Monitor.Query))
             .WithValueAccessor(args => args.Query ?? string.Empty)
             .WithIsRequired(true);
     }
@@ -82,10 +96,8 @@ public class LogQueryCommand : BaseMonitorCommand<LogQueryArguments>
     protected ArgumentChain<LogQueryArguments> CreateHoursArgument()
     {
         return ArgumentChain<LogQueryArguments>
-            .Create(
-                ArgumentDefinitions.Monitor.HoursName,
-                ArgumentDefinitions.Monitor.Hours.Description)
-            .WithCommandExample($"{GetCommandPath()} --{ArgumentDefinitions.Monitor.HoursName} {ArgumentDefinitions.Monitor.Hours.DefaultValue}")
+            .Create(ArgumentDefinitions.Monitor.Hours.Name, ArgumentDefinitions.Monitor.Hours.Description)
+            .WithCommandExample(ArgumentDefinitions.GetCommandExample(GetCommandPath(), ArgumentDefinitions.Monitor.Hours))
             .WithValueAccessor(args => args.Hours?.ToString() ?? ArgumentDefinitions.Monitor.Hours.DefaultValue.ToString())
             .WithDefaultValue(ArgumentDefinitions.Monitor.Hours.DefaultValue.ToString())
             .WithIsRequired(false);
@@ -94,21 +106,18 @@ public class LogQueryCommand : BaseMonitorCommand<LogQueryArguments>
     protected ArgumentChain<LogQueryArguments> CreateLimitArgument()
     {
         return ArgumentChain<LogQueryArguments>
-            .Create(
-                ArgumentDefinitions.Monitor.LimitName,
-                ArgumentDefinitions.Monitor.Limit.Description)
-            .WithCommandExample($"{GetCommandPath()} --{ArgumentDefinitions.Monitor.LimitName} {ArgumentDefinitions.Monitor.Limit.DefaultValue}")
+            .Create(ArgumentDefinitions.Monitor.Limit.Name, ArgumentDefinitions.Monitor.Limit.Description)
+            .WithCommandExample(ArgumentDefinitions.GetCommandExample(GetCommandPath(), ArgumentDefinitions.Monitor.Limit))
             .WithValueAccessor(args => args.Limit?.ToString() ?? ArgumentDefinitions.Monitor.Limit.DefaultValue.ToString())
             .WithDefaultValue(ArgumentDefinitions.Monitor.Limit.DefaultValue.ToString())
             .WithIsRequired(false);
     }
 
-
     protected override LogQueryArguments BindArguments(ParseResult parseResult)
     {
         var args = base.BindArguments(parseResult);
         args.WorkspaceId = parseResult.GetValueForOption(_workspaceIdOption);
-        args.Table = parseResult.GetValueForOption(_tableOption);
+        args.TableName = parseResult.GetValueForOption(_tableNameOption);
         args.Query = parseResult.GetValueForOption(_queryOption);
         args.Hours = parseResult.GetValueForOption(_hoursOption);
         args.Limit = parseResult.GetValueForOption(_limitOption);
@@ -130,7 +139,7 @@ public class LogQueryCommand : BaseMonitorCommand<LogQueryArguments>
             var results = await monitorService.QueryLogs(
                 options.WorkspaceId!,
                 options.Query!,
-                options.Table!,
+                options.TableName!,
                 options.Hours,
                 options.Limit,
                 options.SubscriptionId!,

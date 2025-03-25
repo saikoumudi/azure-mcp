@@ -12,8 +12,8 @@ public class BlobListCommand : BaseStorageCommand<BlobListArguments>
         : base()
     {
         RegisterArgumentChain(
-            CreateAccountArgument(GetAccountOptions),
-            CreateContainerArgument(GetContainerOptions)
+            CreateAccountArgument(),
+            CreateContainerArgument()
         );
     }
 
