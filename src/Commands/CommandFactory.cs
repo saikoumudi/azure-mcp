@@ -171,7 +171,7 @@ public class CommandFactory
         _rootGroup.AddSubGroup(mcpServer);
 
         // Register MCP Server commands
-        var startServer = new McpStartServerCommand(_serviceProvider);
+        var startServer = new ServiceStartCommand(_serviceProvider);
         mcpServer.AddCommand("start", startServer);
 
     }

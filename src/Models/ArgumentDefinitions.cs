@@ -1,4 +1,5 @@
 using Azure.Core;
+using ModelContextProtocol.Protocol.Transport;
 
 namespace AzureMCP.Models;
 
@@ -175,11 +176,11 @@ public static class ArgumentDefinitions
             required: true
         );
 
-          public static readonly ArgumentDefinition<string> TableName = new(
-            TableNameName,
-            "The name of the table to query. This is the specific table within the workspace.",
-            required: true
-        );
+        public static readonly ArgumentDefinition<string> TableName = new(
+          TableNameName,
+          "The name of the table to query. This is the specific table within the workspace.",
+          required: true
+      );
 
         public static readonly ArgumentDefinition<string> Query = new(
             QueryTextName,
@@ -200,5 +201,17 @@ public static class ArgumentDefinitions
             defaultValue: 20,
             required: true
         );
+    }
+
+    public static class Service
+    {
+        public const string TransportName = "transport";
+
+        public static readonly ArgumentDefinition<string> Transport = new(
+            TransportName,
+            "Transport mechanism to use for MCP server.",
+            defaultValue: TransportTypes.StdIo,
+            required: false
+            );
     }
 }

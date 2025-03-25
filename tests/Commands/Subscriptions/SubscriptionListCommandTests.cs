@@ -2,7 +2,7 @@ using AzureMCP.Arguments;
 using AzureMCP.Commands.Subscriptions;
 using AzureMCP.Models;
 using AzureMCP.Services.Interfaces;
-using McpDotNet.Server;
+using ModelContextProtocol.Server;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
 using System.CommandLine;
@@ -70,7 +70,7 @@ namespace AzureMCP.Tests.Commands.Subscriptions
 
             _subscriptionService
                 .GetSubscriptions(Arg.Is<string>(x => x == tenantId), Arg.Any<RetryPolicyArguments>())
-                .Returns(new List<ArgumentOption> { new() { Id = "sub1", Name = "Sub1" } });
+                .Returns([new() { Id = "sub1", Name = "Sub1" }]);
 
             // Act
             var result = await _command.ExecuteAsync(_context, args);
@@ -89,7 +89,7 @@ namespace AzureMCP.Tests.Commands.Subscriptions
             // Arrange
             _subscriptionService
                 .GetSubscriptions(Arg.Any<string>(), Arg.Any<RetryPolicyArguments>())
-                .Returns(new List<ArgumentOption>());
+                .Returns([]);
 
             var args = _parser.Parse("");
 
@@ -131,7 +131,7 @@ namespace AzureMCP.Tests.Commands.Subscriptions
 
             _subscriptionService
                 .GetSubscriptions(Arg.Any<string>(), Arg.Any<RetryPolicyArguments>())
-                .Returns(new List<ArgumentOption> { new() { Id = "sub1", Name = "Sub1" } });
+                .Returns([new() { Id = "sub1", Name = "Sub1" }]);
 
             // Act
             var result = await _command.ExecuteAsync(_context, args);
