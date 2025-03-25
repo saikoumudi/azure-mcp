@@ -24,6 +24,18 @@ Start the MCP server:
 azmcp server start
 ```
 
+## Run in VS Code GitHub Copilot
+1. Install VS Code Insiders
+1. Install Github Copilot and Github Copilot Chat extensions pre-release.
+1. Clone this repo and build /src folder with `dotnet build`
+1. Open a new instance of VS Code in an empty folder.
+1. Copy the .vscode/mcp.json in azure-mcp repo to your new folder.
+1. Update the path to the exe in mcp.json to your machine's path.
+1. Open copilot chat, switch to Agent mode.
+1. You should see Azure MCP Server in the list of tools.
+1. Chat "list my azure storage containers"
+1. It should guide you through the process of listing your storage containers.
+
 ## Tools
 
 `azmcp tools list`

@@ -1,6 +1,6 @@
 {
     "servers": {
-        "azmcp6": {
+        "Azure MCP Server": {
             "command": "C:\\code\\azure-mcp\\src\\bin\\Debug\\net9.0\\azmcp.exe",
             "args": [
                 "server",
