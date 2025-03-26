@@ -39,22 +39,24 @@ Please read our [Contributing Guide](CONTRIBUTING.md) for guidelines on:
 - Code style and testing requirements
 - Making pull requests
 
-## Run in VS Code GitHub Copilot
-1. Install VS Code Insiders
-1. Install Github Copilot and Github Copilot Chat extensions pre-release.
-1. Clone this repo and build /src folder with `dotnet build`
-1. Open a new instance of VS Code in an empty folder.
-1. Copy the .vscode/mcp.json in azure-mcp repo to your new folder.
-1. Comment out the appropriate section if you are running SSE or STDIO.  If SSE, then run the server first with `azmcp server start --transport sse`.  Default port is 5000. Endpoint is http://localhost:5000/sse
-1. If using STDIO, Update the path to the exe in mcp.json to your machine's path.
-1. Open copilot chat, switch to Agent mode.
-1. You should see Azure MCP Server in the list of tools.
-1. Chat "list my azure storage containers"
-1. It should guide you through the process of listing your storage containers.
+# Using the Azure MCP Server in VS Code with GitHub Copilot
 
-## Run in Cursor
+To use the Azure MCP with VS Code Insiders with GitHub Copilot Agent Mode, follow these instructions:
 
-Not supported right now.  We are investigating.
+1. Install [VS Code Insiders](https://code.visualstudio.com/insiders/).
+1. Install the pre-release versions of the GitHub Copilot and GitHub Copilot Chat extensions in VS Code Insiders.
+1. Clone this repo and build the `/src` folder with `dotnet build`.
+1. Open a new instance of VS Code Insiders in an empty folder.
+1. Copy the `.vscode/mcp.json` from the `azure-mcp` repo to your new folder.
+1. Comment out the appropriate section if you are running SSE or STDIO. 
+If SSE, then run the server first with `azmcp server start --transport sse`.  The default port is 5000 and the endpoint is `http://localhost:5000/sse`. If using STDIO, update the path to the .exe in `mcp.json` to match your machine's path.
+1. Open GitHub Copilot and switch to Agent mode. You should see Azure MCP Server in the list of tools.
+1. Try a prompt that tells the agent to use the Azure MCP server, such as "List my Azure Storage containers."
+1. The agent should be able to use the Azure MCP to complete your query.
+
+## Using the Azure MCP Server in Cursor
+
+Cursor support is not available at the moment - we are investigating usage, stay tuned.
 
 ## Tools
 
