@@ -103,7 +103,7 @@ The Azure MCP Server implements the [Model Context Protocol specification](https
 ## Questions and Support
 
 - Create an issue for questions
-- Tag @jong for specific help or clarification
+- Tag @jongio for specific help or clarification
 - Join our community discussions
 
 ## Additional Resources
