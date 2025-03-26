@@ -282,32 +282,28 @@ private void RegisterCommandGroup()
 
 After registering the command, update the MCP server service registration:
 
-Location: `src/Commands/Server/McpStartServerCommand.cs`
+Location: `src/Commands/Server/ServiceStartCommand.cs`
 
-Check if your service is registered in the `CreateHostBuilder` method. Look for a line like:
+Check if your service is registered in the `ConfigureServices` method. Look for a line like:
 ```csharp
-services.AddSingleton(provider => 
-    _rootServiceProvider.GetRequiredService<I{Service}Service>());
+services.AddSingleton(rootServiceProvider.GetRequiredService<I{Service}Service>());
 ```
 
 If not found, add it alongside the other service registrations:
 ```csharp
-private IHostBuilder CreateHostBuilder()
+private static void ConfigureServices(IServiceCollection services, IServiceProvider rootServiceProvider)
 {
-    // ...existing code...
-    .ConfigureServices(services =>
-    {
-        // ...existing code...
-        services.AddSingleton(provider =>
-            _rootServiceProvider.GetRequiredService<IStorageService>());
-        services.AddSingleton(provider =>
-            _rootServiceProvider.GetRequiredService<IYourService>()); // Add your service here
-        // ...existing code...
-    });
+    services.AddSingleton(rootServiceProvider.GetRequiredService<CommandFactory>());
+    services.AddSingleton(rootServiceProvider.GetRequiredService<ISubscriptionService>());
+    services.AddSingleton(rootServiceProvider.GetRequiredService<IStorageService>());
+    services.AddSingleton(rootServiceProvider.GetRequiredService<ICosmosService>());
+    services.AddSingleton(rootServiceProvider.GetRequiredService<IMonitorService>());
+    services.AddSingleton(rootServiceProvider.GetRequiredService<IResourceGroupService>());
+    services.AddSingleton(rootServiceProvider.GetRequiredService<IYourService>()); // Add your service here
 }
 ```
 
-This ensures your service is available when the MCP server is running.
+This ensures your service is available when the MCP server is running in both STDIO and SSE modes.
 
 ## Step 6: Update README.md Documentation
 
@@ -789,21 +785,45 @@ protected override int GetStatusCode(Exception ex) => ex switch
 
 ## CommandFactory Guidelines
 
+Here's an example of how command groups should be registered:
+
+```csharp
+private void RegisterMonitorCommands()
+{
+    // Create Monitor command group with clear description
+    var monitor = new CommandGroup("monitor", 
+        "Azure Monitor operations - Commands for querying and analyzing Azure Monitor logs and metrics.");
+    _rootGroup.AddSubGroup(monitor);
+
+    // Create descriptive subgroups
+    var logs = new CommandGroup("log", 
+        "Azure Monitor logs operations - Commands for querying Log Analytics workspaces using KQL.");
+    monitor.AddSubGroup(logs);
+
+    var workspaces = new CommandGroup("workspace", 
+        "Log Analytics workspace operations - Commands for managing Log Analytics workspaces.");
+    monitor.AddSubGroup(workspaces);
+
+    // Register commands under appropriate groups
+    logs.AddCommand("query", new Monitor.Log.LogQueryCommand());
+    workspaces.AddCommand("list", new Monitor.Workspace.WorkspaceListCommand());
+}
+```
+
+The root command group registration follows this pattern:
 ```csharp
 private void RegisterCommandGroup()
 {
-    var cosmos = new CommandGroup("cosmos", 
-        "Cosmos DB operations - Commands for managing and querying Azure Cosmos DB resources. " + 
-        "Includes operations for databases, containers, and document queries.");
-
-    var databases = new CommandGroup("databases", 
-        "Cosmos DB databases operations - Commands for listing, creating, and managing databases.");
-    
-    _rootGroup.AddSubGroup(cosmos);
-    cosmos.AddSubGroup(databases);
-    
-    databases.AddCommand("list", new DatabaseListCommand());
+    // Register top-level command groups
+    RegisterCosmosCommands();
+    RegisterStorageCommands();
+    RegisterMonitorCommands();
+    RegisterToolsCommands();
+    RegisterSubscriptionCommands();
+    RegisterGroupCommands();
+    RegisterMcpServerCommands();
 }
+```
 
 ## Code Style Requirements
 
@@ -871,6 +891,65 @@ public class ContainersListCommand : BaseStorageCommand<ContainersListArguments>
             var containers = await service.ListContainers(
                 options.Account!,
                 options.SubscriptionId!,
+                options.TenantId,
+                options.RetryPolicy);
+
+            context.Response.Results = containers?.Count > 0 ? 
+                new { containers } : 
+                null;
+        }
+        catch (Exception ex)
+        {
+            HandleException(context.Response, ex);
+        }
+
+        return context.Response;
+    }
+}
+```
+
+### Complete Example of a Command Class
+```csharp
+public class ContainerListCommand : BaseStorageCommand<ContainerListArguments>
+{
+    public ContainerListCommand() : base()
+    {
+        RegisterArgumentChain(
+            CreateAccountArgument()
+        );
+    }
+
+    public override Command GetCommand()
+    {
+        var command = new Command("list", "List all containers in the specified storage account.");
+        AddBaseOptionsToCommand(command);
+        command.AddOption(_accountOption);
+        return command;
+    }
+
+    protected override ContainerListArguments BindArguments(ParseResult parseResult)
+    {
+        var args = base.BindArguments(parseResult);
+        args.Account = parseResult.GetValueForOption(_accountOption);
+        return args;
+    }
+
+    public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult commandOptions)
+    {
+        var options = BindArguments(commandOptions);
+
+        try
+        {
+            if (!await ProcessArgumentChain(context, options))
+            {
+                return context.Response;
+            }
+
+            var storageService = context.GetService<IStorageService>();
+            var containers = await storageService.ListContainers(
+                options.Account!,
+                options.SubscriptionId!,
+                options.AuthMethod ?? AuthMethod.Credential,
                 options.TenantId,
                 options.RetryPolicy);
 
