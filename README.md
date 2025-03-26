@@ -29,6 +29,16 @@ Start the MCP Server (SSE):
 azmcp server start --transport sse
 ```
 
+## Contributing
+
+We welcome contributions to Azure MCP! Whether you're fixing bugs, adding new features, or improving documentation, your contributions are welcome.
+
+Please read our [Contributing Guide](CONTRIBUTING.md) for guidelines on:
+- Setting up your development environment
+- Adding new commands
+- Code style and testing requirements
+- Making pull requests
+
 ## Run in VS Code GitHub Copilot
 1. Install VS Code Insiders
 1. Install Github Copilot and Github Copilot Chat extensions pre-release.
