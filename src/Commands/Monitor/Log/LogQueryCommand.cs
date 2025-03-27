@@ -48,7 +48,7 @@ public class LogQueryCommand : BaseMonitorCommand<LogQueryArguments>
         return command;
     }
 
-    
+
     protected async Task<List<ArgumentOption>> GetTableNameOptions(CommandContext context, string subscriptionId, string resourceGroup, string workspaceName, string? tableType = "CustomLog", string? tenantId = null, RetryPolicyArguments? retryPolicy = null)
     {
         if (string.IsNullOrEmpty(subscriptionId) || string.IsNullOrEmpty(resourceGroup) || string.IsNullOrEmpty(workspaceName))

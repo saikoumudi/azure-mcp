@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace AzureMCP.Models.Tools;
+namespace AzureMCP.Models;
 
 public class CommandInfo
 {

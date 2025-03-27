@@ -1,9 +1,9 @@
-﻿using System.CommandLine;
-using System.Text.Json;
-using AzureMCP.Models;
+﻿using AzureMCP.Models;
 using ModelContextProtocol.Protocol.Types;
 using ModelContextProtocol.Server;
 using ModelContextProtocol.Utils.Json;
+using System.CommandLine;
+using System.Text.Json;
 
 namespace AzureMCP.Commands.Server;
 

@@ -214,4 +214,51 @@ public static class ArgumentDefinitions
             required: false
             );
     }
+
+    public static class AppConfig
+    {
+        public const string AccountName = "account-name";
+        public const string KeyName = "key";
+        public const string ValueName = "value";
+        public const string LabelName = "label";
+
+        public static readonly ArgumentDefinition<string> Account = new(
+            AccountName,
+            "The name of the App Configuration store (e.g., my-appconfig).",
+            required: true
+        );
+
+        public static readonly ArgumentDefinition<string> Key = new(
+            KeyName,
+            "The name of the key to access within the App Configuration store.",
+            required: true
+        );
+
+        public static readonly ArgumentDefinition<string> Value = new(
+            ValueName,
+            "The value to set for the configuration key.",
+            required: true
+        );
+
+        public static readonly ArgumentDefinition<string> Label = new(
+            LabelName,
+            "The label to apply to the configuration key. Labels are used to group and organize settings.",
+            required: false
+        );
+
+        public static class KeyValueList
+        {
+            public static readonly ArgumentDefinition<string> Key = new(
+                KeyName,
+                "Specifies the key filter, if any, to be used when retrieving key-values. The filter can be an exact match, for example a filter of \"foo\" would get all key-values with a key of \"foo\", or the filter can include a '*' character at the end of the string for wildcard searches (e.g., 'App*'). If omitted all keys will be retrieved.",
+                required: false
+            );
+
+            public static readonly ArgumentDefinition<string> Label = new(
+                LabelName,
+                "Specifies the label filter, if any, to be used when retrieving key-values. The filter can be an exact match, for example a filter of \"foo\" would get all key-values with a label of \"foo\", or the filter can include a '*' character at the end of the string for wildcard searches (e.g., 'Prod*'). This filter is case-sensitive. If omitted, all labels will be retrieved.",
+                required: false
+            );
+        }
+    }
 }

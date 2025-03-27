@@ -59,7 +59,7 @@ namespace AzureMCP.Tests.Commands.Cosmos
         {
             // Arrange
             _cosmosService.GetCosmosAccounts("sub123", null, null)
-                .Returns(new List<string>());
+                .Returns([]);
 
             var command = new AccountListCommand();
             var args = command.GetCommand().Parse(["--subscription-id", "sub123"]);

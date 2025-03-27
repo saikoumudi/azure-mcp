@@ -1,5 +1,6 @@
 using AzureMCP.Commands;
 using AzureMCP.Models;
+using AzureMCP.Services.Azure.AppConfig;
 using AzureMCP.Services.Azure.Cosmos;
 using AzureMCP.Services.Azure.Monitor;
 using AzureMCP.Services.Azure.ResourceGroup;
@@ -50,6 +51,7 @@ class Program
         services.AddSingleton<IStorageService, StorageService>();
         services.AddSingleton<IMonitorService, MonitorService>();
         services.AddSingleton<IResourceGroupService, ResourceGroupService>();
+        services.AddSingleton<IAppConfigService, AppConfigService>();
         services.AddSingleton<CommandFactory>();
     }
 }

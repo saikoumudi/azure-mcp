@@ -1,22 +1,22 @@
 using AzureMCP.Arguments;
-using AzureMCP.Commands.Subscriptions;
+using AzureMCP.Commands.Subscription;
 using AzureMCP.Models;
 using AzureMCP.Services.Interfaces;
-using ModelContextProtocol.Server;
 using Microsoft.Extensions.DependencyInjection;
+using ModelContextProtocol.Server;
 using NSubstitute;
 using System.CommandLine;
 using System.CommandLine.Parsing;
 using Xunit;
 
-namespace AzureMCP.Tests.Commands.Subscriptions
+namespace AzureMCP.Tests.Commands.Subscription
 {
     public class SubscriptionListCommandTests
     {
         private readonly IServiceProvider _serviceProvider;
         private readonly IMcpServer _mcpServer;
         private readonly ISubscriptionService _subscriptionService;
-        private readonly SubscriptionsListCommand _command;
+        private readonly SubscriptionListCommand _command;
         private readonly CommandContext _context;
         private readonly Parser _parser;
 
@@ -30,7 +30,7 @@ namespace AzureMCP.Tests.Commands.Subscriptions
             collection.AddSingleton(_subscriptionService);
 
             _serviceProvider = collection.BuildServiceProvider();
-            _command = new SubscriptionsListCommand();
+            _command = new SubscriptionListCommand();
             _context = new CommandContext(_serviceProvider);
             _parser = new Parser(_command.GetCommand());
         }

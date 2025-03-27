@@ -1,5 +1,4 @@
 using AzureMCP.Arguments;
-using AzureMCP.Arguments.Monitor;
 using AzureMCP.Models;
 using AzureMCP.Services.Interfaces;
 using System.CommandLine;
@@ -70,5 +69,5 @@ public abstract class BaseMonitorCommand<TArgs> : BaseCommand<TArgs> where TArgs
             })
             .WithValueLoader(async (context, args) => await GetWorkspaceOptions(context, args.SubscriptionId ?? string.Empty))
             .WithIsRequired(ArgumentDefinitions.Monitor.WorkspaceName.Required);
-    }   
+    }
 }

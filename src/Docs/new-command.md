@@ -149,11 +149,17 @@ namespace AzureMCP.Commands.{Service}.{SubService}.{Resource};
 
 public class {Resource}{Operation}Command : Base{Service}Command<{Resource}{Operation}Arguments>
 {
+    private readonly Option<string> _resourceOption;
+
     public {Resource}{Operation}Command() : base()
     {
+        // Initialize options using ArgumentDefinitions
+        _resourceOption = ArgumentDefinitions.{Service}.Resource.ToOption();
+
+        // Register argument chain - note that command examples are handled by base methods
         RegisterArgumentChain(
-            CreateAccountArgument(GetAccountOptions),
-            CreateContainerArgument(GetContainerOptions)
+            CreateAccountArgument(),
+            CreateResourceArgument()
         );
     }
 
@@ -164,8 +170,7 @@ public class {Resource}{Operation}Command : Base{Service}Command<{Resource}{Oper
             "{Detailed description of what the command does, its requirements, and output format}");
 
         AddBaseOptionsToCommand(command);
-        command.AddOption(_accountOption);
-        command.AddOption(_containerOption);
+        command.AddOption(_resourceOption);
 
         return command;
     }
@@ -173,8 +178,7 @@ public class {Resource}{Operation}Command : Base{Service}Command<{Resource}{Oper
     protected override {Resource}{Operation}Arguments BindArguments(ParseResult parseResult)
     {
         var args = base.BindArguments(parseResult);
-        args.Account = parseResult.GetValueForOption(_accountOption);
-        args.Container = parseResult.GetValueForOption(_containerOption);
+        args.Resource = parseResult.GetValueForOption(_resourceOption);
         return args;
     }
 
@@ -191,7 +195,7 @@ public class {Resource}{Operation}Command : Base{Service}Command<{Resource}{Oper
 
             var service = context.GetService<I{Service}Service>();
             var results = await service.{Operation}{Resource}(
-                options.Account!,
+                options.Resource!,
                 options.SubscriptionId!,
                 options.TenantId,
                 options.RetryPolicy);
@@ -211,18 +215,9 @@ public class {Resource}{Operation}Command : Base{Service}Command<{Resource}{Oper
 ```
 
 > **IMPORTANT NOTES**: 
-> 1. Do not set `IsRequired = true` on System.CommandLine.Option instances in commands. The required status 
->    is handled by the argument chain system through `CreateBaseArgument` or other argument creation methods.
-> 2. Even if your command only needs base arguments (like `SubscriptionId`, `TenantId`, or `AuthMethod`), 
->    you **must** call `RegisterArgumentChain()` (without type parameter) to ensure proper argument registration and validation.
-> 
-> Example for a command that only uses base arguments:
-> ```csharp
-> public AccountListCommand() : base()
-> {
->     RegisterArgumentChain();
-> }
-> ```
+> 1. Do not define literal string values for option names or descriptions in the command class. Always use ArgumentDefinitions.
+> 2. Register command examples using GetCommandExample() helper method from ArgumentDefinitions.
+> 3. Options must be initialized using ToOption() on the appropriate ArgumentDefinition.
 
 ## Step 5: Register Command in CommandFactory
 
@@ -256,31 +251,24 @@ private void RegisterCommandGroup()
 }
 ```
 
-Example for a new service:
+## Step 6: Register Dependencies and Namespaces
+
+Your service must be properly registered in two files:
+
+1. Register the service dependency in Program.cs:
 ```csharp
-private void RegisterKeyVaultCommands()
+private static void ConfigureServices(IServiceCollection services)
 {
-    var keyvault = new CommandGroup("keyvault", 
-        "Key Vault operations - Commands for managing secrets, keys, and certificates");
-    _rootGroup.AddSubGroup(keyvault);
-
-    var secrets = new CommandGroup("secrets",
-        "Key Vault secrets operations");
-    keyvault.AddSubGroup(secrets);
-
-    secrets.AddCommand("list", new Secrets.SecretsListCommand());
-}
-
-private void RegisterCommandGroup()
-{
-    RegisterStorageCommands();
-    RegisterCosmosCommands();
-    RegisterMonitorCommands();
-    RegisterKeyVaultCommands();
+    services.AddSingleton<IYourService, YourService>();
 }
 ```
 
-After registering the command, update the MCP server service registration:
+2. Add the required using statements in Program.cs:
+```csharp
+using AzureMCP.Services.Azure.YourService;  // For YourService implementation
+```
+
+3. After registering the command, update the MCP server service registration:
 
 Location: `src/Commands/Server/ServiceStartCommand.cs`
 
@@ -305,7 +293,7 @@ private static void ConfigureServices(IServiceCollection services, IServiceProvi
 
 This ensures your service is available when the MCP server is running in both STDIO and SSE modes.
 
-## Step 6: Update README.md Documentation
+## Step 7: Update README.md Documentation
 
 Location: `README.md`
 
@@ -409,7 +397,7 @@ public class AccountListCommand : BaseServiceCommand<AccountListArguments>
 {
     public AccountListCommand() : base()
     {
-        RegisterArgumentChain();
+        RegisterArgumentChain();  // Uses only base arguments
     }
 }
 
@@ -424,13 +412,23 @@ public class ContainersListCommand : BaseServiceCommand<ContainersListArguments>
     }
 }
 
-public class SubscriptionsListCommand : BaseCommand<SubscriptionListArguments>
+public class SubscriptionListCommand : BaseCommand<SubscriptionListArguments>
 {
-    public SubscriptionsListCommand() : base()
+    public SubscriptionListCommand() : base()
     {
     }
 }
 ```
+
+IMPORTANT: 
+- DO NOT create argument helper methods in individual command classes
+- DO create argument helper methods in the base command class if they are used by multiple commands
+- DO use the base command's helper methods in command classes
+- DO NOT duplicate argument creation logic across commands
+- DO add ALL argument helper methods to RegisterArgumentChain, even if they're optional
+- DO NOT forget to add the corresponding Option field and initialization in the command class
+
+This ensures proper type checking and inheritance from BaseArguments.
 
 ## Using ArgumentDefinitions
 
@@ -675,6 +673,73 @@ public abstract class Base{Service}Command : BaseCommand
 }
 ```
 
+3. Add helper methods for common arguments:
+```csharp
+public abstract class BaseAppConfigCommand<TArgs> : BaseCommand<TArgs>
+{
+    // Add helper methods for arguments used by multiple commands
+    protected ArgumentChain<TArgs> CreateAccountArgument()
+    {
+        return ArgumentChain<TArgs>
+            .Create(ArgumentDefinitions.AppConfig.Account.Name, ArgumentDefinitions.AppConfig.Account.Description)
+            .WithCommandExample(ArgumentDefinitions.GetCommandExample(GetCommandPath(), ArgumentDefinitions.AppConfig.Account))
+            .WithValueAccessor(args => ((dynamic)args).Account ?? string.Empty)
+            .WithValueLoader(async (context, args) => await GetAccountOptions(context, args.SubscriptionId ?? string.Empty))
+            .WithIsRequired(ArgumentDefinitions.AppConfig.Account.Required);
+    }
+
+    // Helper method for creating key arguments
+    protected ArgumentChain<TArgs> CreateKeyArgument()
+    {
+        return ArgumentChain<TArgs>
+            .Create(ArgumentDefinitions.AppConfig.Key.Name, ArgumentDefinitions.AppConfig.Key.Description)
+            .WithCommandExample(ArgumentDefinitions.GetCommandExample(GetCommandPath(), ArgumentDefinitions.AppConfig.Key))
+            .WithValueAccessor(args => ((dynamic)args).Key ?? string.Empty)
+            .WithIsRequired(ArgumentDefinitions.AppConfig.Key.Required);
+    }
+
+    // Helper method for creating value arguments
+    protected ArgumentChain<TArgs> CreateValueArgument()
+    {
+        return ArgumentChain<TArgs>
+            .Create(ArgumentDefinitions.AppConfig.Value.Name, ArgumentDefinitions.AppConfig.Value.Description)
+            .WithCommandExample(ArgumentDefinitions.GetCommandExample(GetCommandPath(), ArgumentDefinitions.AppConfig.Value))
+            .WithValueAccessor(args => ((dynamic)args).Value ?? string.Empty)
+            .WithIsRequired(ArgumentDefinitions.AppConfig.Value.Required);
+    }
+
+    // Helper method for creating label arguments
+    protected ArgumentChain<TArgs> CreateLabelArgument()
+    {
+        return ArgumentChain<TArgs>
+            .Create(ArgumentDefinitions.AppConfig.Label.Name, ArgumentDefinitions.AppConfig.Label.Description)
+            .WithCommandExample(ArgumentDefinitions.GetCommandExample(GetCommandPath(), ArgumentDefinitions.AppConfig.Label))
+            .WithValueAccessor(args => ((dynamic)args).Label ?? string.Empty)
+            .WithIsRequired(ArgumentDefinitions.AppConfig.Label.Required);
+    }
+}
+```
+
+4. Use helper methods in command classes:
+```csharp
+public class KeyValueLockCommand : BaseAppConfigCommand<KeyValueLockArguments>
+{
+    public KeyValueLockCommand() : base()
+    {
+        RegisterArgumentChain(
+            CreateAccountArgument(),  // Use base class helper method
+            CreateKeyArgument()       // Use base class helper method
+        );
+    }
+}
+```
+
+IMPORTANT: 
+- DO NOT create argument helper methods in individual command classes
+- DO create argument helper methods in the base command class if they are used by multiple commands
+- DO use the base command's helper methods in command classes
+- DO NOT duplicate argument creation logic across commands
+
 This ensures proper type checking and inheritance from BaseArguments.
 
 ## Common Implementation Pitfalls
@@ -705,7 +770,7 @@ This ensures proper type checking and inheritance from BaseArguments.
    }
    ```
 
-Exception: Commands that explicitly don't want certain base arguments (like `SubscriptionsListCommand`) 
+Exception: Commands that explicitly don't want certain base arguments (like `SubscriptionListCommand`) 
 should not call `RegisterArgumentChain()` and instead manage their own argument chain.
 
 > **IMPORTANT**: Base command classes should not call `RegisterArgumentChain()` in their constructor
@@ -750,9 +815,9 @@ should not call `RegisterArgumentChain()` and instead manage their own argument 
            new Command("list", "List all available commands...");
    }
 
-   public class SubscriptionsListCommand : BaseSubscriptionsCommand<SubscriptionListArguments>
+   public class SubscriptionListCommand : BaseSubscriptionCommand<SubscriptionListArguments>
    {
-       public SubscriptionsListCommand() : base()
+       public SubscriptionListCommand() : base()
        {
            _argumentChain.Clear();
            _argumentChain.Add(CreateTenantIdArgument());
@@ -824,6 +889,26 @@ private void RegisterCommandGroup()
     RegisterMcpServerCommands();
 }
 ```
+
+## Building and Testing
+
+After implementing a new command, you must build the project to verify everything works correctly:
+
+1. Run the build command:
+```bash
+dotnet build src/AzureMCP.csproj
+```
+
+2. Fix any compilation errors or warnings that appear. Common issues include:
+   - Missing using directives
+   - Incorrect namespace declarations
+   - Missing method implementations
+   - Type mismatches
+   - Incorrect argument bindings
+
+3. Keep building and fixing until the build succeeds with no errors or warnings.
+
+4. After a successful build, test the command to ensure it works as expected.
 
 ## Code Style Requirements
 
@@ -966,3 +1051,13 @@ public class ContainerListCommand : BaseStorageCommand<ContainerListArguments>
     }
 }
 ```
+
+This example demonstrates:
+1. Using base command helper methods for argument creation
+2. Proper argument chain registration
+3. Clear command description
+4. Proper error handling
+5. Consistent response format
+6. Using ArgumentDefinitions for option names and descriptions
+7. Following the command structure pattern
+8. Proper service interface and implementation separation

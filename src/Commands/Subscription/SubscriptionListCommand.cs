@@ -1,16 +1,15 @@
 using AzureMCP.Arguments;
 using AzureMCP.Arguments.Subscription;
-using AzureMCP.Commands.Subscription;
 using AzureMCP.Models;
 using AzureMCP.Services.Interfaces;
 using System.CommandLine;
 using System.CommandLine.Parsing;
 
-namespace AzureMCP.Commands.Subscriptions;
+namespace AzureMCP.Commands.Subscription;
 
-public class SubscriptionsListCommand : BaseSubscriptionsCommand<SubscriptionListArguments>
+public class SubscriptionListCommand : BaseSubscriptionCommand<SubscriptionListArguments>
 {
-    public SubscriptionsListCommand() : base()
+    public SubscriptionListCommand() : base()
     {
         // Define the argument chain with required and optional arguments
         // Note: We're not calling RegisterArgumentChain here because we don't want to include
@@ -25,7 +24,7 @@ public class SubscriptionsListCommand : BaseSubscriptionsCommand<SubscriptionLis
     public override Command GetCommand()
     {
         var command = new Command(
-            "list", 
+            "list",
             $"List all Azure subscriptions accessible to your account. Optionally specify {ArgumentDefinitions.Common.TenantIdName} " +
             $"and {ArgumentDefinitions.Common.AuthMethodName}. Results include subscription names and IDs, returned as a JSON array.");
 

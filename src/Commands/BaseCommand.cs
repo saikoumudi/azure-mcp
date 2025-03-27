@@ -101,7 +101,7 @@ public abstract class BaseCommand<TArgs> : ICommand where TArgs : BaseArguments,
                 var subArgs = args as BaseArgumentsWithSubscriptionId;
                 if (subArgs?.SubscriptionId == null)
                 {
-                    return new List<ArgumentOption>();
+                    return [];
                 }
                 return await GetResourceGroupOptions(context, subArgs.SubscriptionId);
             })

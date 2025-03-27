@@ -2,10 +2,10 @@ using AzureMCP.Arguments.Subscription;
 
 namespace AzureMCP.Commands.Subscription;
 
-public abstract class BaseSubscriptionsCommand<TArgs> : BaseCommand<TArgs>
+public abstract class BaseSubscriptionCommand<TArgs> : BaseCommand<TArgs>
     where TArgs : BaseSubscriptionArguments, new()
 {
-    protected BaseSubscriptionsCommand()
+    protected BaseSubscriptionCommand()
     {
         // No additional options needed for base subscriptions command
     }

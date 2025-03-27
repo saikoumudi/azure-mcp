@@ -275,6 +275,30 @@ azmcp monitor log query --subscription-id <subscription-id> \
                         --query "recent"
 ```
 
+#### App Configuration Operations
+```bash
+# List App Configuration stores in a subscription
+azmcp appconfig account list --subscription-id <subscription-id> [--tenant-id <tenant-id>]
+
+# List all key-value settings in an App Configuration store
+azmcp appconfig kv list --subscription-id <subscription-id> --account-name <account-name> [--key <key>] [--label <label>]
+
+# Show a specific key-value setting
+azmcp appconfig kv show --subscription-id <subscription-id> --account-name <account-name> --key <key> [--label <label>]
+
+# Set a key-value setting
+azmcp appconfig kv set --subscription-id <subscription-id> --account-name <account-name> --key <key> --value <value> [--label <label>]
+
+# Lock a key-value setting (make it read-only)
+azmcp appconfig kv lock --subscription-id <subscription-id> --account-name <account-name> --key <key> [--label <label>]
+
+# Unlock a key-value setting (make it editable)
+azmcp appconfig kv unlock --subscription-id <subscription-id> --account-name <account-name> --key <key> [--label <label>]
+
+# Delete a key-value setting
+azmcp appconfig kv delete --subscription-id <subscription-id> --account-name <account-name> --key <key> [--label <label>]
+```
+
 #### Resource Group Operations
 ```bash
 # List resource groups in a subscription

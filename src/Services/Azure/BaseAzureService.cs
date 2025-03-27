@@ -1,5 +1,7 @@
+using Azure.Core;
 using Azure.Identity;
 using Azure.ResourceManager;
+using Azure.ResourceManager.Resources;
 using AzureMCP.Arguments;
 
 namespace AzureMCP.Services.Azure;
@@ -53,5 +55,22 @@ public abstract class BaseAzureService
         {
             throw new Exception($"Failed to create ARM client: {ex.Message}", ex);
         }
+    }
+
+    /// <summary>
+    /// Gets a subscription resource by its ID
+    /// </summary>
+    /// <param name="subscriptionId">The subscription ID</param>
+    /// <param name="tenantId">Optional Azure tenant ID</param>
+    /// <param name="retryPolicy">Optional retry policy configuration</param>
+    /// <returns>The subscription resource</returns>
+    protected async Task<SubscriptionResource> GetSubscription(string subscriptionId, string? tenantId = null, RetryPolicyArguments? retryPolicy = null)
+    {
+        if (string.IsNullOrEmpty(subscriptionId))
+            throw new ArgumentException("Subscription ID cannot be null or empty", nameof(subscriptionId));
+
+        var armClient = CreateArmClient(tenantId, retryPolicy);
+        return await armClient.GetSubscriptionResource(
+            ResourceIdentifier.Parse($"/subscriptions/{subscriptionId}")).GetAsync();
     }
 }

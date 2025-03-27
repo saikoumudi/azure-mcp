@@ -1,7 +1,4 @@
-﻿using System.CommandLine;
-using System.CommandLine.Parsing;
-using System.Reflection;
-using AzureMCP.Arguments.Server;
+﻿using AzureMCP.Arguments.Server;
 using AzureMCP.Models;
 using AzureMCP.Services.Interfaces;
 using Microsoft.AspNetCore.Builder;
@@ -13,6 +10,9 @@ using ModelContextProtocol.Protocol.Messages;
 using ModelContextProtocol.Protocol.Transport;
 using ModelContextProtocol.Protocol.Types;
 using ModelContextProtocol.Server;
+using System.CommandLine;
+using System.CommandLine.Parsing;
+using System.Reflection;
 
 namespace AzureMCP.Commands.Server;
 
@@ -154,12 +154,12 @@ public class ServiceStartCommand : ICommand
     private static void ConfigureServices(IServiceCollection services, IServiceProvider rootServiceProvider)
     {
         services.AddSingleton(rootServiceProvider.GetRequiredService<CommandFactory>());
-
         services.AddSingleton(rootServiceProvider.GetRequiredService<ISubscriptionService>());
         services.AddSingleton(rootServiceProvider.GetRequiredService<IStorageService>());
         services.AddSingleton(rootServiceProvider.GetRequiredService<ICosmosService>());
         services.AddSingleton(rootServiceProvider.GetRequiredService<IMonitorService>());
         services.AddSingleton(rootServiceProvider.GetRequiredService<IResourceGroupService>());
+        services.AddSingleton(rootServiceProvider.GetRequiredService<IAppConfigService>());
     }
 
     private class NoOpMcpServer : IMcpServer

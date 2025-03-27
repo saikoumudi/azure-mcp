@@ -1,7 +1,7 @@
 using AzureMCP.Commands.Cosmos;
 using AzureMCP.Commands.Server;
 using AzureMCP.Commands.Storage.Blob;
-using AzureMCP.Commands.Subscriptions;
+using AzureMCP.Commands.Subscription;
 using AzureMCP.Commands.Tools;
 using AzureMCP.Models;
 using System.CommandLine;
@@ -46,6 +46,7 @@ public class CommandFactory
         RegisterCosmosCommands();
         RegisterStorageCommands();
         RegisterMonitorCommands();
+        RegisterAppConfigCommands();
         RegisterToolsCommands();
         RegisterSubscriptionCommands();
         RegisterGroupCommands();
@@ -133,6 +134,26 @@ public class CommandFactory
 
     }
 
+    private void RegisterAppConfigCommands()
+    {
+        var appConfig = new CommandGroup("appconfig", "App Configuration operations - Commands for managing App Configuration stores");
+        _rootGroup.AddSubGroup(appConfig);
+
+        var accounts = new CommandGroup("account", "App Configuration store operations");
+        appConfig.AddSubGroup(accounts);
+
+        var keyValue = new CommandGroup("kv", "App Configuration key-value setting operations - Commands for managing complete configuration settings including values, labels, and metadata");
+        appConfig.AddSubGroup(keyValue);
+
+        accounts.AddCommand("list", new AppConfig.Account.AccountListCommand());
+        keyValue.AddCommand("list", new AppConfig.KeyValue.KeyValueListCommand());
+        keyValue.AddCommand("lock", new AppConfig.KeyValue.KeyValueLockCommand());
+        keyValue.AddCommand("unlock", new AppConfig.KeyValue.KeyValueUnlockCommand());
+        keyValue.AddCommand("set", new AppConfig.KeyValue.KeyValueSetCommand());
+        keyValue.AddCommand("show", new AppConfig.KeyValue.KeyValueShowCommand());
+        keyValue.AddCommand("delete", new AppConfig.KeyValue.KeyValueDeleteCommand());
+    }
+
     private void RegisterToolsCommands()
     {
         // Create Tools command group
@@ -151,7 +172,7 @@ public class CommandFactory
         _rootGroup.AddSubGroup(subscription);
 
         // Register Subscription commands
-        subscription.AddCommand("list", new SubscriptionsListCommand());
+        subscription.AddCommand("list", new SubscriptionListCommand());
     }
 
     private void RegisterGroupCommands()
