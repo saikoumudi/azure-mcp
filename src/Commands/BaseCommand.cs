@@ -245,6 +245,8 @@ public abstract class BaseCommand<TArgs> : ICommand where TArgs : BaseArguments,
 
         // Then, process required arguments that are missing values
         bool allRequiredArgumentsProvided = true;
+        var missingArgs = new List<string>();
+
         foreach (var argDef in _argumentChain)
         {
             if (argDef is ArgumentChain<TArgs> typedArgDef && typedArgDef.Required)
@@ -274,13 +276,19 @@ public abstract class BaseCommand<TArgs> : ICommand where TArgs : BaseArguments,
                         }
                     }
 
-                    // Mark that we're missing a required argument
+                    // Add to missing arguments list
+                    missingArgs.Add(typedArgDef.Name);
                     allRequiredArgumentsProvided = false;
                 }
             }
         }
 
-        // Return true only if all required arguments are provided
+        if (!allRequiredArgumentsProvided)
+        {
+            context.Response.Status = 400;
+            context.Response.Message = $"Missing required arguments: {string.Join(", ", missingArgs)}";
+        }
+
         return allRequiredArgumentsProvided;
     }
 
