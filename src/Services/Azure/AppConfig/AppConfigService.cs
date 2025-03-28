@@ -10,14 +10,15 @@ using AzureMCP.Services.Interfaces;
 
 namespace AzureMCP.Services.Azure.AppConfig;
 
-public class AppConfigService : BaseAzureService, IAppConfigService
+public class AppConfigService(ISubscriptionService subscriptionService) : BaseAzureService, IAppConfigService
 {
+    private readonly ISubscriptionService _subscriptionService = subscriptionService ?? throw new ArgumentNullException(nameof(subscriptionService));
+
     public async Task<List<AppConfigurationAccount>> GetAppConfigAccounts(string subscriptionId, string? tenantId = null, RetryPolicyArguments? retryPolicy = null)
     {
-        if (string.IsNullOrEmpty(subscriptionId))
-            throw new ArgumentException("Subscription ID cannot be null or empty", nameof(subscriptionId));
+        ValidateRequiredParameters(subscriptionId);
 
-        var subscription = await GetSubscription(subscriptionId, tenantId, retryPolicy);
+        var subscription = await _subscriptionService.GetSubscription(subscriptionId, tenantId, retryPolicy);
         var accounts = new List<AppConfigurationAccount>();
 
         await foreach (var account in subscription.GetAppConfigurationStoresAsync())
@@ -160,7 +161,7 @@ public class AppConfigService : BaseAzureService, IAppConfigService
 
     private async Task<ConfigurationClient> GetConfigurationClient(string accountName, string subscriptionId, string? tenantId, RetryPolicyArguments? retryPolicy)
     {
-        var subscription = await GetSubscription(subscriptionId, tenantId, retryPolicy);
+        var subscription = await _subscriptionService.GetSubscription(subscriptionId, tenantId, retryPolicy);
         var configStore = await FindAppConfigStore(subscription, accountName, subscriptionId);
         var endpoint = configStore.Data.Endpoint;
         var credential = GetCredential(tenantId);
@@ -183,14 +184,5 @@ public class AppConfigService : BaseAzureService, IAppConfigService
             throw new Exception($"App Configuration store '{accountName}' not found in subscription '{subscriptionId}'");
 
         return configStore;
-    }
-
-    private void ValidateRequiredParameters(params string?[] parameters)
-    {
-        foreach (var param in parameters)
-        {
-            if (string.IsNullOrEmpty(param))
-                throw new ArgumentException($"Parameter cannot be null or empty", nameof(param));
-        }
     }
 }

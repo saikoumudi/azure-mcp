@@ -1,19 +1,19 @@
-using Azure.Core;
 using AzureMCP.Arguments;
 using AzureMCP.Models.ResourceGroup;
 using AzureMCP.Services.Interfaces;
 
 namespace AzureMCP.Services.Azure.ResourceGroup;
 
-public class ResourceGroupService(ICacheService cacheService) : BaseAzureService, IResourceGroupService
+public class ResourceGroupService(ICacheService cacheService, ISubscriptionService subscriptionService) : BaseAzureService, IResourceGroupService
 {
     private readonly ICacheService _cacheService = cacheService;
+    private readonly ISubscriptionService _subscriptionService = subscriptionService ?? throw new ArgumentNullException(nameof(subscriptionService));
     private const string CACHE_KEY = "resourcegroups";
     private static readonly TimeSpan CACHE_DURATION = TimeSpan.FromHours(1);
 
     public async Task<List<ResourceGroupInfo>> GetResourceGroups(string subscriptionId, string? tenantId = null, RetryPolicyArguments? retryPolicy = null)
     {
-        ArgumentException.ThrowIfNullOrEmpty(subscriptionId);
+        ValidateRequiredParameters(subscriptionId);
 
         // Try to get from cache first
         var cacheKey = $"{CACHE_KEY}_{subscriptionId}_{tenantId ?? "default"}";
@@ -24,14 +24,10 @@ public class ResourceGroupService(ICacheService cacheService) : BaseAzureService
         }
 
         // If not in cache, fetch from Azure
-        var armClient = CreateArmClient(tenantId, retryPolicy);
         try
         {
-            var subscription = await armClient.GetSubscriptionResource(
-                new ResourceIdentifier($"/subscriptions/{subscriptionId}"))
-                .GetAsync();
-
-            var resourceGroups = await subscription.Value.GetResourceGroups()
+            var subscription = await _subscriptionService.GetSubscription(subscriptionId, tenantId, retryPolicy);
+            var resourceGroups = await subscription.GetResourceGroups()
                 .GetAllAsync()
                 .Select(rg => new ResourceGroupInfo(
                     rg.Data.Name,

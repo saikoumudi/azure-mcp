@@ -1,5 +1,4 @@
 using Azure;
-using Azure.Core;
 using Azure.Data.Tables;
 using Azure.ResourceManager.Resources;
 using Azure.ResourceManager.Storage;
@@ -12,30 +11,43 @@ using AzureMCP.Services.Interfaces;
 
 namespace AzureMCP.Services.Azure.Storage;
 
-public class StorageService : BaseAzureService, IStorageService
+public class StorageService(ISubscriptionService subscriptionService, ICacheService cacheService) : BaseAzureService, IStorageService
 {
-    private const string StorageBaseUri = "https://{0}.blob.core.windows.net";
-    private const string TableBaseUri = "https://{0}.table.core.windows.net";
+    private readonly ISubscriptionService _subscriptionService = subscriptionService ?? throw new ArgumentNullException(nameof(subscriptionService));
+    private readonly ICacheService _cacheService = cacheService ?? throw new ArgumentNullException(nameof(cacheService));
+    private const string STORAGE_ACCOUNTS_CACHE_KEY = "storage_accounts";
+    private static readonly TimeSpan CACHE_DURATION = TimeSpan.FromHours(1);
 
     public async Task<List<string>> GetStorageAccounts(string subscriptionId, string? tenantId = null, RetryPolicyArguments? retryPolicy = null)
     {
-        if (string.IsNullOrEmpty(subscriptionId))
-            throw new ArgumentException("Subscription ID cannot be null or empty", nameof(subscriptionId));
+        ValidateRequiredParameters(subscriptionId);
 
-        var armClient = CreateArmClient(tenantId, retryPolicy);
-        var subscription = await armClient.GetSubscriptionResource(
-            new ResourceIdentifier($"/subscriptions/{subscriptionId}")).GetAsync();
+        // Create cache key
+        var cacheKey = tenantId == null 
+            ? $"{STORAGE_ACCOUNTS_CACHE_KEY}_{subscriptionId}" 
+            : $"{STORAGE_ACCOUNTS_CACHE_KEY}_{subscriptionId}_{tenantId}";
 
+        // Try to get from cache first
+        var cachedAccounts = await _cacheService.GetAsync<List<string>>(cacheKey, CACHE_DURATION);
+        if (cachedAccounts != null)
+        {
+            return cachedAccounts;
+        }
+
+        var subscription = await _subscriptionService.GetSubscription(subscriptionId, tenantId, retryPolicy);
         var accounts = new List<string>();
         try
         {
-            await foreach (var account in subscription.Value.GetStorageAccountsAsync())
+            await foreach (var account in subscription.GetStorageAccountsAsync())
             {
                 if (account?.Data?.Name != null)
                 {
                     accounts.Add(account.Data.Name);
                 }
             }
+
+            // Cache the results
+            await _cacheService.SetAsync(cacheKey, accounts, CACHE_DURATION);
         }
         catch (Exception ex)
         {
@@ -47,10 +59,7 @@ public class StorageService : BaseAzureService, IStorageService
 
     public async Task<List<string>> ListContainers(string accountName, string subscriptionId, string? tenantId = null, RetryPolicyArguments? retryPolicy = null)
     {
-        if (string.IsNullOrEmpty(accountName))
-            throw new ArgumentException("Account name cannot be null or empty", nameof(accountName));
-        if (string.IsNullOrEmpty(subscriptionId))
-            throw new ArgumentException("Subscription ID cannot be null or empty", nameof(subscriptionId));
+        ValidateRequiredParameters(accountName, subscriptionId);
 
         var blobServiceClient = CreateBlobServiceClient(accountName, tenantId, retryPolicy);
         var containers = new List<string>();
@@ -78,10 +87,7 @@ public class StorageService : BaseAzureService, IStorageService
         string? tenantId = null,
         RetryPolicyArguments? retryPolicy = null)
     {
-        if (string.IsNullOrEmpty(accountName))
-            throw new ArgumentException("Account name cannot be null or empty", nameof(accountName));
-        if (string.IsNullOrEmpty(subscriptionId))
-            throw new ArgumentException("Subscription ID cannot be null or empty", nameof(subscriptionId));
+        ValidateRequiredParameters(accountName, subscriptionId);
 
         var tables = new List<string>();
 
@@ -168,12 +174,7 @@ public class StorageService : BaseAzureService, IStorageService
 
     public async Task<List<string>> ListBlobs(string accountName, string containerName, string subscriptionId, string? tenantId = null, RetryPolicyArguments? retryPolicy = null)
     {
-        if (string.IsNullOrEmpty(accountName))
-            throw new ArgumentException("Account name cannot be null or empty", nameof(accountName));
-        if (string.IsNullOrEmpty(containerName))
-            throw new ArgumentException("Container name cannot be null or empty", nameof(containerName));
-        if (string.IsNullOrEmpty(subscriptionId))
-            throw new ArgumentException("Subscription ID cannot be null or empty", nameof(subscriptionId));
+        ValidateRequiredParameters(accountName, containerName, subscriptionId);
 
         var blobServiceClient = CreateBlobServiceClient(accountName, tenantId, retryPolicy);
         var containerClient = blobServiceClient.GetBlobContainerClient(containerName);
@@ -201,10 +202,7 @@ public class StorageService : BaseAzureService, IStorageService
         string? tenantId = null,
         RetryPolicyArguments? retryPolicy = null)
     {
-        if (string.IsNullOrEmpty(accountName))
-            throw new ArgumentException("Account name cannot be null or empty", nameof(accountName));
-        if (string.IsNullOrEmpty(containerName))
-            throw new ArgumentException("Container name cannot be null or empty", nameof(containerName));
+        ValidateRequiredParameters(accountName, containerName);
 
         var blobServiceClient = CreateBlobServiceClient(accountName, tenantId, retryPolicy);
         var containerClient = blobServiceClient.GetBlobContainerClient(containerName);
@@ -220,14 +218,10 @@ public class StorageService : BaseAzureService, IStorageService
         }
     }
 
-
     private async Task<string> GetStorageAccountKey(string accountName, string subscriptionId, string? tenantId = null)
     {
-        var armClient = CreateArmClient(tenantId);
-        var subscription = await armClient.GetSubscriptionResource(
-            new ResourceIdentifier($"/subscriptions/{subscriptionId}")).GetAsync();
-
-        var storageAccount = await GetStorageAccount(subscription.Value, accountName);
+        var subscription = await _subscriptionService.GetSubscription(subscriptionId, tenantId);
+        var storageAccount = await GetStorageAccount(subscription, accountName);
         if (storageAccount == null)
         {
             throw new Exception($"Storage account '{accountName}' not found in subscription '{subscriptionId}'");
@@ -249,11 +243,8 @@ public class StorageService : BaseAzureService, IStorageService
 
     private async Task<string> GetStorageAccountConnectionString(string accountName, string subscriptionId, string? tenantId = null)
     {
-        var armClient = CreateArmClient(tenantId);
-        var subscription = await armClient.GetSubscriptionResource(
-            new ResourceIdentifier($"/subscriptions/{subscriptionId}")).GetAsync();
-
-        var storageAccount = await GetStorageAccount(subscription.Value, accountName);
+        var subscription = await _subscriptionService.GetSubscription(subscriptionId, tenantId);
+        var storageAccount = await GetStorageAccount(subscription, accountName);
         if (storageAccount == null)
         {
             throw new Exception($"Storage account '{accountName}' not found in subscription '{subscriptionId}'");

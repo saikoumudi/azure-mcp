@@ -1,23 +1,34 @@
-using Azure.Core;
 using Azure.Identity;
 using Azure.ResourceManager;
-using Azure.ResourceManager.Resources;
 using AzureMCP.Arguments;
 
 namespace AzureMCP.Services.Azure;
 
 public abstract class BaseAzureService
 {
+    private DefaultAzureCredential? _credential;
+    private string? _lastTenantId;
+    private ArmClient? _armClient;
+    private string? _lastArmClientTenantId;
+    private RetryPolicyArguments? _lastRetryPolicy;
+
     protected DefaultAzureCredential GetCredential(string? tenantId = null)
     {
+        // Return cached credential if it exists and tenant ID hasn't changed
+        if (_credential != null && _lastTenantId == tenantId)
+        {
+            return _credential;
+        }
+
         try
         {
-            // Use the default credential
-            var credential = tenantId == null
+            // Create new credential and cache it
+            _credential = tenantId == null
                 ? new DefaultAzureCredential()
                 : new DefaultAzureCredential(new DefaultAzureCredentialOptions { TenantId = tenantId });
+            _lastTenantId = tenantId;
 
-            return credential;
+            return _credential;
         }
         catch (Exception ex)
         {
@@ -32,16 +43,22 @@ public abstract class BaseAzureService
     /// <param name="retryPolicy">Optional retry policy configuration</param>
     protected ArmClient CreateArmClient(string? tenantId = null, RetryPolicyArguments? retryPolicy = null)
     {
+        // Return cached client if parameters match
+        if (_armClient != null &&
+            _lastArmClientTenantId == tenantId &&
+            RetryPolicyArguments.AreEqual(_lastRetryPolicy, retryPolicy))
+        {
+            return _armClient;
+        }
+
         try
         {
             var credential = GetCredential(tenantId);
-
             var options = new ArmClientOptions();
 
             // Configure retry policy if provided
             if (retryPolicy != null)
             {
-                // These properties are not nullable, so we can directly use them
                 options.Retry.MaxRetries = retryPolicy.MaxRetries;
                 options.Retry.Mode = retryPolicy.Mode;
                 options.Retry.Delay = TimeSpan.FromSeconds(retryPolicy.DelaySeconds);
@@ -49,7 +66,11 @@ public abstract class BaseAzureService
                 options.Retry.NetworkTimeout = TimeSpan.FromSeconds(retryPolicy.NetworkTimeoutSeconds);
             }
 
-            return new ArmClient(credential, default, options);
+            _armClient = new ArmClient(credential, default, options);
+            _lastArmClientTenantId = tenantId;
+            _lastRetryPolicy = retryPolicy;
+
+            return _armClient;
         }
         catch (Exception ex)
         {
@@ -58,19 +79,16 @@ public abstract class BaseAzureService
     }
 
     /// <summary>
-    /// Gets a subscription resource by its ID
+    /// Validates that the provided parameters are not null or empty
     /// </summary>
-    /// <param name="subscriptionId">The subscription ID</param>
-    /// <param name="tenantId">Optional Azure tenant ID</param>
-    /// <param name="retryPolicy">Optional retry policy configuration</param>
-    /// <returns>The subscription resource</returns>
-    protected async Task<SubscriptionResource> GetSubscription(string subscriptionId, string? tenantId = null, RetryPolicyArguments? retryPolicy = null)
+    /// <param name="parameters">Array of parameters to validate</param>
+    /// <exception cref="ArgumentException">Thrown when any parameter is null or empty</exception>
+    protected void ValidateRequiredParameters(params string?[] parameters)
     {
-        if (string.IsNullOrEmpty(subscriptionId))
-            throw new ArgumentException("Subscription ID cannot be null or empty", nameof(subscriptionId));
-
-        var armClient = CreateArmClient(tenantId, retryPolicy);
-        return await armClient.GetSubscriptionResource(
-            ResourceIdentifier.Parse($"/subscriptions/{subscriptionId}")).GetAsync();
+        foreach (var param in parameters)
+        {
+            if (string.IsNullOrEmpty(param))
+                throw new ArgumentException($"Parameter cannot be null or empty", nameof(param));
+        }
     }
 }

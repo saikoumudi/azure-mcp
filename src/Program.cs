@@ -45,6 +45,7 @@ class Program
 
     private static void ConfigureServices(IServiceCollection services)
     {
+        services.AddMemoryCache();
         services.AddSingleton<ICacheService, CacheService>();
         services.AddSingleton<ISubscriptionService, SubscriptionService>();
         services.AddSingleton<ICosmosService, CosmosService>();

@@ -1,5 +1,3 @@
-using Azure.Core;
-using Azure.ResourceManager;
 using Azure.ResourceManager.CosmosDB;
 using AzureMCP.Arguments;
 using AzureMCP.Services.Interfaces;
@@ -8,23 +6,68 @@ using System.Text.Json;
 
 namespace AzureMCP.Services.Azure.Cosmos;
 
-public class CosmosService : BaseAzureService, ICosmosService
+public class CosmosService(ISubscriptionService subscriptionService) : BaseAzureService, ICosmosService, IDisposable
 {
     private const string CosmosBaseUri = "https://{0}.documents.azure.com:443/";
+    private CosmosClient? _cosmosClient;
+    private bool _disposed;
+    private readonly ISubscriptionService _subscriptionService = subscriptionService ?? throw new ArgumentNullException(nameof(subscriptionService));
+
+    private async Task<CosmosDBAccountResource> GetCosmosAccountAsync(
+        string subscriptionId,
+        string accountName,
+        string? tenantId = null,
+        RetryPolicyArguments? retryPolicy = null)
+    {
+        ValidateRequiredParameters(subscriptionId, accountName);
+
+        var subscription = await _subscriptionService.GetSubscription(subscriptionId, tenantId, retryPolicy);
+
+        await foreach (var account in subscription.GetCosmosDBAccountsAsync())
+        {
+            if (account.Data.Name == accountName)
+            {
+                return account;
+            }
+        }
+        throw new Exception($"Cosmos DB account '{accountName}' not found in subscription '{subscriptionId}'");
+    }
+
+    private async Task<CosmosClient> GetCosmosClientAsync(string accountName, string subscriptionId, string? tenantId = null, RetryPolicyArguments? retryPolicy = null)
+    {
+        ValidateRequiredParameters(accountName, subscriptionId);
+
+        if (_cosmosClient != null)
+            return _cosmosClient;
+
+        var cosmosAccount = await GetCosmosAccountAsync(subscriptionId, accountName, tenantId, retryPolicy);
+        var keys = await cosmosAccount.GetKeysAsync();
+
+        var clientOptions = new CosmosClientOptions { AllowBulkExecution = true };
+        if (retryPolicy != null)
+        {
+            clientOptions.MaxRetryAttemptsOnRateLimitedRequests = retryPolicy.MaxRetries;
+            clientOptions.MaxRetryWaitTimeOnRateLimitedRequests = TimeSpan.FromSeconds(retryPolicy.MaxDelaySeconds);
+        }
+
+        _cosmosClient = new CosmosClient(
+            string.Format(CosmosBaseUri, accountName),
+            keys.Value.PrimaryMasterKey,
+            clientOptions
+        );
+
+        return _cosmosClient;
+    }
 
     public async Task<List<string>> GetCosmosAccounts(string subscriptionId, string? tenantId = null, RetryPolicyArguments? retryPolicy = null)
     {
-        if (string.IsNullOrEmpty(subscriptionId))
-            throw new ArgumentException("Subscription ID cannot be null or empty", nameof(subscriptionId));
+        ValidateRequiredParameters(subscriptionId);
 
-        var armClient = CreateArmClient(tenantId, retryPolicy);
-        var subscription = await armClient.GetSubscriptionResource(
-            new ResourceIdentifier($"/subscriptions/{subscriptionId}")).GetAsync();
-
+        var subscription = await _subscriptionService.GetSubscription(subscriptionId, tenantId, retryPolicy);
         var accounts = new List<string>();
         try
         {
-            await foreach (var account in subscription.Value.GetCosmosDBAccountsAsync())
+            await foreach (var account in subscription.GetCosmosDBAccountsAsync())
             {
                 if (account?.Data?.Name != null)
                 {
@@ -42,29 +85,11 @@ public class CosmosService : BaseAzureService, ICosmosService
 
     public async Task<List<string>> ListDatabases(string accountName, string subscriptionId, string? tenantId = null, RetryPolicyArguments? retryPolicy = null)
     {
-        if (string.IsNullOrEmpty(accountName))
-            throw new ArgumentException("Account name cannot be null or empty", nameof(accountName));
-        if (string.IsNullOrEmpty(subscriptionId))
-            throw new ArgumentException("Subscription ID cannot be null or empty", nameof(subscriptionId));
+        ValidateRequiredParameters(accountName, subscriptionId);
 
-        var armClient = CreateArmClient(tenantId, retryPolicy);
-        var cosmosAccount = await GetCosmosAccountAsync(armClient, subscriptionId, accountName);
-        var keys = await cosmosAccount.GetKeysAsync();
-
-        var clientOptions = new CosmosClientOptions();
-        if (retryPolicy != null)
-        {
-            clientOptions.MaxRetryAttemptsOnRateLimitedRequests = retryPolicy.MaxRetries;
-            clientOptions.MaxRetryWaitTimeOnRateLimitedRequests = TimeSpan.FromSeconds(retryPolicy.MaxDelaySeconds);
-        }
-
-        var client = new CosmosClient(
-            string.Format(CosmosBaseUri, accountName),
-            keys.Value.PrimaryMasterKey,
-            clientOptions
-        );
-
+        var client = await GetCosmosClientAsync(accountName, subscriptionId, tenantId, retryPolicy);
         var databases = new List<string>();
+
         try
         {
             var iterator = client.GetDatabaseQueryIterator<DatabaseProperties>();
@@ -84,31 +109,11 @@ public class CosmosService : BaseAzureService, ICosmosService
 
     public async Task<List<string>> ListContainers(string accountName, string databaseName, string subscriptionId, string? tenantId = null, RetryPolicyArguments? retryPolicy = null)
     {
-        if (string.IsNullOrEmpty(accountName))
-            throw new ArgumentException("Account name cannot be null or empty", nameof(accountName));
-        if (string.IsNullOrEmpty(databaseName))
-            throw new ArgumentException("Database name cannot be null or empty", nameof(databaseName));
-        if (string.IsNullOrEmpty(subscriptionId))
-            throw new ArgumentException("Subscription ID cannot be null or empty", nameof(subscriptionId));
+        ValidateRequiredParameters(accountName, databaseName, subscriptionId);
 
-        var armClient = CreateArmClient(tenantId, retryPolicy);
-        var cosmosAccount = await GetCosmosAccountAsync(armClient, subscriptionId, accountName);
-        var keys = await cosmosAccount.GetKeysAsync();
-
-        var clientOptions = new CosmosClientOptions();
-        if (retryPolicy != null)
-        {
-            clientOptions.MaxRetryAttemptsOnRateLimitedRequests = retryPolicy.MaxRetries;
-            clientOptions.MaxRetryWaitTimeOnRateLimitedRequests = TimeSpan.FromSeconds(retryPolicy.MaxDelaySeconds);
-        }
-
-        var client = new CosmosClient(
-            string.Format(CosmosBaseUri, accountName),
-            keys.Value.PrimaryMasterKey,
-            clientOptions
-        );
-
+        var client = await GetCosmosClientAsync(accountName, subscriptionId, tenantId, retryPolicy);
         var containers = new List<string>();
+
         try
         {
             var database = client.GetDatabase(databaseName);
@@ -136,31 +141,9 @@ public class CosmosService : BaseAzureService, ICosmosService
         string? tenantId = null,
         RetryPolicyArguments? retryPolicy = null)
     {
-        if (string.IsNullOrEmpty(accountName))
-            throw new ArgumentException("Account name cannot be null or empty", nameof(accountName));
-        if (string.IsNullOrEmpty(databaseName))
-            throw new ArgumentException("Database name cannot be null or empty", nameof(databaseName));
-        if (string.IsNullOrEmpty(containerName))
-            throw new ArgumentException("Container name cannot be null or empty", nameof(containerName));
-        if (string.IsNullOrEmpty(subscriptionId))
-            throw new ArgumentException("Subscription ID cannot be null or empty", nameof(subscriptionId));
+        ValidateRequiredParameters(accountName, databaseName, containerName, subscriptionId);
 
-        var armClient = CreateArmClient(tenantId, retryPolicy);
-        var cosmosAccount = await GetCosmosAccountAsync(armClient, subscriptionId, accountName);
-        var keys = await cosmosAccount.GetKeysAsync();
-
-        var clientOptions = new CosmosClientOptions { AllowBulkExecution = true };
-        if (retryPolicy != null)
-        {
-            clientOptions.MaxRetryAttemptsOnRateLimitedRequests = retryPolicy.MaxRetries;
-            clientOptions.MaxRetryWaitTimeOnRateLimitedRequests = TimeSpan.FromSeconds(retryPolicy.MaxDelaySeconds);
-        }
-
-        var client = new CosmosClient(
-            string.Format(CosmosBaseUri, accountName),
-            keys.Value.PrimaryMasterKey,
-            clientOptions
-        );
+        var client = await GetCosmosClientAsync(accountName, subscriptionId, tenantId, retryPolicy);
 
         try
         {
@@ -196,22 +179,22 @@ public class CosmosService : BaseAzureService, ICosmosService
         }
     }
 
-    private async Task<CosmosDBAccountResource> GetCosmosAccountAsync(
-        ArmClient armClient,
-        string subscriptionId,
-        string accountName)
+    protected virtual void Dispose(bool disposing)
     {
-        var subscription = await armClient.GetSubscriptionResource(
-            new ResourceIdentifier($"/subscriptions/{subscriptionId}")).GetAsync();
-
-        await foreach (var account in subscription.Value.GetCosmosDBAccountsAsync())
+        if (!_disposed)
         {
-            if (account.Data.Name == accountName)
+            if (disposing)
             {
-                return account;
+                _cosmosClient?.Dispose();
             }
+            _disposed = true;
         }
-        throw new Exception($"Cosmos DB account '{accountName}' not found in subscription '{subscriptionId}'");
+    }
+
+    public void Dispose()
+    {
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
     }
 }
 

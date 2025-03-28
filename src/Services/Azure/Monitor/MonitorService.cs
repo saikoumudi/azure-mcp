@@ -1,5 +1,4 @@
 using Azure;
-using Azure.Core;
 using Azure.Monitor.Query;
 using Azure.ResourceManager.OperationalInsights;
 using AzureMCP.Arguments;
@@ -9,8 +8,10 @@ using System.Text.Json;
 
 namespace AzureMCP.Services.Azure.Monitor;
 
-public class MonitorService : BaseAzureService, IMonitorService
+public class MonitorService(ISubscriptionService subscriptionService) : BaseAzureService, IMonitorService
 {
+    private readonly ISubscriptionService _subscriptionService = subscriptionService ?? throw new ArgumentNullException(nameof(subscriptionService));
+
     private const string ListTablesQuery = @"
         search *
         | distinct $table
@@ -19,7 +20,7 @@ public class MonitorService : BaseAzureService, IMonitorService
 
     private const string TablePlaceholder = "{tableName}";
 
-    private static readonly Dictionary<string, string> PredefinedQueries = new Dictionary<string, string>
+    private static readonly Dictionary<string, string> PredefinedQueries = new()
     {
         ["recent"] = @"
             {tableName}
@@ -44,10 +45,7 @@ public class MonitorService : BaseAzureService, IMonitorService
         string? tenantId = null,
         RetryPolicyArguments? retryPolicy = null)
     {
-        if (string.IsNullOrEmpty(workspaceId))
-            throw new ArgumentException("Workspace ID cannot be null or empty", nameof(workspaceId));
-        if (string.IsNullOrEmpty(query))
-            throw new ArgumentException("Query cannot be null or empty", nameof(query));
+        ValidateRequiredParameters(workspaceId, query);
 
         var credential = GetCredential(tenantId);
         var options = new LogsQueryClientOptions();
@@ -104,39 +102,32 @@ public class MonitorService : BaseAzureService, IMonitorService
         string? tenantId = null,
         RetryPolicyArguments? retryPolicy = null)
     {
-        if (string.IsNullOrEmpty(subscriptionId))
-            throw new ArgumentException("Subscription ID cannot be null or empty", nameof(subscriptionId));
-        if (string.IsNullOrEmpty(resourceGroup))
-            throw new ArgumentException("Resource group cannot be null or empty", nameof(resourceGroup));
-        if (string.IsNullOrEmpty(workspaceName))
-            throw new ArgumentException("Workspace name cannot be null or empty", nameof(workspaceName));
+        ValidateRequiredParameters(subscriptionId, resourceGroup, workspaceName);
 
         try
         {
-            var armClient = CreateArmClient(tenantId, retryPolicy);
-            var subscription = await armClient.GetSubscriptionResource(
-                new ResourceIdentifier($"/subscriptions/{subscriptionId}"))
-                .GetAsync()
-                .ConfigureAwait(false);
+            var subscription = await _subscriptionService.GetSubscription(subscriptionId, tenantId, retryPolicy);
 
-            var resourceGroupResource = await subscription.Value.GetResourceGroups()
+            var resourceGroupResponse = await subscription.GetResourceGroups()
                 .GetAsync(resourceGroup)
                 .ConfigureAwait(false);
 
-            if (resourceGroupResource == null || resourceGroupResource.Value == null)
+            if (resourceGroupResponse?.Value == null)
             {
                 throw new Exception($"Resource group {resourceGroup} not found in subscription {subscriptionId}");
             }
 
-            var workspace = await resourceGroupResource.Value.GetOperationalInsightsWorkspaceAsync(workspaceName)
+            var resourceGroupResource = resourceGroupResponse.Value;
+            var workspaceResponse = await resourceGroupResource.GetOperationalInsightsWorkspaceAsync(workspaceName)
                 .ConfigureAwait(false);
 
-            if (workspace == null || workspace.Value == null)
+            if (workspaceResponse?.Value == null)
             {
                 throw new Exception($"Workspace {workspaceName} not found in resource group {resourceGroup}");
             }
 
-            var tableOperations = workspace.Value.GetOperationalInsightsTables();
+            var workspace = workspaceResponse.Value;
+            var tableOperations = workspace.GetOperationalInsightsTables();
             var tables = await tableOperations.GetAllAsync()
                 .ToListAsync()
                 .ConfigureAwait(false);
@@ -155,19 +146,13 @@ public class MonitorService : BaseAzureService, IMonitorService
     public async Task<List<WorkspaceInfo>> ListWorkspaces(string subscriptionId, string? tenantId = null,
         RetryPolicyArguments? retryPolicy = null)
     {
-        ArgumentNullException.ThrowIfNull(subscriptionId);
-
-        var armClient = CreateArmClient(tenantId, retryPolicy);
-        var subscriptionResource = new ResourceIdentifier($"/subscriptions/{subscriptionId}");
+        ValidateRequiredParameters(subscriptionId);
 
         try
         {
-            var subscription = await armClient
-                .GetSubscriptionResource(subscriptionResource)
-                .GetAsync()
-                .ConfigureAwait(false);
+            var subscription = await _subscriptionService.GetSubscription(subscriptionId, tenantId, retryPolicy);
 
-            var workspaces = await subscription.Value
+            var workspaces = await subscription
                 .GetOperationalInsightsWorkspacesAsync()
                 .Select(workspace => new WorkspaceInfo
                 {
@@ -195,11 +180,7 @@ public class MonitorService : BaseAzureService, IMonitorService
         string? tenantId = null,
         RetryPolicyArguments? retryPolicy = null)
     {
-        // Validate required parameters
-        if (string.IsNullOrEmpty(workspaceId))
-            throw new ArgumentException("Workspace ID cannot be null or empty", nameof(workspaceId));
-        if (string.IsNullOrEmpty(table))
-            throw new ArgumentException("Table name cannot be null or empty", nameof(table));
+        ValidateRequiredParameters(workspaceId, table);
 
         // Check if the query is a predefined query name
         if (!string.IsNullOrEmpty(query) && PredefinedQueries.ContainsKey(query.Trim().ToLower()))
@@ -209,8 +190,7 @@ public class MonitorService : BaseAzureService, IMonitorService
             query = query.Replace(TablePlaceholder, table);
         }
 
-        if (string.IsNullOrEmpty(query))
-            throw new ArgumentException("Query cannot be null or empty", nameof(query));
+        ValidateRequiredParameters(query);
 
         // Add limit to query if specified and not already present
         if (limit.HasValue && !query.Contains("limit", StringComparison.CurrentCultureIgnoreCase))
