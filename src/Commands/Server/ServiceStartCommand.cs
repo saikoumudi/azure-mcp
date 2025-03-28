@@ -127,8 +127,7 @@ public class ServiceStartCommand : ICommand
 
             if (transport == null)
             {
-                // This IMcpServer is unused.  It is set later when /sse makes a connection.
-                return new NoOpMcpServer();
+                return new AzureMcpServer(options, loggerFactory, provider);
             }
             else
             {
@@ -160,28 +159,5 @@ public class ServiceStartCommand : ICommand
         services.AddSingleton(rootServiceProvider.GetRequiredService<IMonitorService>());
         services.AddSingleton(rootServiceProvider.GetRequiredService<IResourceGroupService>());
         services.AddSingleton(rootServiceProvider.GetRequiredService<IAppConfigService>());
-    }
-
-    private class NoOpMcpServer : IMcpServer
-    {
-        public bool IsInitialized { get; }
-
-        public ClientCapabilities? ClientCapabilities { get; }
-
-        public Implementation? ClientInfo { get; }
-
-        public IServiceProvider? ServiceProvider { get; }
-
-        public void AddNotificationHandler(string method, Func<JsonRpcNotification, Task> handler)
-        {
-        }
-
-        public ValueTask DisposeAsync() => ValueTask.CompletedTask;
-
-        public Task SendMessageAsync(IJsonRpcMessage message, CancellationToken cancellationToken = default) => Task.CompletedTask;
-
-        public Task<T> SendRequestAsync<T>(JsonRpcRequest request, CancellationToken cancellationToken) where T : class => throw new NotImplementedException("Should not be used to send message.");
-
-        public Task StartAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
     }
 }

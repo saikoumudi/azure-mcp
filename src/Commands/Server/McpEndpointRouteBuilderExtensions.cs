@@ -17,19 +17,18 @@ public static class McpEndpointRouteBuilderExtensions
 {
     public static IEndpointConventionBuilder MapMcpSse(this IEndpointRouteBuilder endpoints)
     {
-        IMcpServer? server = null;
         SseResponseStreamTransport? transport = null;
-        var loggerFactory = endpoints.ServiceProvider.GetRequiredService<ILoggerFactory>();
-        var mcpServerOptions = endpoints.ServiceProvider.GetRequiredService<McpServerOptions>();
-
         var routeGroup = endpoints.MapGroup("");
 
         routeGroup.MapGet("/sse", async (HttpResponse response, CancellationToken requestAborted) =>
         {
-            await using var localTransport = transport = new SseResponseStreamTransport(response.Body);
-            await using var localServer = server = McpServerFactory.Create(transport, mcpServerOptions, loggerFactory, endpoints.ServiceProvider);
-
-            await localServer.StartAsync(requestAborted);
+            var mcpServer = endpoints.ServiceProvider.GetRequiredService<IMcpServer>();
+            var wrapper = mcpServer as AzureMcpServer
+                ?? throw new InvalidOperationException($"Expected mcpServer to be of type {typeof(AzureMcpServer)}."
+                    + $"Instead it is {mcpServer.GetType()}");
+            var localTransport = transport = new SseResponseStreamTransport(response.Body);
+            
+            await wrapper.SetTransportAndStartAsync(localTransport);
 
             response.Headers.ContentType = "text/event-stream";
             response.Headers.CacheControl = "no-cache";
