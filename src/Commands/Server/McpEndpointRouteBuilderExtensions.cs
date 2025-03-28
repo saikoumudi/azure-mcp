@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using ModelContextProtocol.Protocol.Messages;
 using ModelContextProtocol.Protocol.Transport;
 using ModelContextProtocol.Server;
@@ -27,7 +26,7 @@ public static class McpEndpointRouteBuilderExtensions
                 ?? throw new InvalidOperationException($"Expected mcpServer to be of type {typeof(AzureMcpServer)}."
                     + $"Instead it is {mcpServer.GetType()}");
             var localTransport = transport = new SseResponseStreamTransport(response.Body);
-            
+
             await wrapper.SetTransportAndStartAsync(localTransport);
 
             response.Headers.ContentType = "text/event-stream";

@@ -36,7 +36,7 @@ public class AzureMcpServerTests
     public async Task SetTransportAndStartAsync_InitializesServer()
     {
         var wrapper = new AzureMcpServer(_options, _loggerFactory);
-        
+
         await wrapper.SetTransportAndStartAsync(_transport);
 
         Assert.True(wrapper.IsInitialized);

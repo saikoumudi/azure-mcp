@@ -8,8 +8,8 @@ namespace AzureMCP.Services.Caching;
 public class CacheService(IMemoryCache memoryCache) : ICacheService
 {
     private readonly IMemoryCache _memoryCache = memoryCache;
-    private static readonly JsonSerializerOptions _jsonOptions = new() 
-    { 
+    private static readonly JsonSerializerOptions _jsonOptions = new()
+    {
         WriteIndented = true,
         Converters = { new JsonStringEnumConverter() },
     };

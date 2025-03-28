@@ -10,21 +10,14 @@ namespace AzureMCP.Commands.Server;
 /// Wraps the implementation of an McpServer.  Used when the transport is not immediately available or active. 
 /// (i.e. The user has not instantiated a connection to the MCP server.)
 /// </summary>
-public class AzureMcpServer : IMcpServer
+public class AzureMcpServer(McpServerOptions serverOptions,
+    ILoggerFactory? loggerFactory = null,
+    IServiceProvider? serviceProvider = null) : IMcpServer
 {
-    private readonly ILoggerFactory? _loggerFactory;
-    private readonly IServiceProvider? _serviceProvider;
+    private readonly ILoggerFactory? _loggerFactory = loggerFactory;
+    private readonly IServiceProvider? _serviceProvider = serviceProvider;
 
     private IMcpServer? _implementation;
-
-    public AzureMcpServer(McpServerOptions serverOptions,
-        ILoggerFactory? loggerFactory = null,
-        IServiceProvider? serviceProvider = null)
-    {
-        _loggerFactory = loggerFactory;
-        _serviceProvider = serviceProvider;
-        ServerOptions = serverOptions;
-    }
 
     public Boolean IsInitialized => _implementation != null;
 
@@ -32,7 +25,7 @@ public class AzureMcpServer : IMcpServer
 
     public Implementation? ClientInfo => _implementation?.ClientInfo;
 
-    public McpServerOptions ServerOptions { get; }
+    public McpServerOptions ServerOptions { get; } = serverOptions;
 
     public IServiceProvider? Services => _implementation?.Services;
 
@@ -77,7 +70,7 @@ public class AzureMcpServer : IMcpServer
         return _implementation.SendMessageAsync(message, cancellationToken);
     }
 
-    public Task<T> SendRequestAsync<T>(JsonRpcRequest request, CancellationToken cancellationToken) 
+    public Task<T> SendRequestAsync<T>(JsonRpcRequest request, CancellationToken cancellationToken)
         where T : class
     {
         if (_implementation is null)

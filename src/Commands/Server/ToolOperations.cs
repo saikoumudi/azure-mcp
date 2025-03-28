@@ -3,6 +3,7 @@ using ModelContextProtocol.Protocol.Types;
 using ModelContextProtocol.Server;
 using ModelContextProtocol.Utils.Json;
 using System.CommandLine;
+using System.Reflection;
 using System.Text.Json;
 
 namespace AzureMCP.Commands.Server;
@@ -31,12 +32,14 @@ public class ToolOperations
         var allCommands = _commandFactory.AllCommands;
         if (allCommands.Count == 0)
         {
-            //Console.Error.WriteLine("Could not resolve CommandFactory.AllCommands when getting tools list.");
-
             return Task.FromResult(new ListToolsResult { Tools = [] });
         }
 
-        var tools = allCommands.Select(kvp => GetTool(kvp.Key, kvp.Value)).ToList();
+        var tools = allCommands
+            .Where(kvp => kvp.Value.GetType().GetCustomAttribute<HiddenCommandAttribute>() == null)
+            .Select(kvp => GetTool(kvp.Key, kvp.Value))
+            .ToList();
+
         var listToolsResult = new ListToolsResult { Tools = tools };
 
         return Task.FromResult(listToolsResult);

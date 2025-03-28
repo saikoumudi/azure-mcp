@@ -1,7 +1,4 @@
-﻿using System.CommandLine;
-using System.CommandLine.Parsing;
-using System.Reflection;
-using AzureMCP.Arguments.Server;
+﻿using AzureMCP.Arguments.Server;
 using AzureMCP.Models;
 using AzureMCP.Services.Interfaces;
 using Microsoft.AspNetCore.Builder;
@@ -9,13 +6,16 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using ModelContextProtocol.Hosting;
-using ModelContextProtocol.Protocol.Messages;
 using ModelContextProtocol.Protocol.Transport;
 using ModelContextProtocol.Protocol.Types;
 using ModelContextProtocol.Server;
+using System.CommandLine;
+using System.CommandLine.Parsing;
+using System.Reflection;
 
 namespace AzureMCP.Commands.Server;
 
+[HiddenCommand]
 public class ServiceStartCommand : ICommand
 {
     private readonly Command _command;

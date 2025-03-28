@@ -5,6 +5,7 @@ using System.CommandLine.Parsing;
 
 namespace AzureMCP.Commands.Tools;
 
+[HiddenCommand]
 public class ToolsListCommand : BaseCommandWithoutArgs
 {
 
