@@ -8,8 +8,9 @@
     <Nullable>enable</Nullable>
     <CliName>azmcp</CliName>
     <AssemblyName>$(CliName)</AssemblyName>
+    <AssemblyTitle>Azure MCP Server</AssemblyTitle>
     <RootNamespace>AzureMCP</RootNamespace>
-    
+
     <!-- Publishing settings -->
     <PublishSingleFile>true</PublishSingleFile>
     <SelfContained>true</SelfContained>

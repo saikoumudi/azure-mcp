@@ -1,4 +1,7 @@
-﻿using AzureMCP.Arguments.Server;
+﻿using System.CommandLine;
+using System.CommandLine.Parsing;
+using System.Reflection;
+using AzureMCP.Arguments.Server;
 using AzureMCP.Models;
 using AzureMCP.Services.Interfaces;
 using Microsoft.AspNetCore.Builder;
@@ -10,9 +13,6 @@ using ModelContextProtocol.Protocol.Messages;
 using ModelContextProtocol.Protocol.Transport;
 using ModelContextProtocol.Protocol.Types;
 using ModelContextProtocol.Server;
-using System.CommandLine;
-using System.CommandLine.Parsing;
-using System.Reflection;
 
 namespace AzureMCP.Commands.Server;
 
@@ -101,8 +101,9 @@ public class ServiceStartCommand : ICommand
         {
             var toolOperations = provider.GetRequiredService<ToolOperations>();
 
-            var assemblyName = Assembly.GetCallingAssembly().GetName();
-            var serverName = assemblyName?.Name ?? "Azure MCP server";
+            var entryAssembly = Assembly.GetEntryAssembly();
+            var assemblyName = entryAssembly?.GetName();
+            var serverName = entryAssembly?.GetCustomAttribute<AssemblyTitleAttribute>()?.Title ?? "Azure MCP server";
             var mcpServerOptions = new McpServerOptions
             {
                 ServerInfo = new Implementation
