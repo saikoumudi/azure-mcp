@@ -1,3 +1,4 @@
+#!/bin/env pwsh
 $currentDirectory = $PSScriptRoot
 $projectFile = Join-Path $currentDirectory "AzureMCP.csproj"
 
@@ -5,13 +6,22 @@ $projectFile = Join-Path $currentDirectory "AzureMCP.csproj"
 New-Item -ItemType Directory -Force -Path .dist | Out-Null
 
 # Clean previous builds
-Remove-Item -Path .dist\* -Recurse -Force -ErrorAction SilentlyContinue
+Remove-Item -Path .dist/* -Recurse -Force -ErrorAction SilentlyContinue
+
+$arch = [System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture.ToString().ToLowerInvariant()
+$desc, $runtime, $ext = if ($IsLinux) {
+    "Linux", "linux-$arch"
+} elseif ($IsMacOS) {
+    "MacOS", "osx-$arch"
+} elseif ($IsWindows) {
+    "Windows", "win-$arch", ".exe"
+}
 
 # Build the project
-Write-Host "Building azmcp for Windows..." -ForegroundColor Green
+Write-Host "Building azmcp for $desc..." -ForegroundColor Green
 dotnet publish "$projectFile" `
     --configuration Release `
-    --runtime win-x64 `
+    --runtime $runtime `
     --self-contained true `
     --output .dist `
     /p:PublishSingleFile=true `
@@ -22,8 +32,8 @@ dotnet publish "$projectFile" `
 
 if ($LASTEXITCODE -eq 0) {
     Write-Host "`nBuild completed successfully!" -ForegroundColor Green
-    Write-Host "Binary location: $((Resolve-Path '.dist\azmcp.exe').Path)" -ForegroundColor Yellow
+    Write-Host "Binary location: $((Resolve-Path ".dist/azmcp$ext").Path)" -ForegroundColor Yellow
 } else {
     Write-Host "`nBuild failed!" -ForegroundColor Red
     exit 1
-} 
+}

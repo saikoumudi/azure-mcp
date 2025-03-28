@@ -17,7 +17,7 @@ The server acts as a bridge, translating AI agent requests into Azure service op
 
 Build the project:
 
-1. Execute `src/build.ps1` to build binary `.dist/azmcp.exe`.
+1. Execute `src/build.ps1` to build binary `.dist/azmcp.exe` (`.dist/azmcp` on Linux and MacOS)
 
 Start the MCP server:
 ```bash
