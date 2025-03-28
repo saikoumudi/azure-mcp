@@ -8,20 +8,19 @@ New-Item -ItemType Directory -Force -Path .dist | Out-Null
 # Clean previous builds
 Remove-Item -Path .dist/* -Recurse -Force -ErrorAction SilentlyContinue
 
-$arch = [System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture.ToString().ToLowerInvariant()
-$desc, $runtime, $ext = if ($IsLinux) {
-    "Linux", "linux-$arch"
+$desc, $ext = if ($IsLinux) {
+    "Linux"
 } elseif ($IsMacOS) {
-    "MacOS", "osx-$arch"
+    "MacOS"
 } elseif ($IsWindows) {
-    "Windows", "win-$arch", ".exe"
+    "Windows", ".exe"
 }
 
 # Build the project
 Write-Host "Building azmcp for $desc..." -ForegroundColor Green
 dotnet publish "$projectFile" `
     --configuration Release `
-    --runtime $runtime `
+    --runtime $([System.Runtime.InteropServices.RuntimeInformation]::RuntimeIdentifier) `
     --self-contained true `
     --output .dist `
     /p:PublishSingleFile=true `
