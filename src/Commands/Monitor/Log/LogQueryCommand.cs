@@ -142,7 +142,7 @@ public class LogQueryCommand : BaseMonitorCommand<LogQueryArguments>
                 options.TableName!,
                 options.Hours,
                 options.Limit,
-                options.SubscriptionId!,
+                options.Subscription!,
                 options.TenantId,
                 options.RetryPolicy);
 

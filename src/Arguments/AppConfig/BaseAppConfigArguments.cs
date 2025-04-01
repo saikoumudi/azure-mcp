@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace AzureMCP.Arguments.AppConfig;
 
-public class BaseAppConfigArguments : BaseArgumentsWithSubscriptionId
+public class BaseAppConfigArguments : BaseArgumentsWithSubscription
 {
     [JsonPropertyName(ArgumentDefinitions.AppConfig.AccountName)]
     public string? Account { get; set; }

@@ -61,7 +61,7 @@ public class ItemQueryCommand : BaseCosmosCommand<ItemQueryArguments>
                 options.Database!,
                 options.Container!,
                 options.Query ?? "SELECT * FROM c",
-                options.SubscriptionId!,
+                options.Subscription!,
                 options.TenantId,
                 options.RetryPolicy);
 

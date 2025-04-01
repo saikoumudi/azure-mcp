@@ -44,7 +44,7 @@ public class ContainerListCommand : BaseStorageCommand<ContainerListArguments>
             }
 
             var storageService = context.GetService<IStorageService>();
-            var containers = await storageService.ListContainers(options.Account!, options.SubscriptionId!, options.TenantId,
+            var containers = await storageService.ListContainers(options.Account!, options.Subscription!, options.TenantId,
                 options.RetryPolicy);
 
             context.Response.Results = containers?.Count > 0 ? new { containers } : null;

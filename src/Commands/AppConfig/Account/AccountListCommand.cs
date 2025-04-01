@@ -41,7 +41,7 @@ public class AccountListCommand : BaseAppConfigCommand<AccountListArguments>
 
             var appConfigService = context.GetService<IAppConfigService>();
             var accounts = await appConfigService.GetAppConfigAccounts(
-                options.SubscriptionId!,
+                options.Subscription!,
                 options.TenantId,
                 options.RetryPolicy);
 

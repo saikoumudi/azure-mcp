@@ -13,7 +13,7 @@ public class SubscriptionListCommand : BaseSubscriptionCommand<SubscriptionListA
     {
         // Define the argument chain with required and optional arguments
         // Note: We're not calling RegisterArgumentChain here because we don't want to include
-        // the subscription-id parameter that's automatically added by BaseCommand
+        // the subscription parameter that's automatically added by BaseCommand
 
         // Instead, we'll manually add only the tenant ID argument
         _argumentChain.Clear(); // Clear any existing arguments

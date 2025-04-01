@@ -1,4 +1,4 @@
-namespace AzureMCP.Arguments.AppConfig.Account;
+namespace AzureMCP.Arguments.Storage.Account;
 
 public class AccountListArguments : BaseArgumentsWithSubscription
 {

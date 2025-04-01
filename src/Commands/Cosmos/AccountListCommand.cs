@@ -18,7 +18,7 @@ public class AccountListCommand : BaseCosmosCommand<AccountListArguments>
     {
         var command = new Command(
             "list",
-            "List all Cosmos DB accounts in a subscription. This command retrieves and displays all Cosmos DB accounts available in the specified subscription. Results include account names and are returned as a JSON array. You must specify a subscription ID.");
+            "List all Cosmos DB accounts in a subscription. This command retrieves and displays all Cosmos DB accounts available in the specified subscription. Results include account names and are returned as a JSON array.");
 
         AddBaseOptionsToCommand(command);
         return command;
@@ -37,7 +37,7 @@ public class AccountListCommand : BaseCosmosCommand<AccountListArguments>
 
             var cosmosService = context.GetService<ICosmosService>();
             var accounts = await cosmosService.GetCosmosAccounts(
-                options.SubscriptionId!,
+                options.Subscription!,
                 options.TenantId,
                 options.RetryPolicy);
 

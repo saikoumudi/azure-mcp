@@ -31,7 +31,7 @@ public abstract class BaseCommand<TArgs> : ICommand where TArgs : BaseArguments,
     {
         // Initialize options
         _tenantOption = ArgumentDefinitions.Common.TenantId.ToOption();
-        _subscriptionOption = ArgumentDefinitions.Common.SubscriptionId.ToOption();
+        _subscriptionOption = ArgumentDefinitions.Common.Subscription.ToOption();
         _authMethodOption = ArgumentDefinitions.Common.AuthMethod.ToOption();
         _resourceGroupOption = ArgumentDefinitions.Common.ResourceGroup.ToOption();
 
@@ -87,7 +87,7 @@ public abstract class BaseCommand<TArgs> : ICommand where TArgs : BaseArguments,
 
     protected ArgumentChain<TArgs>? CreateResourceGroupArgument()
     {
-        if (!typeof(BaseArgumentsWithSubscriptionId).IsAssignableFrom(typeof(TArgs)))
+        if (!typeof(BaseArgumentsWithSubscription).IsAssignableFrom(typeof(TArgs)))
         {
             return null;
         }
@@ -95,30 +95,30 @@ public abstract class BaseCommand<TArgs> : ICommand where TArgs : BaseArguments,
         return ArgumentChain<TArgs>
             .Create(ArgumentDefinitions.Common.ResourceGroup.Name, ArgumentDefinitions.Common.ResourceGroup.Description)
             .WithCommandExample(ArgumentDefinitions.GetCommandExample(GetCommandPath(), ArgumentDefinitions.Common.ResourceGroup))
-            .WithValueAccessor(args => (args as BaseArgumentsWithSubscriptionId)?.ResourceGroup ?? string.Empty)
+            .WithValueAccessor(args => (args as BaseArgumentsWithSubscription)?.ResourceGroup ?? string.Empty)
             .WithValueLoader(async (context, args) =>
             {
-                var subArgs = args as BaseArgumentsWithSubscriptionId;
-                if (subArgs?.SubscriptionId == null)
+                var subArgs = args as BaseArgumentsWithSubscription;
+                if (subArgs?.Subscription == null)
                 {
                     return [];
                 }
-                return await GetResourceGroupOptions(context, subArgs.SubscriptionId);
+                return await GetResourceGroupOptions(context, subArgs.Subscription);
             })
             .WithIsRequired(true);
     }
 
     protected ArgumentChain<TArgs>? CreateSubscriptionIdArgument()
     {
-        if (typeof(BaseArgumentsWithSubscriptionId).IsAssignableFrom(typeof(TArgs)))
+        if (typeof(TArgs).IsSubclassOf(typeof(BaseArgumentsWithSubscription)))
         {
             return ArgumentChain<TArgs>
-            .Create(ArgumentDefinitions.Common.SubscriptionId.Name, ArgumentDefinitions.Common.SubscriptionId.Description)
-            .WithCommandExample(ArgumentDefinitions.GetCommandExample(GetCommandPath(), ArgumentDefinitions.Common.SubscriptionId))
-            .WithValueAccessor(args => (args as BaseArgumentsWithSubscriptionId)?.SubscriptionId ?? string.Empty)
-            .WithValueLoader(async (context, args) => await GetSubscriptionOptions(context))
-            .WithIsRequired(true);
+                .Create(ArgumentDefinitions.Common.Subscription.Name, ArgumentDefinitions.Common.Subscription.Description)
+                .WithCommandExample(ArgumentDefinitions.GetCommandExample(GetCommandPath(), ArgumentDefinitions.Common.Subscription))
+                .WithValueAccessor(args => ((dynamic)args).Subscription ?? string.Empty)
+                .WithIsRequired(ArgumentDefinitions.Common.Subscription.Required);
         }
+
         return null;
     }
 
@@ -344,10 +344,10 @@ public abstract class BaseCommand<TArgs> : ICommand where TArgs : BaseArguments,
             AuthMethod = parseResult.GetValueForOption(_authMethodOption)
         };
 
-        if (args is BaseArgumentsWithSubscriptionId baseArgs)
+        if (args is BaseArgumentsWithSubscription baseArgs)
         {
             // Bind base arguments
-            baseArgs.SubscriptionId = parseResult.GetValueForOption(_subscriptionOption);
+            baseArgs.Subscription = parseResult.GetValueForOption(_subscriptionOption);
         }
 
         // Only create RetryPolicy if any retry options are specified

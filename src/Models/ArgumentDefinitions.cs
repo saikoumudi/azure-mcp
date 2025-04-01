@@ -14,7 +14,7 @@ public static class ArgumentDefinitions
     public static class Common
     {
         public const string TenantIdName = "tenant-id";
-        public const string SubscriptionIdName = "subscription-id";
+        public const string SubscriptionName = "subscription";
         public const string ResourceGroupName = "resource-group";
         public const string AuthMethodName = "auth-method";
 
@@ -24,9 +24,9 @@ public static class ArgumentDefinitions
             required: false
         );
 
-        public static readonly ArgumentDefinition<string> SubscriptionId = new(
-            SubscriptionIdName,
-            "The Azure subscription ID. This is the GUID identifier for the Azure subscription to use.",
+        public static readonly ArgumentDefinition<string> Subscription = new(
+            SubscriptionName,
+            "The Azure subscription ID or name. This can be either the GUID identifier or the display name of the Azure subscription to use.",
             required: true
         );
 

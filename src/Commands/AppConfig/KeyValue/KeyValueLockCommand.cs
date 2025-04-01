@@ -61,7 +61,7 @@ public class KeyValueLockCommand : BaseAppConfigCommand<KeyValueLockArguments>
             await appConfigService.LockKeyValue(
                 options.Account!,
                 options.Key!,
-                options.SubscriptionId!,
+                options.Subscription!,
                 options.TenantId,
                 options.RetryPolicy,
                 options.Label);

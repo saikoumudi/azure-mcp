@@ -11,8 +11,8 @@
                 "cosmos",
                 "database",
                 "list",
-                "--subscription-id",
-                "${input:subscriptionId}",
+                "--subscription",
+                "${input:subscription}",
                 "--retry-max-retries", 
                 "0"
             ],
@@ -50,7 +50,7 @@
                 "monitor",
                 "table",
                 "list",
-                "--subscription-id",
+                "--subscription",
                 "25fd0362-aa79-488b-b37b-d6e892009fdf"
             ],
             "cwd": "${workspaceFolder}",
@@ -70,7 +70,7 @@
                 "monitor",
                 "log",
                 "query",
-                "--subscription-id",
+                "--subscription",
                 "25fd0362-aa79-488b-b37b-d6e892009fdf",
                 "--workspace-id",
                 "5a9c0f6e-cb75-481b-b018-1a6c6b67e089",

@@ -49,7 +49,7 @@ public class BlobListCommand : BaseStorageCommand<BlobListArguments>
             var blobs = await storageService.ListBlobs(
                 options.Account!,
                 options.Container!,
-                options.SubscriptionId!,
+                options.Subscription!,
                 options.TenantId,
                 options.RetryPolicy);
 

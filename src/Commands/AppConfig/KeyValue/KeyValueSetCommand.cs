@@ -67,7 +67,7 @@ public class KeyValueSetCommand : BaseAppConfigCommand<KeyValueSetArguments>
                 options.Account!,
                 options.Key!,
                 options.Value!,
-                options.SubscriptionId!,
+                options.Subscription!,
                 options.TenantId,
                 options.RetryPolicy,
                 options.Label);

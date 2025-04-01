@@ -1,5 +1,5 @@
 namespace AzureMCP.Arguments.Cosmos;
 
-public class AccountListArguments : BaseArgumentsWithSubscriptionId
+public class AccountListArguments : BaseArgumentsWithSubscription
 {
 }

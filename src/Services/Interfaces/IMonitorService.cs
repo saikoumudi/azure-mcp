@@ -14,7 +14,7 @@ public interface IMonitorService
         RetryPolicyArguments? retryPolicy = null);
 
     Task<List<string>> ListTables(
-        string subscriptionId,
+        string subscription,
         string resourceGroup,
         string workspaceName,
         string? tableType = "CustomLog",
@@ -22,7 +22,7 @@ public interface IMonitorService
         RetryPolicyArguments? retryPolicy = null);
 
     Task<List<WorkspaceInfo>> ListWorkspaces(
-        string subscriptionId,
+        string subscription,
         string? tenantId = null,
         RetryPolicyArguments? retryPolicy = null);
 
@@ -32,7 +32,7 @@ public interface IMonitorService
         string table,
         int? hours = 24,
         int? limit = 20,
-        string? subscriptionId = null,
+        string? subscription = null,
         string? tenantId = null,
         RetryPolicyArguments? retryPolicy = null);
 }

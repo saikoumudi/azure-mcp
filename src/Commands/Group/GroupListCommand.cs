@@ -6,7 +6,7 @@ using System.CommandLine.Parsing;
 
 namespace AzureMCP.Commands.Group;
 
-public class GroupListCommand : BaseCommand<BaseArgumentsWithSubscriptionId>
+public class GroupListCommand : BaseCommand<BaseArgumentsWithSubscription>
 {
     public GroupListCommand() : base()
     {
@@ -18,7 +18,7 @@ public class GroupListCommand : BaseCommand<BaseArgumentsWithSubscriptionId>
         var command = new Command(
             "list",
             $"List all resource groups in a subscription. This command retrieves all resource groups available " +
-            $"in the specified {ArgumentDefinitions.Common.SubscriptionIdName}. Results include resource group names and IDs, " +
+            $"in the specified {ArgumentDefinitions.Common.SubscriptionName}. Results include resource group names and IDs, " +
             "returned as a JSON array.");
 
         AddBaseOptionsToCommand(command);
@@ -38,7 +38,7 @@ public class GroupListCommand : BaseCommand<BaseArgumentsWithSubscriptionId>
 
             var resourceGroupService = context.GetService<IResourceGroupService>();
             var groups = await resourceGroupService.GetResourceGroups(
-                options.SubscriptionId!,
+                options.Subscription!,
                 options.TenantId,
                 options.RetryPolicy);
 

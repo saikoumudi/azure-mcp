@@ -37,7 +37,7 @@ namespace AzureMCP.Tests.Commands.Cosmos
                 .Returns(expectedAccounts);
 
             var command = new AccountListCommand();
-            var args = command.GetCommand().Parse(["--subscription-id", "sub123"]);
+            var args = command.GetCommand().Parse(["--subscription", "sub123"]);
             var context = new CommandContext(_serviceProvider);
 
             // Act
@@ -62,7 +62,7 @@ namespace AzureMCP.Tests.Commands.Cosmos
                 .Returns([]);
 
             var command = new AccountListCommand();
-            var args = command.GetCommand().Parse(["--subscription-id", "sub123"]);
+            var args = command.GetCommand().Parse(["--subscription", "sub123"]);
             var context = new CommandContext(_serviceProvider);
 
             // Act
@@ -82,7 +82,7 @@ namespace AzureMCP.Tests.Commands.Cosmos
                 .Throws(new Exception(expectedError));
 
             var command = new AccountListCommand();
-            var args = command.GetCommand().Parse(["--subscription-id", "sub123"]);
+            var args = command.GetCommand().Parse(["--subscription", "sub123"]);
             var context = new CommandContext(_serviceProvider);
 
             // Act

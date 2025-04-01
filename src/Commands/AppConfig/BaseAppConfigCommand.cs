@@ -5,7 +5,7 @@ using System.CommandLine;
 
 namespace AzureMCP.Commands.AppConfig;
 
-public abstract class BaseAppConfigCommand<TArgs> : BaseCommand<TArgs> where TArgs : BaseArgumentsWithSubscriptionId, new()
+public abstract class BaseAppConfigCommand<TArgs> : BaseCommand<TArgs> where TArgs : BaseArgumentsWithSubscription, new()
 {
     protected readonly Option<string> _accountOption;
 
@@ -33,7 +33,7 @@ public abstract class BaseAppConfigCommand<TArgs> : BaseCommand<TArgs> where TAr
             .WithCommandExample(ArgumentDefinitions.GetCommandExample(GetCommandPath(), ArgumentDefinitions.AppConfig.Account))
             .WithValueAccessor(args => ((dynamic)args).Account ?? string.Empty)
             .WithValueLoader(async (context, args) =>
-                await GetAccountOptions(context, args.SubscriptionId ?? string.Empty))
+                await GetAccountOptions(context, args.Subscription ?? string.Empty))
             .WithIsRequired(ArgumentDefinitions.AppConfig.Account.Required);
     }
 

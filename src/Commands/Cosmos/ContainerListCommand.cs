@@ -51,7 +51,7 @@ public class ContainerListCommand : BaseCosmosCommand<ContainerListArguments>
             var containers = await cosmosService.ListContainers(
                 options.Account!,
                 options.Database!,
-                options.SubscriptionId!,
+                options.Subscription!,
                 options.TenantId,
                 options.RetryPolicy);
 

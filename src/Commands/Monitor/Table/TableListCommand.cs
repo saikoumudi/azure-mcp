@@ -57,7 +57,7 @@ public class TableListCommand : BaseMonitorCommand<TableListArguments>
 
             var monitorService = context.GetService<IMonitorService>();
             var tables = await monitorService.ListTables(
-                options.SubscriptionId!,
+                options.Subscription!,
                 options.ResourceGroup!,
                 options.WorkspaceName!,
                 options.TableType,

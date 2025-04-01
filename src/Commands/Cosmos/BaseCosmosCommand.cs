@@ -6,7 +6,7 @@ using System.CommandLine;
 
 namespace AzureMCP.Commands.Cosmos;
 
-public abstract class BaseCosmosCommand<TArgs> : BaseCommand<TArgs> where TArgs : BaseArgumentsWithSubscriptionId, new()
+public abstract class BaseCosmosCommand<TArgs> : BaseCommand<TArgs> where TArgs : BaseArgumentsWithSubscription, new()
 {
     protected readonly Option<string> _accountOption;
     protected readonly Option<string> _databaseOption;
@@ -20,36 +20,36 @@ public abstract class BaseCosmosCommand<TArgs> : BaseCommand<TArgs> where TArgs 
     }
 
     // Common method to get account options
-    protected async Task<List<ArgumentOption>> GetAccountOptions(CommandContext context, string subscriptionId)
+    protected async Task<List<ArgumentOption>> GetAccountOptions(CommandContext context, string subscription)
     {
-        if (string.IsNullOrEmpty(subscriptionId)) return [];
+        if (string.IsNullOrEmpty(subscription)) return [];
 
         var cosmosService = context.GetService<ICosmosService>();
-        var accounts = await cosmosService.GetCosmosAccounts(subscriptionId);
+        var accounts = await cosmosService.GetCosmosAccounts(subscription);
 
         return accounts?.Select(a => new ArgumentOption { Name = a, Id = a }).ToList() ?? [];
     }
 
     // Common method to get database options
-    protected async Task<List<ArgumentOption>> GetDatabaseOptions(CommandContext context, string accountName, string subscriptionId)
+    protected async Task<List<ArgumentOption>> GetDatabaseOptions(CommandContext context, string accountName, string subscription)
     {
-        if (string.IsNullOrEmpty(accountName) || string.IsNullOrEmpty(subscriptionId))
+        if (string.IsNullOrEmpty(accountName) || string.IsNullOrEmpty(subscription))
             return [];
 
         var cosmosService = context.GetService<ICosmosService>();
-        var databases = await cosmosService.ListDatabases(accountName, subscriptionId);
+        var databases = await cosmosService.ListDatabases(accountName, subscription);
 
         return databases?.Select(d => new ArgumentOption { Name = d, Id = d }).ToList() ?? [];
     }
 
     // Common method to get container options
-    protected async Task<List<ArgumentOption>> GetContainerOptions(CommandContext context, string accountName, string databaseName, string subscriptionId)
+    protected async Task<List<ArgumentOption>> GetContainerOptions(CommandContext context, string accountName, string databaseName, string subscription)
     {
-        if (string.IsNullOrEmpty(accountName) || string.IsNullOrEmpty(databaseName) || string.IsNullOrEmpty(subscriptionId))
+        if (string.IsNullOrEmpty(accountName) || string.IsNullOrEmpty(databaseName) || string.IsNullOrEmpty(subscription))
             return [];
 
         var cosmosService = context.GetService<ICosmosService>();
-        var containers = await cosmosService.ListContainers(accountName, databaseName, subscriptionId);
+        var containers = await cosmosService.ListContainers(accountName, databaseName, subscription);
 
         return containers?.Select(c => new ArgumentOption { Name = c, Id = c }).ToList() ?? [];
     }
@@ -73,8 +73,7 @@ public abstract class BaseCosmosCommand<TArgs> : BaseCommand<TArgs> where TArgs 
             .Create(ArgumentDefinitions.Cosmos.Account.Name, ArgumentDefinitions.Cosmos.Account.Description)
             .WithCommandExample(ArgumentDefinitions.GetCommandExample(GetCommandPath(), ArgumentDefinitions.Cosmos.Account))
             .WithValueAccessor(args => ((dynamic)args).Account ?? string.Empty)
-            .WithValueLoader(async (context, args) =>
-                await GetAccountOptions(context, args.SubscriptionId ?? string.Empty))
+            .WithValueLoader(async (context, args) => await GetAccountOptions(context, args.Subscription ?? string.Empty))
             .WithIsRequired(ArgumentDefinitions.Cosmos.Account.Required);
     }
 
@@ -85,7 +84,7 @@ public abstract class BaseCosmosCommand<TArgs> : BaseCommand<TArgs> where TArgs 
             .WithCommandExample(ArgumentDefinitions.GetCommandExample(GetCommandPath(), ArgumentDefinitions.Cosmos.Database))
             .WithValueAccessor(args => ((dynamic)args).Database ?? string.Empty)
             .WithValueLoader(async (context, args) =>
-                await GetDatabaseOptions(context, ((dynamic)args).Account ?? string.Empty, args.SubscriptionId ?? string.Empty))
+                await GetDatabaseOptions(context, ((dynamic)args).Account ?? string.Empty, args.Subscription ?? string.Empty))
             .WithIsRequired(ArgumentDefinitions.Cosmos.Database.Required);
     }
 
@@ -100,7 +99,7 @@ public abstract class BaseCosmosCommand<TArgs> : BaseCommand<TArgs> where TArgs 
                     context,
                     ((dynamic)args).Account ?? string.Empty,
                     ((dynamic)args).Database ?? string.Empty,
-                    args.SubscriptionId ?? string.Empty))
+                    args.Subscription ?? string.Empty))
             .WithIsRequired(ArgumentDefinitions.Cosmos.Container.Required);
     }
 

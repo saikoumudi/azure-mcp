@@ -61,7 +61,7 @@ public class KeyValueUnlockCommand : BaseAppConfigCommand<KeyValueUnlockArgument
             await appConfigService.UnlockKeyValue(
                 options.Account!,
                 options.Key!,
-                options.SubscriptionId!,
+                options.Subscription!,
                 options.TenantId,
                 options.RetryPolicy,
                 options.Label);

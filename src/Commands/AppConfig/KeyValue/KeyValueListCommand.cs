@@ -78,7 +78,7 @@ public class KeyValueListCommand : BaseAppConfigCommand<KeyValueListArguments>
             var appConfigService = context.GetService<IAppConfigService>();
             var settings = await appConfigService.ListKeyValues(
                 options.Account!,
-                options.SubscriptionId!,
+                options.Subscription!,
                 options.Key,
                 options.Label,
                 options.TenantId,

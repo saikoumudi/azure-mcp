@@ -5,7 +5,7 @@ using System.CommandLine;
 
 namespace AzureMCP.Commands.Monitor;
 
-public abstract class BaseMonitorCommand<TArgs> : BaseCommand<TArgs> where TArgs : BaseArgumentsWithSubscriptionId, new()
+public abstract class BaseMonitorCommand<TArgs> : BaseCommand<TArgs> where TArgs : BaseArgumentsWithSubscription, new()
 {
     protected readonly Option<string> _workspaceIdOption;
     protected readonly Option<string> _workspaceNameOption;
@@ -47,7 +47,7 @@ public abstract class BaseMonitorCommand<TArgs> : BaseCommand<TArgs> where TArgs
                     return string.Empty;
                 }
             })
-            .WithValueLoader(async (context, args) => await GetWorkspaceOptions(context, args.SubscriptionId ?? string.Empty))
+            .WithValueLoader(async (context, args) => await GetWorkspaceOptions(context, args.Subscription ?? string.Empty))
             .WithIsRequired(ArgumentDefinitions.Monitor.WorkspaceId.Required);
     }
 
@@ -67,7 +67,7 @@ public abstract class BaseMonitorCommand<TArgs> : BaseCommand<TArgs> where TArgs
                     return string.Empty;
                 }
             })
-            .WithValueLoader(async (context, args) => await GetWorkspaceOptions(context, args.SubscriptionId ?? string.Empty))
+            .WithValueLoader(async (context, args) => await GetWorkspaceOptions(context, args.Subscription ?? string.Empty))
             .WithIsRequired(ArgumentDefinitions.Monitor.WorkspaceName.Required);
     }
 }

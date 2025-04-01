@@ -37,7 +37,7 @@ public class WorkspaceListCommand : BaseCommand<WorkspaceListArguments>
 
             var monitorService = context.GetService<IMonitorService>();
             var workspaces = await monitorService.ListWorkspaces(
-                options.SubscriptionId!,
+                options.Subscription!,
                 options.TenantId,
                 options.RetryPolicy);
 

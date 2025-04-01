@@ -64,7 +64,7 @@ Cursor support is not available at the moment - we are investigating usage, stay
 
 ## Commands
 
-`azmcp cosmos database list --subscription-id <subscription-id> --account-name <account-name>`
+`azmcp cosmos database list --subscription <subscription> --account-name <account-name>`
 
 ```json
 {
@@ -72,9 +72,9 @@ Cursor support is not available at the moment - we are investigating usage, stay
   "message": "Success",
   "args": [
     {
-      "name": "subscription-id",
+      "name": "subscription",
       "description": "Azure Subscription ID",
-      "command": "azmcp cosmos database list --subscription-id <subscription-id>",
+      "command": "azmcp cosmos database list --subscription <subscription>",
       "value": "25fd0362-aa79-488b-b37b-d6e892009fdf"
     },
     {
@@ -95,7 +95,7 @@ Cursor support is not available at the moment - we are investigating usage, stay
 
 ## Example Schema with Missing Arg and Suggested Values
 
-`azmcp cosmos database list --subscription-id <subscription-id>`
+`azmcp cosmos database list --subscription <subscription>`
 
 ```json
 {
@@ -103,9 +103,9 @@ Cursor support is not available at the moment - we are investigating usage, stay
   "message": "Missing required args",
   "args": [
     {
-      "name": "subscription-id",
+      "name": "subscription",
       "description": "Azure Subscription ID",
-      "command": "azmcp cosmos database list --subscription-id <subscription-id>",
+      "command": "azmcp cosmos database list --subscription <subscription>",
       "value": "25fd0362-aa79-488b-b37b-d6e892009fdf",
       "values": []
     },
@@ -134,9 +134,9 @@ Cursor support is not available at the moment - we are investigating usage, stay
   "message": "Missing required args",
   "args": [
     {
-      "name": "subscription-id",
+      "name": "subscription",
       "description": "Azure Subscription ID",
-      "command": "azmcp cosmos database list --subscription-id <subscription-id>",
+      "command": "azmcp cosmos database list --subscription <subscription>",
       "value": "",
       "values": [
         {
@@ -185,7 +185,7 @@ The following args are available for all commands:
 
 | Arg | Required | Default | Description |
 |-----------|----------|---------|-------------|
-| `--subscription-id` | Yes | - | Azure subscription ID for target resources |
+| `--subscription` | Yes | - | Azure subscription ID for target resources |
 | `--tenant-id` | No | - | Azure tenant ID for authentication |
 | `--auth-method` | No | 'credential' | Authentication method ('credential', 'key', 'connectionString') |
 | `--retry-max-retries` | No | 3 | Maximum retry attempts for failed operations |
@@ -199,7 +199,7 @@ The following args are available for all commands:
 #### Server Operations
 ```bash
 # Start the MCP server
-azmcp server start
+azmcp server start [--transport <transport>]
 ```
 
 #### Subscription Management
@@ -211,16 +211,16 @@ azmcp subscription list [--tenant-id <tenant-id>]
 #### Cosmos DB Operations
 ```bash
 # List Cosmos DB accounts in a subscription
-azmcp cosmos account list --subscription-id <subscription-id>
+azmcp cosmos account list --subscription <subscription>
 
 # List databases in a Cosmos DB account
-azmcp cosmos database list --subscription-id <subscription-id> --account-name <account-name>
+azmcp cosmos database list --subscription <subscription> --account-name <account-name>
 
 # List containers in a Cosmos DB database
-azmcp cosmos database container list --subscription-id <subscription-id> --account-name <account-name> --database-name <database-name>
+azmcp cosmos database container list --subscription <subscription> --account-name <account-name> --database-name <database-name>
 
 # Query items in a Cosmos DB container
-azmcp cosmos database container item query --subscription-id <subscription-id> \
+azmcp cosmos database container item query --subscription <subscription> \
                        --account-name <account-name> \
                        --database-name <database-name> \
                        --container-name <container-name> \
@@ -230,79 +230,73 @@ azmcp cosmos database container item query --subscription-id <subscription-id> \
 #### Storage Operations
 ```bash
 # List Storage accounts in a subscription
-azmcp storage account list --subscription-id <subscription-id>
+azmcp storage account list --subscription <subscription>
 
 # List tables in a Storage account
-azmcp storage table list --subscription-id <subscription-id> --account-name <account-name>
+azmcp storage table list --subscription <subscription> --account-name <account-name>
 
-# List blobs in a Storage account
-azmcp storage blob list --subscription-id <subscription-id> --account-name <account-name>
+# List blobs in a Storage container
+azmcp storage blob list --subscription <subscription> --account-name <account-name> --container-name <container-name>
 
 # List containers in a Storage blob service
-azmcp storage blob container list --subscription-id <subscription-id> --account-name <account-name>
+azmcp storage blob container list --subscription <subscription> --account-name <account-name>
 
 # Get detailed properties of a storage container
-azmcp storage blob container details --subscription-id <subscription-id> --account-name <account-name> --container-name <container-name>
+azmcp storage blob container details --subscription <subscription> --account-name <account-name> --container-name <container-name>
 ```
 
 #### Monitor Operations
 ```bash
 # List Log Analytics workspaces in a subscription
-azmcp monitor workspace list --subscription-id <subscription-id> [--tenant-id <tenant-id>]
+azmcp monitor workspace list --subscription <subscription>
 
 # List tables in a Log Analytics workspace
-azmcp monitor table list --workspace-id <workspace-id> [--tenant-id <tenant-id>]
+azmcp monitor table list --subscription <subscription> --workspace-name <workspace-name> --resource-group <resource-group>
 
 # Query logs from Azure Monitor using KQL
-azmcp monitor log query --subscription-id <subscription-id> \
+azmcp monitor log query --subscription <subscription> \
                         --workspace-id <workspace-id> \
-                        --table <table-name> \
+                        --table-name <table-name> \
                         --query "<kql-query>" \
                         [--hours <hours>] \
                         [--limit <limit>]
 
 # Examples:
 # Query logs from a specific table
-azmcp monitor log query --subscription-id <subscription-id> \
+azmcp monitor log query --subscription <subscription> \
                         --workspace-id <workspace-id> \
-                        --table "AppEvents_CL" \
+                        --table-name "AppEvents_CL" \
                         --query "| order by TimeGenerated desc"
-
-# Use a predefined query type with a specific table
-azmcp monitor log query --subscription-id <subscription-id> \
-                        --workspace-id <workspace-id> \
-                        --table "AppEvents_CL" \
-                        --query "recent"
 ```
 
 #### App Configuration Operations
 ```bash
 # List App Configuration stores in a subscription
-azmcp appconfig account list --subscription-id <subscription-id> [--tenant-id <tenant-id>]
+azmcp appconfig account list --subscription <subscription>
 
 # List all key-value settings in an App Configuration store
-azmcp appconfig kv list --subscription-id <subscription-id> --account-name <account-name> [--key <key>] [--label <label>]
+azmcp appconfig kv list --subscription <subscription> --account-name <account-name> [--key <key>] [--label <label>]
 
 # Show a specific key-value setting
-azmcp appconfig kv show --subscription-id <subscription-id> --account-name <account-name> --key <key> [--label <label>]
+azmcp appconfig kv show --subscription <subscription> --account-name <account-name> --key <key> [--label <label>]
 
 # Set a key-value setting
-azmcp appconfig kv set --subscription-id <subscription-id> --account-name <account-name> --key <key> --value <value> [--label <label>]
+azmcp appconfig kv set --subscription <subscription> --account-name <account-name> --key <key> --value <value> [--label <label>]
 
 # Lock a key-value setting (make it read-only)
-azmcp appconfig kv lock --subscription-id <subscription-id> --account-name <account-name> --key <key> [--label <label>]
+azmcp appconfig kv lock --subscription <subscription> --account-name <account-name> --key <key> [--label <label>]
 
 # Unlock a key-value setting (make it editable)
-azmcp appconfig kv unlock --subscription-id <subscription-id> --account-name <account-name> --key <key> [--label <label>]
+azmcp appconfig kv unlock --subscription <subscription> --account-name <account-name> --key <key> [--label <label>]
 
 # Delete a key-value setting
-azmcp appconfig kv delete --subscription-id <subscription-id> --account-name <account-name> --key <key> [--label <label>]
+azmcp appconfig kv delete --subscription <subscription> --account-name <account-name> --key <key> [--label <label>]
 ```
 
 #### Resource Group Operations
 ```bash
 # List resource groups in a subscription
-azmcp group list --subscription-id <subscription-id> [--tenant-id <tenant-id>]
+azmcp group list --subscription <subscription>
 ```
 
 #### CLI Utilities

@@ -61,7 +61,7 @@ public class KeyValueShowCommand : BaseAppConfigCommand<KeyValueShowArguments>
             var setting = await appConfigService.GetKeyValue(
                 options.Account!,
                 options.Key!,
-                options.SubscriptionId!,
+                options.Subscription!,
                 options.TenantId,
                 options.RetryPolicy,
                 options.Label);

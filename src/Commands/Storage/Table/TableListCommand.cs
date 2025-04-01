@@ -44,7 +44,7 @@ public class TableListCommand : BaseStorageCommand<TableListArguments>
             var storageService = context.GetService<IStorageService>();
             var tables = await storageService.ListTables(
                 options.Account!,
-                options.SubscriptionId!,
+                options.Subscription!,
                 options.AuthMethod ?? AuthMethod.Credential,
                 null,
                 options.TenantId,

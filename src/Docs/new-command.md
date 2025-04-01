@@ -62,7 +62,7 @@ Template:
 ```csharp 
 namespace AzureMCP.Arguments.{Service}.{SubService}.{Resource};
 
-public class {Resource}{Operation}Arguments : BaseArgumentsWithSubscriptionId 
+public class {Resource}{Operation}Arguments : BaseArgumentsWithSubscription 
 {
     public string? {SpecificParam} { get; set; }
 }
@@ -70,8 +70,8 @@ public class {Resource}{Operation}Arguments : BaseArgumentsWithSubscriptionId
 
 IMPORTANT: 
 1. Do not redefine properties from base classes
-2. Use `BaseArgumentsWithSubscriptionId` for commands that require subscription ID
-3. Use `BaseAzureArguments` only for commands that don't need subscription ID (rare)
+2. Use `BaseArgumentsWithSubscription` for commands that require subscription (can be either ID or name)
+3. Use `BaseAzureArguments` only for commands that don't need subscription (rare)
 
 ## Step 2: Define Service Interface Method
 
@@ -89,7 +89,7 @@ public interface I{Service}Service
 {
     Task<List<string>> {Operation}{Resource}(
         string {requiredParam1},
-        string subscriptionId,
+        string subscription,
         string? tenantId = null,
         RetryPolicyArguments? retryPolicy = null);
 }
@@ -105,7 +105,7 @@ public class {Service}Service : Base{Service}Service, I{Service}Service
 {
     public async Task<List<string>> {Operation}{Resource}(
         string {requiredParam1}, 
-        string subscriptionId, 
+        string subscription, 
         string? tenantId = null)
     {
         var credential = await GetCredential(tenantId);
@@ -196,7 +196,7 @@ public class {Resource}{Operation}Command : Base{Service}Command<{Resource}{Oper
             var service = context.GetService<I{Service}Service>();
             var results = await service.{Operation}{Resource}(
                 options.Resource!,
-                options.SubscriptionId!,
+                options.Subscription!,
                 options.TenantId,
                 options.RetryPolicy);
 
@@ -314,7 +314,7 @@ Example:
 #### Resource Group Operations
 ```bash
 # List resource groups in a subscription
-azmcp groups list --subscription-id <subscription-id> [--tenant-id <tenant-id>]
+azmcp groups list --subscription <subscription> [--tenant-id <tenant-id>]
 ```
 
 3. Place new sections in alphabetical order, but keep these sections in fixed positions:
@@ -325,7 +325,7 @@ azmcp groups list --subscription-id <subscription-id> [--tenant-id <tenant-id>]
 4. For commands that support multiple output formats or have complex options, include example usages:
 ```bash
 # Query logs from a specific table
-azmcp monitor logs query --subscription-id <subscription-id> \
+azmcp monitor logs query --subscription <subscription> \
                         --workspace-id <workspace-id> \
                         --table "AppEvents_CL" \
                         --query "| order by TimeGenerated desc"
@@ -617,7 +617,7 @@ public class ContainersListCommand : BaseStorageCommand
             var storageService = context.GetService<IStorageService>();
             var containers = await storageService.ListContainers(
                 options.Account!, 
-                options.SubscriptionId!, 
+                options.Subscription!, 
                 options.TenantId,
                 options.RetryPolicy);
                 
@@ -684,7 +684,7 @@ public abstract class BaseAppConfigCommand<TArgs> : BaseCommand<TArgs>
             .Create(ArgumentDefinitions.AppConfig.Account.Name, ArgumentDefinitions.AppConfig.Account.Description)
             .WithCommandExample(ArgumentDefinitions.GetCommandExample(GetCommandPath(), ArgumentDefinitions.AppConfig.Account))
             .WithValueAccessor(args => ((dynamic)args).Account ?? string.Empty)
-            .WithValueLoader(async (context, args) => await GetAccountOptions(context, args.SubscriptionId ?? string.Empty))
+            .WithValueLoader(async (context, args) => await GetAccountOptions(context, args.Subscription ?? string.Empty))
             .WithIsRequired(ArgumentDefinitions.AppConfig.Account.Required);
     }
 
@@ -798,7 +798,7 @@ should not call `RegisterArgumentChain()` and instead manage their own argument 
    ```csharp
    - Authentication method handling
    - Tenant ID handling
-   - Subscription ID handling (for BaseArgumentsWithSubscriptionId)
+   - Subscription ID handling (for BaseArgumentsWithSubscription)
    - Retry policy options
    - Argument chain infrastructure
    
@@ -975,7 +975,7 @@ public class ContainersListCommand : BaseStorageCommand<ContainersListArguments>
             var service = context.GetService<IStorageService>();
             var containers = await service.ListContainers(
                 options.Account!,
-                options.SubscriptionId!,
+                options.Subscription!,
                 options.TenantId,
                 options.RetryPolicy);
 
@@ -1033,7 +1033,7 @@ public class ContainerListCommand : BaseStorageCommand<ContainerListArguments>
             var storageService = context.GetService<IStorageService>();
             var containers = await storageService.ListContainers(
                 options.Account!,
-                options.SubscriptionId!,
+                options.Subscription!,
                 options.AuthMethod ?? AuthMethod.Credential,
                 options.TenantId,
                 options.RetryPolicy);

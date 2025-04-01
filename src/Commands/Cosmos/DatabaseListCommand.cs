@@ -47,7 +47,7 @@ public class DatabaseListCommand : BaseCosmosCommand<DatabaseListArguments>
             var cosmosService = context.GetService<ICosmosService>();
             var databases = await cosmosService.ListDatabases(
                 options.Account!,
-                options.SubscriptionId!,
+                options.Subscription!,
                 options.TenantId,
                 options.RetryPolicy);
 

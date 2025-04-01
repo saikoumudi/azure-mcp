@@ -56,7 +56,7 @@ public class ContainerDetailsCommand : BaseStorageCommand<ContainerDetailsArgume
             var details = await storageService.GetContainerDetails(
                 args.Account!,
                 args.Container!,
-                args.SubscriptionId!,
+                args.Subscription!,
                 args.TenantId,
                 args.RetryPolicy
             );

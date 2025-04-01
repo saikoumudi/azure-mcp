@@ -1,4 +1,5 @@
-using AzureMCP.Arguments.Storage;
+using AzureMCP.Arguments.Storage.Account;
+
 using AzureMCP.Models;
 using AzureMCP.Services.Interfaces;
 using System.CommandLine;
@@ -18,7 +19,7 @@ public class AccountListCommand : BaseCommand<AccountListArguments>
         var command = new Command(
             "list",
             $"List all Storage accounts in a subscription. This command retrieves all Storage accounts available " +
-            $"in the specified {ArgumentDefinitions.Common.SubscriptionIdName}. Results include account names and are returned as a JSON array.");
+            $"in the specified {ArgumentDefinitions.Common.SubscriptionName}. Results include account names and are returned as a JSON array.");
 
         // We only need auth/subscription options for list command
         AddCommonOptionsToCommand(command);
@@ -39,7 +40,7 @@ public class AccountListCommand : BaseCommand<AccountListArguments>
 
             var storageService = context.GetService<IStorageService>();
             var accounts = await storageService.GetStorageAccounts(
-                args.SubscriptionId!,
+                args.Subscription!,
                 args.TenantId,
                 args.RetryPolicy);
 

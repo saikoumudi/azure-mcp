@@ -24,10 +24,10 @@ public abstract class BaseStorageCommand<TArgs> : BaseCommand<TArgs>
     // Common method to get storage account options
     protected async Task<List<ArgumentOption>> GetAccountOptions(CommandContext context, TArgs args)
     {
-        if (string.IsNullOrEmpty(args.SubscriptionId)) return [];
+        if (string.IsNullOrEmpty(args.Subscription)) return [];
 
         var storageService = context.GetService<IStorageService>();
-        var accounts = await storageService.GetStorageAccounts(args.SubscriptionId);
+        var accounts = await storageService.GetStorageAccounts(args.Subscription);
 
         return accounts?.Select(a => new ArgumentOption { Name = a, Id = a }).ToList() ?? [];
     }
@@ -35,13 +35,13 @@ public abstract class BaseStorageCommand<TArgs> : BaseCommand<TArgs>
     // Helper method to get container options
     protected async Task<List<ArgumentOption>> GetContainerOptions(CommandContext context, TArgs args)
     {
-        if (string.IsNullOrEmpty(args.Account) || string.IsNullOrEmpty(args.SubscriptionId))
+        if (string.IsNullOrEmpty(args.Account) || string.IsNullOrEmpty(args.Subscription))
         {
             return [];
         }
 
         var storageService = context.GetService<IStorageService>();
-        var containers = await storageService.ListContainers(args.Account, args.SubscriptionId);
+        var containers = await storageService.ListContainers(args.Account, args.Subscription);
 
         return containers?.Select(c => new ArgumentOption { Name = c, Id = c }).ToList() ?? [];
     }
