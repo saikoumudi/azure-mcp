@@ -4,6 +4,7 @@ using AzureMCP.Models;
 using AzureMCP.Services.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using ModelContextProtocol.Server;
+using System.Text.Json;
 using NSubstitute;
 using System.CommandLine;
 using System.CommandLine.Parsing;
@@ -142,6 +143,76 @@ namespace AzureMCP.Tests.Commands.Subscription
             await _subscriptionService.Received(1).GetSubscriptions(
                 Arg.Any<string>(),
                 Arg.Any<RetryPolicyArguments>());
+        }
+
+        [Fact]
+        public async Task ExecuteAsync_GetBySubscriptionId_ReturnsMatchingSubscription()
+        {
+            // Arrange
+            var expectedSubscriptionId = "test-subscription-id";
+            var expectedSubscriptions = new List<ArgumentOption>
+            {
+                new() { Id = expectedSubscriptionId, Name = "Test Subscription" }
+            };
+
+            _subscriptionService
+                .GetSubscriptions(Arg.Any<string>(), Arg.Any<RetryPolicyArguments>())
+                .Returns(expectedSubscriptions);
+
+            var args = _parser.Parse($"--subscription {expectedSubscriptionId}");
+
+            // Act
+            var result = await _command.ExecuteAsync(_context, args);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(200, result.Status);
+            Assert.NotNull(result.Results);
+
+            var json = JsonSerializer.Serialize(result.Results);
+            var jsonDoc = JsonDocument.Parse(json);
+            var subscriptions = jsonDoc.RootElement
+                .GetProperty("subscriptions")
+                .Deserialize<List<ArgumentOption>>();
+            
+            Assert.NotNull(subscriptions);
+            Assert.Single(subscriptions);
+            Assert.Equal(expectedSubscriptionId, subscriptions[0].Id);
+        }
+
+        [Fact]
+        public async Task ExecuteAsync_GetBySubscriptionName_ReturnsMatchingSubscription()
+        {
+            // Arrange
+            var expectedSubscriptionName = "Test Subscription";
+            var expectedSubscriptions = new List<ArgumentOption>
+            {
+                new() { Id = "test-subscription-id", Name = expectedSubscriptionName }
+            };
+
+            _subscriptionService
+                .GetSubscriptions(Arg.Any<string>(), Arg.Any<RetryPolicyArguments>())
+                .Returns(expectedSubscriptions);
+
+            var args = _parser.Parse($"--subscription {expectedSubscriptionName}");
+
+            // Act
+            var result = await _command.ExecuteAsync(_context, args);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(200, result.Status);
+            Assert.NotNull(result.Results);
+
+            var json = JsonSerializer.Serialize(result.Results);
+            var jsonDoc = JsonDocument.Parse(json);
+            var subscriptions = jsonDoc.RootElement
+                .GetProperty("subscriptions")
+                .Deserialize<List<ArgumentOption>>();
+            
+            Assert.NotNull(subscriptions);
+            Assert.Single(subscriptions);
+            Assert.Equal(expectedSubscriptionName, subscriptions[0].Name);
         }
     }
 }
