@@ -1,0 +1,69 @@
+parameters:
+- name: TimeoutInMinutes
+  type: number
+  default: 120
+
+jobs:
+- job: Sign
+  condition: and(succeededOrFailed(), ne(variables['Skip.Analyze'], 'true'))
+  timeoutInMinutes: ${{ parameters.TimeoutInMinutes }}
+  pool:
+    name: $(MACPOOL)
+    vmImage: $(MACVMIMAGE)
+    os: macos
+  steps:
+  - checkout: self
+  - checkout: azure-sdk-build-tools
+
+  - download: current
+    displayName: Download artifacts
+
+  - task: Powershell@2
+    displayName: "Compress packages for signing"
+    inputs:
+      pwsh: true
+      filePath: $(Build.SourcesDirectory)/azure-mcp/eng/scripts/Compress-ForSigning.ps1
+      arguments: >
+        -ArtifactsPath '$(Pipeline.Workspace)'
+        -ArtifactPrefix '$(PipelineArtifactName)_'
+        -OutputPath '$(Build.ArtifactStagingDirectory)/signed'
+
+  - template: pipelines/steps/azd-cli-win-signing.yml@azure-sdk-build-tools
+    parameters:
+      WinPath: $(Build.ArtifactStagingDirectory)/signed
+      WinPattern: '**/*.exe'
+
+  - template: pipelines/steps/azd-cli-mac-signing.yml@azure-sdk-build-tools
+    parameters:
+      MacPath: $(Build.ArtifactStagingDirectory)/signed
+      MacPattern: "**/*.zip"
+
+  - task: Powershell@2
+    displayName: "Expand packages after signing"
+    inputs:
+      pwsh: true
+      filePath: $(Build.SourcesDirectory)/azure-mcp/eng/scripts/Expand-AfterSigning.ps1
+      arguments: >
+        -Path '$(Build.ArtifactStagingDirectory)/signed'
+
+  - task: Powershell@2
+    displayName: "npm pack modules"
+    inputs:
+      pwsh: true
+      filePath: $(Build.SourcesDirectory)/azure-mcp/eng/scripts/Pack-Modules.ps1
+      arguments: >
+        -ArtifactsPath '$(Build.ArtifactStagingDirectory)/signed'
+        -OutputPath '$(Build.ArtifactStagingDirectory)/packed'
+        -Version '$(Version)'
+
+  - template: /eng/common/pipelines/templates/steps/publish-1es-artifact.yml
+    parameters:
+      ArtifactPath: $(Build.ArtifactStagingDirectory)/signed
+      ArtifactName: $(PipelineArtifactName)_signed
+      CustomCondition: and(succeededOrFailed(), ne(variables['NoPackagesChanged'],'true'))
+
+  - template: /eng/common/pipelines/templates/steps/publish-1es-artifact.yml
+    parameters:
+      ArtifactPath: $(Build.ArtifactStagingDirectory)/packed
+      ArtifactName: $(PipelineArtifactName)_packed
+      CustomCondition: and(succeededOrFailed(), ne(variables['NoPackagesChanged'],'true'))

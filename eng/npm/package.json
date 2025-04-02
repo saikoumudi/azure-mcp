@@ -1,0 +1,29 @@
+{
+  "name": "@azure/azure-mcp",
+  "version": "0.0.0",
+  "description": "Azure MCP Server - Model Context Protocol implementation for Azure",
+  "main": "bin/index.js",
+  "repository": "github:Azure/azure-mcp",
+  "author": "Microsoft Corporation",
+  "license": "MIT",
+  "keywords": [
+    "azure",
+    "mcp",
+    "model-context-protocol"
+  ],
+  "bugs": {
+    "url": "https://github.com/Azure/azure-mcp/issues"
+  },
+  "homepage": "https://github.com/Azure/azure-mcp#readme",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "bin": {
+    "azmcp": "bin/index.js"
+  },
+  "os": [
+  ],
+  "cpu": [
+  ],
+  "optionalDependencies": {}
+}

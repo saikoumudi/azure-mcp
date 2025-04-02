@@ -39,7 +39,7 @@ The project is organized as follows:
    "create [service] [resource] [operation] command using #new-command.md as a reference"
    ```
 
-4. Follow the implementation guidelines in [src/Docs/new-command.md](src/Docs/new-command.md)
+4. Follow the implementation guidelines in [src/Docs/new-command.md](https://github.com/Azure/azure-mcp/blob/main/src/Docs/new-command.md)
 
 5. Create a Pull Request:
    - Reference the issue you created
@@ -108,8 +108,8 @@ The Azure MCP Server implements the [Model Context Protocol specification](https
 
 ## Additional Resources
 
-- [Azure MCP Documentation](README.md)
-- [Command Implementation Guide](src/Docs/new-command.md)
+- [Azure MCP Documentation](https://github.com/Azure/azure-mcp/blob/main/README.md)
+- [Command Implementation Guide](https://github.com/Azure/azure-mcp/blob/main/src/Docs/new-command.md)
 - [VS Code Insiders Download](https://code.visualstudio.com/insiders/)
 - [GitHub Copilot Documentation](https://docs.github.com/en/copilot)
 

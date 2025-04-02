@@ -17,17 +17,9 @@ $desc, $ext = if ($IsLinux) {
 }
 
 # Build the project
+$runtime = $([System.Runtime.InteropServices.RuntimeInformation]::RuntimeIdentifier)
 Write-Host "Building azmcp for $desc..." -ForegroundColor Green
-dotnet publish "$projectFile" `
-    --configuration Release `
-    --runtime $([System.Runtime.InteropServices.RuntimeInformation]::RuntimeIdentifier) `
-    --self-contained true `
-    --output .dist `
-    /p:PublishSingleFile=true `
-    /p:PublishTrimmed=false `
-    /p:PublishReadyToRun=true `
-    /p:IncludeNativeLibrariesForSelfExtract=true `
-    /p:DebugType=embedded
+dotnet publish "$projectFile" --runtime $runtime --self-contained --output .dist
 
 if ($LASTEXITCODE -eq 0) {
     Write-Host "`nBuild completed successfully!" -ForegroundColor Green

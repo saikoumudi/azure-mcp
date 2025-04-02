@@ -1,0 +1,27 @@
+jobs:
+- job: Initialize
+  timeoutInMinutes: 90
+  steps:
+  - checkout: self
+
+  - pwsh: |
+      Write-Host "Attaching build reason string to the build for additional tag generation."
+      @('$(Build.Reason)') | ConvertTo-Json -AsArray | Out-File -FilePath $(System.DefaultWorkingDirectory)/build-reason.json -Encoding utf8
+      Write-Host '##vso[task.addattachment type=AdditionalTags;name=AdditionalTags;]$(System.DefaultWorkingDirectory)/build-reason.json'
+    displayName: Tag build reason
+  
+  - task: Powershell@2
+    name: Version
+    displayName: "Set package version"
+    condition: and(succeeded(), ne(variables['NoPackagesChanged'],'true'))
+    inputs:
+      pwsh: true
+      filePath: $(Build.SourcesDirectory)/eng/scripts/Get-Version.ps1
+      ${{ if ne(variables['Build.Reason'], 'Manual') }}:
+        arguments: >
+          -PrereleaseLabel 'alpha'
+          -PrereleaseNumber '$(Build.BuildId)'
+          -Variable 'Version'
+      ${{ else }}:
+        arguments: >
+          -Variable 'Version'

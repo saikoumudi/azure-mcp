@@ -33,7 +33,7 @@ azmcp server start --transport sse
 
 We welcome contributions to Azure MCP! Whether you're fixing bugs, adding new features, or improving documentation, your contributions are welcome.
 
-Please read our [Contributing Guide](CONTRIBUTING.md) for guidelines on:
+Please read our [Contributing Guide](https://github.com/Azure/azure-mcp/blob/main/CONTRIBUTING.md) for guidelines on:
 - Setting up your development environment
 - Adding new commands
 - Code style and testing requirements

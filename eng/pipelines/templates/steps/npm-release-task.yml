@@ -1,0 +1,61 @@
+parameters:
+  - name: PathToArtifacts
+    type: string
+  - name: Registry
+    type: string
+    default: 'https://registry.npmjs.org/'
+  - name: Tag
+    type: string
+    default: 'latest'
+  - name: NpmrcPath
+    type: string
+    default: '$(Pipeline.Workspace)/.npmrc'
+
+steps:
+  - template: /eng/common/pipelines/templates/steps/set-default-branch.yml
+
+  - ${{ if eq(parameters.Registry, 'https://registry.npmjs.org/') }}:
+    - pwsh: |
+        Write-Host "TODO: Uncomment real release task"
+    # - task: EsrpRelease@9
+    #   displayName: 'Publish ${{parameters.Artifact.name}} to ESRP'
+    #   inputs:
+    #     ConnectedServiceName: 'Azure SDK PME Managed Identity'
+    #     ClientId: '5f81938c-2544-4f1f-9251-dd9de5b8a81b'
+    #     DomainTenantId: '975f013f-7f24-47e8-a7d3-abc4752bf346'
+    #     Usemanagedidentity: true
+    #     KeyVaultName: 'kv-azuresdk-codesign'
+    #     SignCertName: 'azure-sdk-esrp-release-certificate'
+    #     Intent: 'PackageDistribution'
+    #     ContentType: 'npm'
+    #     FolderLocation: ${{parameters.PathToArtifacts}}
+    #     Owners: ${{ coalesce(variables['Build.RequestedForEmail'], 'azuresdk@microsoft.com') }}
+    #     Approvers: ${{ coalesce(variables['Build.RequestedForEmail'], 'azuresdk@microsoft.com') }}
+    #     ServiceEndpointUrl: 'https://api.esrp.microsoft.com'
+    #     MainPublisher: 'ESRPRELPACMANTEST'
+    #     productstate: ${{parameters.Tag}}
+
+  - ${{ else }}:
+    - template: /eng/common/pipelines/templates/steps/create-authenticated-npmrc.yml
+      parameters:
+        npmrcPath: ${{parameters.PathToArtifacts}}/.npmrc
+        registryUrl: ${{ parameters.Registry }}
+
+    - pwsh: |
+        $tgzFiles = Get-ChildItem -Path ${{parameters.PathToArtifacts}} -Filter *.tgz
+        if ($tgzFiles.Count -eq 0) {
+          Write-Host "No .tgz files found in ${{parameters.PathToArtifacts}}"
+          exit 1
+        }
+
+        Write-Host "Publishing the following files to ${{parameters.Registry}}:"
+        foreach ($file in $tgzFiles) {
+          Write-Host "  - $($file.FullName)"
+        }
+
+        foreach ($file in $tgzFiles) {
+          Write-Host '> npm publish $file --access public --tag "${{parameters.Tag}}"'
+          npm publish $file --access public --tag "${{parameters.Tag}}"
+        }
+      displayName: Publish to Dev Feed
+      workingDirectory: ${{parameters.PathToArtifacts}}

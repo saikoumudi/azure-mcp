@@ -27,16 +27,7 @@ fi
 
 # Build the project
 echo -e "\033[32mBuilding azmcp for ${RUNTIME}...\033[0m"
-dotnet publish "$PROJECT_FILE" \
-    --configuration Release \
-    --runtime "$RUNTIME" \
-    --self-contained true \
-    --output .dist \
-    /p:PublishSingleFile=true \
-    /p:PublishTrimmed=false \
-    /p:PublishReadyToRun=true \
-    /p:IncludeNativeLibrariesForSelfExtract=true \
-    /p:DebugType=embedded
+dotnet publish "$PROJECT_FILE" --runtime "$RUNTIME" --self-contained --output .dist 
 
 if [ $? -eq 0 ]; then
     echo -e "\n\033[32mBuild completed successfully!\033[0m"

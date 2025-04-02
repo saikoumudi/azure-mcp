@@ -1,0 +1,69 @@
+parameters:
+- name: IncludeRelease
+  type: boolean
+
+resources:
+  repositories:
+  - repository: azure-sdk-build-tools
+    type: git
+    name: internal/azure-sdk-build-tools
+    ref: refs/tags/azure-sdk-build-tools_20250307.1
+    
+extends:
+  template: /eng/pipelines/templates/1es-redirect.yml
+  parameters:
+    autoBaseline: ${{ and(eq(variables['Build.DefinitionName'], 'azure - mcp'), eq(variables['Build.SourceBranchName'], 'main'), eq(variables['System.TeamProject'], 'internal')) }}
+    stages:
+    - stage: Build
+      pool:
+        name: $(LINUXPOOL)
+        image: $(LINUXVMIMAGE)
+        os: linux
+      variables:
+      - template: /eng/pipelines/templates/variables/image.yml
+      - template: /eng/pipelines/templates/variables/globals.yml
+      jobs:
+      - template: /eng/pipelines/templates/jobs/initialize.yml
+      - template: /eng/common/pipelines/templates/jobs/generate-job-matrix.yml
+        parameters:
+          SparseCheckout: false
+          DependsOn: Initialize
+          JobTemplatePath: /eng/pipelines/templates/jobs/build.yml
+          MatrixConfigs:
+            - Name: build_matrix
+              Path: eng/pipelines/build-matrix.json
+              Selection: all
+              GenerateVMJobs: true
+          AdditionalParameters: {}
+      - template: /eng/pipelines/templates/jobs/analyze.yml
+
+    - ${{ if and(eq(variables['Build.Reason'], 'Manual'), eq(parameters.IncludeRelease, true)) }}:
+      - stage: Release
+        dependsOn: Build
+        pool:
+          name: $(LINUXPOOL)
+          image: $(LINUXVMIMAGE)
+          os: linux
+        variables:
+        - template: /eng/pipelines/templates/variables/image.yml
+        - template: /eng/pipelines/templates/variables/globals.yml
+        - name: Version
+          value: $[ stageDependencies.Build.Initialize.outputs['Version.Version'] ]
+        jobs:
+        - template: /eng/pipelines/templates/jobs/sign-and-pack.yml
+        - template: /eng/pipelines/templates/jobs/release.yml
+    - ${{ else }}:
+      - stage: Integration
+        dependsOn: Build
+        pool:
+          name: $(LINUXPOOL)
+          image: $(LINUXVMIMAGE)
+          os: linux
+        variables:
+        - template: /eng/pipelines/templates/variables/image.yml
+        - template: /eng/pipelines/templates/variables/globals.yml
+        - name: Version
+          value: $[ stageDependencies.Build.Initialize.outputs['Version.Version'] ]
+        jobs:
+        - template: /eng/pipelines/templates/jobs/sign-and-pack.yml
+        - template: /eng/pipelines/templates/jobs/integration.yml
