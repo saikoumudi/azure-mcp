@@ -4,7 +4,8 @@
 param(
     [string] $ArtifactsPath,
     [string] $OutputPath,
-    [string] $Version
+    [string] $Version,
+    [switch] $UsePaths
 )
 
 . "$PSScriptRoot/../common/scripts/common.ps1"
@@ -64,23 +65,27 @@ try {
         }
 
         if (!$IsWindows -and $os -ne 'win32') {
-            Write-Host "Setting executable permissions for $packageFolder/bin/azmcp" -ForegroundColor Yellow
-            Invoke-LoggedCommand "chmod +x `"$packageFolder/bin/azmcp`""
+            Write-Host "Setting executable permissions for $packageFolder/azmcp" -ForegroundColor Yellow
+            Invoke-LoggedCommand "chmod +x `"$packageFolder/azmcp`""
         }
 
         Write-Host "Packaging $packageFolder into $OutputPath"
         Invoke-LoggedCommand "npm pack $packageFolder --pack-destination '$OutputPath'" -GroupOutput | Tee-Object -Variable fileName
         Write-Host "Package location: $OutputPath/$fileName" -ForegroundColor Yellow
 
-        $package.optionalDependencies[$platform.name] = $version
+        if ($UsePaths) {
+            $package.optionalDependencies[$platform.name] = "file://$((Resolve-Path "$OutputPath/$fileName").Path.Replace('\', '/'))"
+        } else {
+            $package.optionalDependencies[$platform.name] = $version
+        }
     }
 
     New-Item -ItemType Directory $wrapperFolder | Out-Null
     Copy-Item -Path "$npmPackagePath/*" -Destination $wrapperFolder -Recurse -Force
 
     if (!$IsWindows) {
-        Write-Host "Setting executable permissions for $wrapperFolder/bin/index.js" -ForegroundColor Yellow
-        Invoke-LoggedCommand "chmod +x `"$wrapperFolder/bin/index.js`""
+        Write-Host "Setting executable permissions for $wrapperFolder/index.js" -ForegroundColor Yellow
+        Invoke-LoggedCommand "chmod +x `"$wrapperFolder/index.js`""
     }
 
     $package | ConvertTo-Json -Depth 10 | Out-File -FilePath "$wrapperFolder/package.json" -Encoding utf8

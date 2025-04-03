@@ -43,7 +43,7 @@ foreach ($packageJson in $packageJsonFiles) {
         # Mac requires code signing the binary with an entitlements file such that the signed and notarized binary will properly invoke on
         # a mac system. However, the `codesign` command is only available on a MacOS agent. With that being the case, we simply special case
         # this function here to ensure that the script does not fail outside of a MacOS agent.
-        $binaryFilePath = "$packageDirectory/bin/azmcp"
+        $binaryFilePath = "$packageDirectory/azmcp"
 
         if ($IsMacOS) {
             chmod +x $binaryFilePath
@@ -53,7 +53,7 @@ foreach ($packageJson in $packageJsonFiles) {
             Write-Warning "Mac binaries should be code signed with entitlements, but this is only possible on a mac agent."
         }
         
-        $archivePath = "$packageDirectory/bin/azmcp.zip"
+        $archivePath = "$packageDirectory/azmcp.zip"
         Write-Host "Creating $archivePath" -ForegroundColor Yellow
         # We only need to compress the single binary file.
         Compress-Archive -Path $binaryFilePath -DestinationPath $archivePath

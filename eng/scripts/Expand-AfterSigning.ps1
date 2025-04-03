@@ -8,7 +8,7 @@ param(
 . "$PSScriptRoot/../common/scripts/common.ps1"
 $RepoRoot = $RepoRoot.Path.Replace('\', '/')
 
-Write-Host "##[group] $Path Contents:"
+Write-Host "##[group] $Path Contents before:"
 Get-ChildItem -Path $Path -File -Recurse | Select-Object -ExpandProperty FullName | Out-Host
 Write-Host "##[endgroup]"
 
@@ -23,6 +23,6 @@ foreach ($archiveFile in $archiveFiles) {
     Remove-Item -Path $archiveFile -Force
 }
 
-Write-Host "##[group] $Path Contents:"
+Write-Host "##[group] $Path Contents after:"
 Get-ChildItem -Path $Path -File -Recurse | Select-Object -ExpandProperty FullName | Out-Host
 Write-Host "##[endgroup]"

@@ -1,7 +1,6 @@
 jobs:
 - job: PublishDev
   displayName: "Publish to dev feed"
-  dependsOn: Sign
   condition: and(succeeded(), ne(variables['Skip.PublishPackage'], 'true'))
   steps:
   - checkout: self

@@ -1,8 +1,7 @@
 {
-  "name": "@azure/azure-mcp",
+  "name": "@azure/mcp",
   "version": "0.0.0",
   "description": "Azure MCP Server - Model Context Protocol implementation for Azure",
-  "main": "bin/index.js",
   "repository": "github:Azure/azure-mcp",
   "author": "Microsoft Corporation",
   "license": "MIT",
@@ -19,7 +18,7 @@
     "node": ">=18.0.0"
   },
   "bin": {
-    "azmcp": "bin/index.js"
+    "azmcp": "./index.js"
   },
   "os": [
   ],

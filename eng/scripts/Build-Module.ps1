@@ -4,7 +4,8 @@
 param(
     [string] $OutputPath,
     [string] $Version,
-    [switch] $RuntimeDependent,
+    [switch] $SelfContained,
+    [switch] $ReadyToRun,
     [Parameter(Mandatory=$true, ParameterSetName='Named')]
     [ValidateSet('windows','linux','macOS')]
     [string] $OperatingSystem,
@@ -60,7 +61,7 @@ try {
 
     $package = Get-Content "$npmPackagePath/package.json" -Raw | ConvertFrom-Json -AsHashtable
 
-    Write-Host "Building version $version, $os-$arch" -ForegroundColor Green
+    Write-Host "Building version $Version, $os-$arch" -ForegroundColor Green
 
     $outputDir = "$OutputPath/$os-$arch"
     
@@ -69,22 +70,29 @@ try {
     New-Item -ItemType Directory -Force -Path $outputDir | Out-Null
 
     Write-Host "Building azmcp for $os-$arch..." -ForegroundColor Green
-    if($RuntimeDependent){
-        Invoke-LoggedCommand "dotnet publish $projectFile --runtime '$os-$arch' --output $outputDir/bin" -GroupOutput
-    } else {
-        Invoke-LoggedCommand "dotnet publish $projectFile --runtime '$os-$arch' --self-contained --output $outputDir/bin" -GroupOutput
+
+    $command = "dotnet publish '$projectFile' --runtime '$os-$arch' --output '$outputDir' /p:Version=$Version" 
+    
+    if($SelfContained) {
+        $command += " --self-contained"
     }
+
+    if($ReadyToRun) {
+        $command += " /p:PublishReadyToRun=true"
+    }
+
+    Invoke-LoggedCommand $command -GroupOutput
 
     # create a package.json in the output directory with a bin entry for the executable
     $platformPackageJson = [ordered]@{
         name        = "$($package.name)-$node_os-$arch"
-        version     = $version
+        version     = $Version
         description = "$($package.description) for $node_os-$arch"
         repository  = $package.repository
         author      = $package.author
         bugs        = $package.bugs
         license     = $package.license
-        bin         = @{ "azmcp" = "bin/azmcp$extension" }
+        bin         = @{ "azmcp-$node_os-$arch" = "azmcp$extension" }
         os          = @( $node_os )
         cpu         = @( $arch )
     }

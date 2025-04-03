@@ -1,8 +1,20 @@
+parameters:
+- name: ReleaseRun
+  type: boolean
+  default: false
+
 jobs:
 - job: Initialize
   timeoutInMinutes: 90
   steps:
   - checkout: self
+
+  - ${{ if eq(variables['System.TeamProject'], 'internal') }}:
+    - pwsh: |
+        Write-Host "##[group] Environment Variables"
+        Get-ChildItem env: | ForEach-Object { Write-Host "$($_.Name)  =  $($_.Value)" }
+        Write-Host "##[endgroup]"
+      displayName: Dump environment variables
 
   - pwsh: |
       Write-Host "Attaching build reason string to the build for additional tag generation."
@@ -17,11 +29,12 @@ jobs:
     inputs:
       pwsh: true
       filePath: $(Build.SourcesDirectory)/eng/scripts/Get-Version.ps1
-      ${{ if ne(variables['Build.Reason'], 'Manual') }}:
+      ${{ if eq(parameters.ReleaseRun, true) }}:
         arguments: >
-          -PrereleaseLabel 'alpha'
-          -PrereleaseNumber '$(Build.BuildId)'
           -Variable 'Version'
       ${{ else }}:
         arguments: >
           -Variable 'Version'
+          -PrereleaseLabel 'alpha'
+          -PrereleaseNumber '$(Build.BuildId)'
+

@@ -1,3 +1,9 @@
+parameters:
+- name: QuickBuild
+  displayName: Quick Build (Skip signing and slow arguments)
+  type: boolean
+  default: false
+  
 trigger:
   branches:
     include:
@@ -15,4 +21,6 @@ pr:
 extends:
   template: /eng/pipelines/templates/common.yml
   parameters:
-    IncludeRelease: ${{ or(eq(variables['Build.Reason'], 'Manual'), eq(variables['Build.Reason'], 'IndividualCI')) }}
+    QuickBuild: ${{ parameters.QuickBuild }}
+    # We release manual runs, but not from PR refs
+    ReleaseRun: ${{ and(eq(variables['Build.Reason'], 'Manual'), not(startswith(variables['Build.SourceBranch'], 'refs/pull/'))) }}

@@ -8,7 +8,9 @@ let platform = os.platform();
 let arch = os.arch();
 
 // get the current platform and architecture
-const packageName = `@azure/azure-mcp-${platform}-${arch}`;
+const packageName = `@azure/mcp-${platform}-${arch}`;
+
+console.log('Locating platform package:', packageName); // Debugging line
 
 function getPackagePath() {
   const basePaths = require.resolve.paths(packageName) || [];
@@ -30,12 +32,12 @@ if (!packagePath) {
   process.exit(1); // Exit with an error code
 }
 
-console.log(`Using package: ${packagePath}`);
-
 // run package at path passing all args
 const args = process.argv.slice(2);
 const childProcess = require('child_process');
-const execPath = path.join(packagePath, 'bin', 'azmcp');
+const execPath = path.join(packagePath, 'azmcp');
+
+console.log(`Starting ${execPath}`); // Debugging line
 
 const child = childProcess.spawn(execPath, args, {
   stdio: 'inherit',

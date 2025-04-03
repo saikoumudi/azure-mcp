@@ -44,15 +44,36 @@ Please read our [Contributing Guide](https://github.com/Azure/azure-mcp/blob/mai
 To use the Azure MCP with VS Code Insiders with GitHub Copilot Agent Mode, follow these instructions:
 
 1. Install [VS Code Insiders](https://code.visualstudio.com/insiders/).
-1. Install the pre-release versions of the GitHub Copilot and GitHub Copilot Chat extensions in VS Code Insiders.
-1. Clone this repo and build the `/src` folder with `dotnet build`.
-1. Open a new instance of VS Code Insiders in an empty folder.
-1. Copy the `.vscode/mcp.json` from the `azure-mcp` repo to your new folder.
-1. Comment out the appropriate section if you are running SSE or STDIO. 
-If SSE, then run the server first with `azmcp server start --transport sse`.  The default port is 5000 and the endpoint is `http://localhost:5000/sse`. If using STDIO, update the path to the .exe in `mcp.json` to match your machine's path.
-1. Open GitHub Copilot and switch to Agent mode. You should see Azure MCP Server in the list of tools.
+1. Install the pre-release versions of the [GitHub Copilot](https://marketplace.visualstudio.com/items?itemName=GitHub.copilot) and [GitHub Copilot Chat](https://marketplace.visualstudio.com/items?itemName=GitHub.copilot-chat) extensions in VS Code Insiders.
+1. Open VS Code Insiders in an empty folder.
+1. Add `.vscode/mcp.json`:
+```json
+{
+    "servers": {
+        "Azure MCP Server": {
+            "command": "npx",
+            "args": [
+                "-y",
+                "--registry",
+                "https://pkgs.dev.azure.com/azure-sdk/internal/_packaging/azure-sdk-for-js-pr/npm/registry/",
+                "@azure/mcp",
+                "server",
+                "start"
+            ]
+        }
+    }
+}
+```
+1. Run `npm install -g vsts-npm-auth`
+1. Create file `.npmrc`
+```
+registry=https://pkgs.dev.azure.com/azure-sdk/internal/_packaging/azure-sdk-for-js-pr/npm/registry/
+always-auth=true
+```
+1. Run `vsts-npm-auth -config .npmrc`
+1. Open GitHub Copilot and switch to Agent mode. You should see Azure MCP Server in the list of tools
 1. Try a prompt that tells the agent to use the Azure MCP server, such as "List my Azure Storage containers."
-1. The agent should be able to use the Azure MCP to complete your query.
+1. The agent should be able to use the Azure MCP Server tools to complete your query.
 
 ## Using the Azure MCP Server in Cursor
 
@@ -304,3 +325,37 @@ azmcp group list --subscription <subscription>
 # List all available commands and tools
 azmcp tools list
 ```
+
+## Installing internally published version
+
+All of the builds currently publish to the internal / private npm feed:  
+https://dev.azure.com/azure-sdk/internal/_artifacts/feed/azure-sdk-for-js-pr
+
+### Authenticate
+You'll need to authenticate an `.npmrc` file to access the feed using `npm` or `npx`.
+
+To create the `.npmrc` file, run `eng/scripts/New-Npmrc.ps1 -Authenticate`.
+
+This will add credentials for the feed url into your `~/.npmrc` file, not the local file.  
+
+While the local file exists, it will tell `npm` to use the dev feed for all packages. If you delete the file, or run `npm`/`npx` from another directory, you'll need to pass `--registry https://pkgs.dev.azure.com/azure-sdk/internal/_packaging/azure-sdk-for-js-pr/npm/registry/` to use the feed.
+
+For details on the script, see the [NPM connection instructions](https://dev.azure.com/azure-sdk/internal/_artifacts/feed/azure-sdk-for-js-pr/connect).
+
+### Install
+
+You can globally install the package and call it:
+```
+npm install -g --registry https://pkgs.dev.azure.com/azure-sdk/internal/_packaging/azure-sdk-for-js-pr/npm/registry/ @azure/mcp
+
+azmcp server start
+```
+
+Or, you can use npx to install and run in one command:
+```bash
+npx -y --registry https://pkgs.dev.azure.com/azure-sdk/internal/_packaging/azure-sdk-for-js-pr/npm/registry/ @azure/mcp server start
+```
+
+If you still have the `.npmrc` in your local directory, you can omit the `--registry` option.
+
+

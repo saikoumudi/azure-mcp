@@ -2,9 +2,13 @@ parameters:
 - name: TimeoutInMinutes
   type: number
   default: 120
+- name: SkipSigning
+  type: boolean
+  default: false
 
 jobs:
-- job: Sign
+- job: SignAndPack
+  displayName: "Sign and Pack"
   condition: and(succeededOrFailed(), ne(variables['Skip.Analyze'], 'true'))
   timeoutInMinutes: ${{ parameters.TimeoutInMinutes }}
   pool:
@@ -27,16 +31,17 @@ jobs:
         -ArtifactsPath '$(Pipeline.Workspace)'
         -ArtifactPrefix '$(PipelineArtifactName)_'
         -OutputPath '$(Build.ArtifactStagingDirectory)/signed'
+        
+  - ${{ if not(parameters.SkipSigning) }}:
+    - template: pipelines/steps/azd-cli-win-signing.yml@azure-sdk-build-tools
+      parameters:
+        WinPath: $(Build.ArtifactStagingDirectory)/signed
+        WinPattern: '**/*.exe'
 
-  - template: pipelines/steps/azd-cli-win-signing.yml@azure-sdk-build-tools
-    parameters:
-      WinPath: $(Build.ArtifactStagingDirectory)/signed
-      WinPattern: '**/*.exe'
-
-  - template: pipelines/steps/azd-cli-mac-signing.yml@azure-sdk-build-tools
-    parameters:
-      MacPath: $(Build.ArtifactStagingDirectory)/signed
-      MacPattern: "**/*.zip"
+    - template: pipelines/steps/azd-cli-mac-signing.yml@azure-sdk-build-tools
+      parameters:
+        MacPath: $(Build.ArtifactStagingDirectory)/signed
+        MacPattern: "**/*.zip"
 
   - task: Powershell@2
     displayName: "Expand packages after signing"
@@ -59,7 +64,10 @@ jobs:
   - template: /eng/common/pipelines/templates/steps/publish-1es-artifact.yml
     parameters:
       ArtifactPath: $(Build.ArtifactStagingDirectory)/signed
-      ArtifactName: $(PipelineArtifactName)_signed
+      ${{ if parameters.SkipSigning }}:
+        ArtifactName: $(PipelineArtifactName)_not_signed
+      ${{ else }}:
+        ArtifactName: $(PipelineArtifactName)_signed
       CustomCondition: and(succeededOrFailed(), ne(variables['NoPackagesChanged'],'true'))
 
   - template: /eng/common/pipelines/templates/steps/publish-1es-artifact.yml

@@ -1,7 +1,6 @@
 jobs:
 - job: TagRepository
   displayName: "Create release tag"
-  dependsOn: Sign
   condition: and(succeeded(), ne(variables['Skip.TagRepository'], 'true'))
   steps:
   - checkout: self

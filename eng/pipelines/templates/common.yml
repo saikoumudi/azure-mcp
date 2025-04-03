@@ -1,6 +1,10 @@
 parameters:
-- name: IncludeRelease
+- name: QuickBuild
   type: boolean
+  default: false
+- name: ReleaseRun
+  type: boolean
+  default: false
 
 resources:
   repositories:
@@ -12,7 +16,7 @@ resources:
 extends:
   template: /eng/pipelines/templates/1es-redirect.yml
   parameters:
-    autoBaseline: ${{ and(eq(variables['Build.DefinitionName'], 'azure - mcp'), eq(variables['Build.SourceBranchName'], 'main'), eq(variables['System.TeamProject'], 'internal')) }}
+    autoBaseline: ${{ and(eq(variables['Build.DefinitionName'], 'azure - mcp'), eq(variables['Build.SourceBranch'], 'refs/heads/main'), eq(variables['System.TeamProject'], 'internal')) }}
     stages:
     - stage: Build
       pool:
@@ -24,6 +28,8 @@ extends:
       - template: /eng/pipelines/templates/variables/globals.yml
       jobs:
       - template: /eng/pipelines/templates/jobs/initialize.yml
+        parameters:
+          ReleaseRun: ${{ parameters.ReleaseRun }}
       - template: /eng/common/pipelines/templates/jobs/generate-job-matrix.yml
         parameters:
           SparseCheckout: false
@@ -34,16 +40,15 @@ extends:
               Path: eng/pipelines/build-matrix.json
               Selection: all
               GenerateVMJobs: true
-          AdditionalParameters: {}
+          AdditionalParameters:
+            QuickBuild: ${{ parameters.QuickBuild }}
       - template: /eng/pipelines/templates/jobs/analyze.yml
 
-    - ${{ if and(eq(variables['Build.Reason'], 'Manual'), eq(parameters.IncludeRelease, true)) }}:
-      - stage: Release
+    # All builds in the internal project get signing
+    - ${{ if eq(variables['System.TeamProject'], 'internal') }}:
+      - stage: Sign
+        displayName: 'Sign and Pack'
         dependsOn: Build
-        pool:
-          name: $(LINUXPOOL)
-          image: $(LINUXVMIMAGE)
-          os: linux
         variables:
         - template: /eng/pipelines/templates/variables/image.yml
         - template: /eng/pipelines/templates/variables/globals.yml
@@ -51,19 +56,39 @@ extends:
           value: $[ stageDependencies.Build.Initialize.outputs['Version.Version'] ]
         jobs:
         - template: /eng/pipelines/templates/jobs/sign-and-pack.yml
-        - template: /eng/pipelines/templates/jobs/release.yml
-    - ${{ else }}:
-      - stage: Integration
-        dependsOn: Build
-        pool:
-          name: $(LINUXPOOL)
-          image: $(LINUXVMIMAGE)
-          os: linux
-        variables:
-        - template: /eng/pipelines/templates/variables/image.yml
-        - template: /eng/pipelines/templates/variables/globals.yml
-        - name: Version
-          value: $[ stageDependencies.Build.Initialize.outputs['Version.Version'] ]
-        jobs:
-        - template: /eng/pipelines/templates/jobs/sign-and-pack.yml
-        - template: /eng/pipelines/templates/jobs/integration.yml
+          parameters:
+            SkipSigning: ${{ parameters.QuickBuild }}
+
+      - ${{ if eq(parameters.ReleaseRun, 'true') }}:
+        - stage: Release
+          dependsOn:
+          - Build
+          - Sign
+          pool:
+            name: $(LINUXPOOL)
+            image: $(LINUXVMIMAGE)
+            os: linux
+          variables:
+          - template: /eng/pipelines/templates/variables/image.yml
+          - template: /eng/pipelines/templates/variables/globals.yml
+          - name: Version
+            value: $[ stageDependencies.Build.Initialize.outputs['Version.Version'] ]
+          jobs:
+          - template: /eng/pipelines/templates/jobs/release.yml
+
+      - ${{ else }}:
+        - stage: Integration
+          dependsOn:
+          - Build
+          - Sign
+          pool:
+            name: $(LINUXPOOL)
+            image: $(LINUXVMIMAGE)
+            os: linux
+          variables:
+          - template: /eng/pipelines/templates/variables/image.yml
+          - template: /eng/pipelines/templates/variables/globals.yml
+          - name: Version
+            value: $[ stageDependencies.Build.Initialize.outputs['Version.Version'] ]
+          jobs:
+          - template: /eng/pipelines/templates/jobs/integration.yml

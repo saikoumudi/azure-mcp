@@ -10,9 +10,11 @@ parameters:
   type: string
 - name: CloudConfig
   type: object
+- name: QuickBuild
+  type: boolean
 
 jobs:
-- job:
+- job: Build_${{ parameters.OSName }}
   displayName: "Build"
   dependsOn:
   - Initialize
@@ -48,6 +50,8 @@ jobs:
         -Version '$(Version)'
         -OperatingSystem '${{ parameters.OSName }}'
         -Architecture '$(Architecture)'
+        -SelfContained:$${{ not(parameters.QuickBuild) }}
+        -ReadyToRun:$${{ not(parameters.QuickBuild) }}
 
   - template: /eng/common/pipelines/templates/steps/publish-1es-artifact.yml
     parameters:

@@ -29,6 +29,7 @@
         "MACOS",
         "MACPOOL",
         "MACVMIMAGE",
+        "vsts",
         "WINDOWSOS",
         "WINDOWSPOOL",
         "WINDOWSVMIMAGE"

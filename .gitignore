@@ -6,4 +6,5 @@ tests/test-cmds.txt
 .vs
 tests/TestResults
 
-!/eng/npm/bin
+node_modules
+.npmrc
