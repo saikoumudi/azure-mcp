@@ -15,6 +15,18 @@ jobs:
     name: $(MACPOOL)
     vmImage: $(MACVMIMAGE)
     os: macos
+  templateContext:
+    outputParentDirectory: $(Build.ArtifactStagingDirectory)
+    outputs:
+    - ${{ if not(parameters.SkipSigning) }}:
+      - output: pipelineArtifact
+        artifact: $(PipelineArtifactName)_signed
+        path: $(Build.ArtifactStagingDirectory)/signed
+        condition: succeededOrFailed()
+    - output: pipelineArtifact
+      artifact: $(PipelineArtifactName)_packed
+      path: $(Build.ArtifactStagingDirectory)/packed
+      condition: succeededOrFailed()
   steps:
   - checkout: self
   - checkout: azure-sdk-build-tools
@@ -60,18 +72,3 @@ jobs:
         -ArtifactsPath '$(Build.ArtifactStagingDirectory)/signed'
         -OutputPath '$(Build.ArtifactStagingDirectory)/packed'
         -Version '$(Version)'
-
-  - template: /eng/common/pipelines/templates/steps/publish-1es-artifact.yml
-    parameters:
-      ArtifactPath: $(Build.ArtifactStagingDirectory)/signed
-      ${{ if parameters.SkipSigning }}:
-        ArtifactName: $(PipelineArtifactName)_not_signed
-      ${{ else }}:
-        ArtifactName: $(PipelineArtifactName)_signed
-      CustomCondition: and(succeededOrFailed(), ne(variables['NoPackagesChanged'],'true'))
-
-  - template: /eng/common/pipelines/templates/steps/publish-1es-artifact.yml
-    parameters:
-      ArtifactPath: $(Build.ArtifactStagingDirectory)/packed
-      ArtifactName: $(PipelineArtifactName)_packed
-      CustomCondition: and(succeededOrFailed(), ne(variables['NoPackagesChanged'],'true'))
