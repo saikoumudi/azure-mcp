@@ -12,7 +12,6 @@ jobs:
   - template: /eng/pipelines/templates/steps/npm-release-task.yml
     parameters:
       PathToArtifacts: $(Pipeline.Workspace)/$(PipelineArtifactName)_packed
-      Tag: latest
       Registry: https://pkgs.dev.azure.com/azure-sdk/internal/_packaging/azure-sdk-for-js-pr/npm/registry/
 
 # - job: PublishDocsToNightly

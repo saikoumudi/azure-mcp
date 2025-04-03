@@ -29,8 +29,8 @@ jobs:
     isProduction: true
     inputs:
     - input: pipelineArtifact
-      artifactName: $(PipelineArtifactName)
-      targetPath: $(Pipeline.Workspace)/$(PipelineArtifactName)
+      artifactName: $(PipelineArtifactName)_packed
+      targetPath: $(Pipeline.Workspace)/drop
   environment: package-publish
   timeoutInMinutes: 120
   dependsOn: TagRepository
@@ -44,7 +44,7 @@ jobs:
         steps:
         - template: /eng/pipelines/templates/steps/npm-release-task.yml
           parameters:
-            PathToArtifacts: $(Pipeline.Workspace)/$(PipelineArtifactName)
+            PathToArtifacts: $(Pipeline.Workspace)/drop
             Tag: latest
 
 - job: UpdatePackageVersion

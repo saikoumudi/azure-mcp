@@ -6,7 +6,7 @@ parameters:
     default: 'https://registry.npmjs.org/'
   - name: Tag
     type: string
-    default: 'latest'
+    default: ''
   - name: NpmrcPath
     type: string
     default: '$(Pipeline.Workspace)/.npmrc'
@@ -53,9 +53,14 @@ steps:
           Write-Host "  - $($file.FullName)"
         }
 
+        $tag = '${{parameters.Tag}}'
         foreach ($file in $tgzFiles) {
-          Write-Host '> npm publish $file --access public --tag "${{parameters.Tag}}"'
-          npm publish $file --access public --tag "${{parameters.Tag}}"
+          $command = "npm publish $file --access public"
+          if ($tag) {
+            $command += " --tag '$tag'"
+          }
+          Write-Host "> $command"
+          Invoke-Expression $command
         }
       displayName: Publish to Dev Feed
       workingDirectory: ${{parameters.PathToArtifacts}}
