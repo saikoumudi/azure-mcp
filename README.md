@@ -63,12 +63,15 @@ For detailed command documentation and examples, see [Azure MCP Commands](docs/a
 1. Run `npm install -g vsts-npm-auth`
 1. Create file `.npmrc`
 
-```
-registry=https://pkgs.dev.azure.com/azure-sdk/internal/_packaging/azure-sdk-for-js-pr/npm/registry/
-always-auth=true
-```
+    ```
+    registry=https://pkgs.dev.azure.com/azure-sdk/internal/_packaging/azure-sdk-for-js-pr/npm/registry/
+    always-auth=true
+    ```
 
 1. Run `vsts-npm-auth -config .npmrc`
+
+    > [!IMPORTANT]
+    > WSL users need to run `vsts-npm-auth -config .npmrc -target ~/.npmrc`
 
 ## Manual Install:
 
