@@ -6,7 +6,7 @@ using System.CommandLine.Parsing;
 
 namespace AzureMCP.Commands.Storage.Blob;
 
-public class BlobListCommand : BaseStorageCommand<BlobListArguments>
+public class BlobListCommand : BaseContainerCommand<BlobListArguments>
 {
     public BlobListCommand()
         : base()

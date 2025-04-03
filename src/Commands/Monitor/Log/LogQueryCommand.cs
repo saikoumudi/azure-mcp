@@ -74,7 +74,7 @@ public class LogQueryCommand : BaseMonitorCommand<LogQueryArguments>
             {
                 try
                 {
-                    return ((dynamic)args).TableName ?? string.Empty;
+                    return args.TableName ?? string.Empty;
                 }
                 catch
                 {

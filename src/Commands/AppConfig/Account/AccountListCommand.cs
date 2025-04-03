@@ -6,7 +6,7 @@ using System.CommandLine.Parsing;
 
 namespace AzureMCP.Commands.AppConfig.Account;
 
-public class AccountListCommand : BaseAppConfigCommand<AccountListArguments>
+public class AccountListCommand : BaseCommandWithSubscription<AccountListArguments>
 {
     public AccountListCommand() : base()
     {

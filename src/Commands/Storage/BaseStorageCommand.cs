@@ -6,7 +6,7 @@ using System.CommandLine.Parsing;
 
 namespace AzureMCP.Commands.Storage;
 
-public abstract class BaseStorageCommand<TArgs> : BaseCommand<TArgs>
+public abstract class BaseStorageCommand<TArgs> : BaseCommandWithSubscription<TArgs>
     where TArgs : BaseStorageArguments, new()
 {
     protected readonly Option<string> _accountOption;
@@ -55,25 +55,6 @@ public abstract class BaseStorageCommand<TArgs> : BaseCommand<TArgs>
             .WithValueAccessor(args => ((BaseStorageArguments)args).Account ?? string.Empty)
             .WithValueLoader(GetAccountOptions)
             .WithIsRequired(ArgumentDefinitions.Storage.Account.Required);
-    }
-
-    protected ArgumentChain<TArgs> CreateContainerArgument()
-    {
-        return ArgumentChain<TArgs>
-            .Create(ArgumentDefinitions.Storage.Container.Name, ArgumentDefinitions.Storage.Container.Description)
-            .WithCommandExample(ArgumentDefinitions.GetCommandExample(GetCommandPath(), ArgumentDefinitions.Storage.Container))
-            .WithValueAccessor(args => ((dynamic)args).Container ?? string.Empty)
-            .WithValueLoader(GetContainerOptions)
-            .WithIsRequired(ArgumentDefinitions.Storage.Container.Required);
-    }
-
-    protected ArgumentChain<TArgs> CreateTableArgument()
-    {
-        return ArgumentChain<TArgs>
-            .Create(ArgumentDefinitions.Storage.Table.Name, ArgumentDefinitions.Storage.Table.Description)
-            .WithCommandExample(ArgumentDefinitions.GetCommandExample(GetCommandPath(), ArgumentDefinitions.Storage.Table))
-            .WithValueAccessor(args => ((dynamic)args).Table ?? string.Empty)
-            .WithIsRequired(ArgumentDefinitions.Storage.Table.Required);
     }
 
     protected override TArgs BindArguments(ParseResult parseResult)

@@ -1,6 +1,6 @@
 # azmcp Command Implementation Guide for AI Assistants
 
-## Command Structure 
+## Command Structure
 
 Commands follow this exact pattern:
 ```
@@ -59,16 +59,16 @@ A complete command implementation requires the following files in this exact str
 Location: `src/Arguments/{Service}/{SubService}/{Resource}/{Resource}{Operation}Arguments.cs`
 
 Template:
-```csharp 
+```csharp
 namespace AzureMCP.Arguments.{Service}.{SubService}.{Resource};
 
-public class {Resource}{Operation}Arguments : BaseArgumentsWithSubscription 
+public class {Resource}{Operation}Arguments : BaseArgumentsWithSubscription
 {
     public string? {SpecificParam} { get; set; }
 }
 ```
 
-IMPORTANT: 
+IMPORTANT:
 1. Do not redefine properties from base classes
 2. Use `BaseArgumentsWithSubscription` for commands that require subscription (can be either ID or name)
 3. Use `BaseAzureArguments` only for commands that don't need subscription (rare)
@@ -104,20 +104,20 @@ Template:
 public class {Service}Service : Base{Service}Service, I{Service}Service
 {
     public async Task<List<string>> {Operation}{Resource}(
-        string {requiredParam1}, 
-        string subscription, 
+        string {requiredParam1},
+        string subscription,
         string? tenantId = null)
     {
         var credential = await GetCredential(tenantId);
-        
+
         try
         {
             var client = new {ServiceClient}(
-                endpoint, 
+                endpoint,
                 credential);
-            
+
             var response = await client.{SdkMethod}Async();
-            
+
             return response.Value.Select(item => item.Name).ToList();
         }
         catch (Exception ex)
@@ -200,8 +200,8 @@ public class {Resource}{Operation}Command : Base{Service}Command<{Resource}{Oper
                 options.TenantId,
                 options.RetryPolicy);
 
-            context.Response.Results = results?.Count > 0 ? 
-                new { results } : 
+            context.Response.Results = results?.Count > 0 ?
+                new { results } :
                 null;
         }
         catch (Exception ex)
@@ -214,7 +214,7 @@ public class {Resource}{Operation}Command : Base{Service}Command<{Resource}{Oper
 }
 ```
 
-> **IMPORTANT NOTES**: 
+> **IMPORTANT NOTES**:
 > 1. Do not define literal string values for option names or descriptions in the command class. Always use ArgumentDefinitions.
 > 2. Register command examples using GetCommandExample() helper method from ArgumentDefinitions.
 > 3. Options must be initialized using ToOption() on the appropriate ArgumentDefinition.
@@ -234,11 +234,11 @@ private void Register{Service}Commands()
     _rootGroup.AddSubGroup(service);
 
     var resource = new CommandGroup(
-        "{resource}", 
+        "{resource}",
         "{Resource} operations - {Description}");
     service.AddSubGroup(resource);
 
-    resource.AddCommand("{operation}", 
+    resource.AddCommand("{operation}",
         new {Resource}{Operation}Command());
 }
 
@@ -319,7 +319,7 @@ azmcp groups list --subscription <subscription> [--tenant-id <tenant-id>]
 
 3. Place new sections in alphabetical order, but keep these sections in fixed positions:
    - "Server Operations" always first
-   - "CLI Utilities" always last 
+   - "CLI Utilities" always last
    - Everything else alphabetically in between
 
 4. For commands that support multiple output formats or have complex options, include example usages:
@@ -360,12 +360,11 @@ Base command classes provide these argument creation methods:
 
 ```csharp
 CreateAuthMethodArgument()
-CreateTenantIdArgument() 
+CreateTenantIdArgument()
 CreateSubscriptionIdArgument()
 
 CreateAccountArgument(accountOptionsLoader)
 CreateContainerArgument(containerOptionsLoader)
-CreateTableArgument(tableOptionsLoader)
 
 CreateAccountArgument()
 CreateDatabaseArgument()
@@ -385,9 +384,9 @@ The RegisterArgumentChain method:
 
 Key rules:
 ```csharp
-public abstract class BaseServiceCommand<TArgs> : BaseCommand<TArgs> 
+public abstract class BaseServiceCommand<TArgs> : BaseCommand<TArgs>
 {
-    protected BaseServiceCommand() 
+    protected BaseServiceCommand()
     {
         _accountOption = ArgumentDefinitions.Service.Account.ToOption();
     }
@@ -420,7 +419,7 @@ public class SubscriptionListCommand : BaseCommand<SubscriptionListArguments>
 }
 ```
 
-IMPORTANT: 
+IMPORTANT:
 - DO NOT create argument helper methods in individual command classes
 - DO create argument helper methods in the base command class if they are used by multiple commands
 - DO use the base command's helper methods in command classes
@@ -526,7 +525,7 @@ var accountName = args.GetType().GetProperty(ArgumentDefinitions.Storage.Account
 public static class YourService
 {
     public const string ResourceName = "resource-name";
-    
+
     public static readonly ArgumentDefinition<string> Resource = new(
         ResourceName,
         "Detailed description of the resource argument.",
@@ -595,9 +594,9 @@ public class ContainersListCommand : BaseStorageCommand
     public override Command GetCommand()
     {
         var command = new Command(
-            "list", 
+            "list",
             "List all containers in a storage account.");
-            
+
         AddBaseOptionsToCommand(command);
         return command;
     }
@@ -616,13 +615,13 @@ public class ContainersListCommand : BaseStorageCommand
 
             var storageService = context.GetService<IStorageService>();
             var containers = await storageService.ListContainers(
-                options.Account!, 
-                options.Subscription!, 
+                options.Account!,
+                options.Subscription!,
                 options.TenantId,
                 options.RetryPolicy);
-                
-            context.Response.Results = containers?.Count > 0 ? 
-                new { containers } : 
+
+            context.Response.Results = containers?.Count > 0 ?
+                new { containers } :
                 null;
         }
         catch (Exception ex)
@@ -641,12 +640,12 @@ private void RegisterCommandGroup()
 {
     var storage = new CommandGroup("storage", "Storage operations");
     _rootGroup.AddSubGroup(storage);
-    
+
     var container = new CommandGroup(
-        "container", 
+        "container",
         "Storage container operations");
     storage.AddSubGroup(container);
-    
+
     container.AddCommand("list", new Storage.ContainerListCommand());
 }
 
@@ -666,7 +665,7 @@ using AzureMCP.Arguments;
 ```csharp
 public abstract class Base{Service}Command : BaseCommand
 {
-    protected ArgumentChain<TArgs> Create{Resource}Argument<TArgs>() 
+    protected ArgumentChain<TArgs> Create{Resource}Argument<TArgs>()
         where TArgs : BaseArguments
     {
     }
@@ -734,7 +733,7 @@ public class KeyValueLockCommand : BaseAppConfigCommand<KeyValueLockArguments>
 }
 ```
 
-IMPORTANT: 
+IMPORTANT:
 - DO NOT create argument helper methods in individual command classes
 - DO create argument helper methods in the base command class if they are used by multiple commands
 - DO use the base command's helper methods in command classes
@@ -770,7 +769,7 @@ This ensures proper type checking and inheritance from BaseArguments.
    }
    ```
 
-Exception: Commands that explicitly don't want certain base arguments (like `SubscriptionListCommand`) 
+Exception: Commands that explicitly don't want certain base arguments (like `SubscriptionListCommand`)
 should not call `RegisterArgumentChain()` and instead manage their own argument chain.
 
 > **IMPORTANT**: Base command classes should not call `RegisterArgumentChain()` in their constructor
@@ -780,11 +779,11 @@ should not call `RegisterArgumentChain()` and instead manage their own argument 
 
 1. Command Description Guidelines:
    ```csharp
-   var command = new Command("list", 
-       "List all blobs in a Storage container. This command retrieves and " + 
+   var command = new Command("list",
+       "List all blobs in a Storage container. This command retrieves and " +
        "displays all blobs available in the specified container and Storage account. " +
        "Results include blob names, sizes, and content types, returned as a JSON array. " +
-       "You must specify both an account name and a container name. " + 
+       "You must specify both an account name and a container name. " +
        "Use this command to explore your container contents or to verify blob existence " +
        "before performing operations on specific blobs.");
    ```
@@ -801,7 +800,7 @@ should not call `RegisterArgumentChain()` and instead manage their own argument 
    - Subscription ID handling (for BaseArgumentsWithSubscription)
    - Retry policy options
    - Argument chain infrastructure
-   
+
    - Service-specific option handling (_accountOption, etc)
    - GetPath() implementation for proper command paths
    - Service-specific argument creation methods
@@ -811,7 +810,7 @@ should not call `RegisterArgumentChain()` and instead manage their own argument 
    ```csharp
    public class ToolsListCommand : BaseCommandWithoutArgs
    {
-       public override Command GetCommand() => 
+       public override Command GetCommand() =>
            new Command("list", "List all available commands...");
    }
 
@@ -856,16 +855,16 @@ Here's an example of how command groups should be registered:
 private void RegisterMonitorCommands()
 {
     // Create Monitor command group with clear description
-    var monitor = new CommandGroup("monitor", 
+    var monitor = new CommandGroup("monitor",
         "Azure Monitor operations - Commands for querying and analyzing Azure Monitor logs and metrics.");
     _rootGroup.AddSubGroup(monitor);
 
     // Create descriptive subgroups
-    var logs = new CommandGroup("log", 
+    var logs = new CommandGroup("log",
         "Azure Monitor logs operations - Commands for querying Log Analytics workspaces using KQL.");
     monitor.AddSubGroup(logs);
 
-    var workspaces = new CommandGroup("workspace", 
+    var workspaces = new CommandGroup("workspace",
         "Log Analytics workspace operations - Commands for managing Log Analytics workspaces.");
     monitor.AddSubGroup(workspaces);
 
@@ -918,22 +917,22 @@ dotnet build src/AzureMCP.csproj
    - Even "helpful" or "clarifying" comments should be avoided
    - Convert would-be comments into well-named methods or variables
    - Only exception: XML documentation for public APIs
-   
+
    Examples:
    ```csharp
    // BAD - uses comments
    // Get the storage account client
    var client = new StorageAccountClient(endpoint, credential);
-   
+
    // GOOD - self-documenting code
    var storageClient = new StorageAccountClient(endpoint, credential);
-   
+
    // BAD - commented steps
    // First validate the input
    if (string.IsNullOrEmpty(accountName)) return false;
    // Then check permissions
    if (!await HasPermissions()) return false;
-   
+
    // GOOD - extracted to meaningful method
    if (!await ValidateAccountAccess(accountName)) return false;
    ```
@@ -979,8 +978,8 @@ public class ContainersListCommand : BaseStorageCommand<ContainersListArguments>
                 options.TenantId,
                 options.RetryPolicy);
 
-            context.Response.Results = containers?.Count > 0 ? 
-                new { containers } : 
+            context.Response.Results = containers?.Count > 0 ?
+                new { containers } :
                 null;
         }
         catch (Exception ex)
@@ -1038,8 +1037,8 @@ public class ContainerListCommand : BaseStorageCommand<ContainerListArguments>
                 options.TenantId,
                 options.RetryPolicy);
 
-            context.Response.Results = containers?.Count > 0 ? 
-                new { containers } : 
+            context.Response.Results = containers?.Count > 0 ?
+                new { containers } :
                 null;
         }
         catch (Exception ex)

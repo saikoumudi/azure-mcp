@@ -6,7 +6,7 @@ using System.CommandLine.Parsing;
 
 namespace AzureMCP.Commands.Cosmos;
 
-public class ContainerListCommand : BaseCosmosCommand<ContainerListArguments>
+public class ContainerListCommand : BaseDatabaseCommand<ContainerListArguments>
 {
     public ContainerListCommand() : base()
     {

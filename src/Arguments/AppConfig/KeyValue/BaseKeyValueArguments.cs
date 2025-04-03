@@ -1,0 +1,14 @@
+
+using System.Text.Json.Serialization;
+using AzureMCP.Models;
+
+namespace AzureMCP.Arguments.AppConfig.KeyValue;
+
+public class BaseKeyValueArguments : BaseAppConfigArguments
+{
+    [JsonPropertyName(ArgumentDefinitions.AppConfig.KeyName)]
+    public string? Key { get; set; }
+
+    [JsonPropertyName(ArgumentDefinitions.AppConfig.LabelName)]
+    public string? Label { get; set; }
+}

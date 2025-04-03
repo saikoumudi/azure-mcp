@@ -6,7 +6,7 @@ using System.CommandLine.Parsing;
 
 namespace AzureMCP.Commands.Cosmos;
 
-public class ItemQueryCommand : BaseCosmosCommand<ItemQueryArguments>
+public class ItemQueryCommand : BaseDatabaseCommand<ItemQueryArguments>
 {
     public ItemQueryCommand() : base()
     {
@@ -16,6 +16,32 @@ public class ItemQueryCommand : BaseCosmosCommand<ItemQueryArguments>
             CreateContainerArgument(),
             CreateQueryArgument()
         );
+    }
+
+    private ArgumentChain<ItemQueryArguments> CreateContainerArgument()
+    {
+        return ArgumentChain<ItemQueryArguments>
+            .Create(ArgumentDefinitions.Cosmos.Container.Name, ArgumentDefinitions.Cosmos.Container.Description)
+            .WithCommandExample(ArgumentDefinitions.GetCommandExample(GetCommandPath(), ArgumentDefinitions.Cosmos.Container))
+            .WithValueAccessor(args => args.Container ?? string.Empty)
+            .WithValueLoader(async (context, args) =>
+                await GetContainerOptions(
+                    context,
+                    args.Account ?? string.Empty,
+                    args.Database ?? string.Empty,
+                    args.Subscription ?? string.Empty))
+            .WithIsRequired(ArgumentDefinitions.Cosmos.Container.Required);
+    }
+
+    protected ArgumentChain<ItemQueryArguments> CreateQueryArgument()
+    {
+        var defaultValue = ArgumentDefinitions.Cosmos.Query.DefaultValue ?? "SELECT * FROM c";
+        return ArgumentChain<ItemQueryArguments>
+            .Create(ArgumentDefinitions.Cosmos.Query.Name, ArgumentDefinitions.Cosmos.Query.Description)
+            .WithCommandExample(ArgumentDefinitions.GetCommandExample(GetCommandPath(), ArgumentDefinitions.Cosmos.Query))
+            .WithValueAccessor(args => args.Query ?? string.Empty)
+            .WithDefaultValue(defaultValue)
+            .WithIsRequired(ArgumentDefinitions.Cosmos.Query.Required);
     }
 
     public override Command GetCommand()

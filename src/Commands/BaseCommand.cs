@@ -43,27 +43,6 @@ public abstract class BaseCommand<TArgs> : ICommand where TArgs : BaseArguments,
         _retryNetworkTimeoutOption = ArgumentDefinitions.RetryPolicy.NetworkTimeout.ToOption();
     }
 
-    // New method to register an argument chain
-    protected void RegisterArgumentChain(params ArgumentChain<TArgs>[] argumentDefinitions)
-    {
-        var fullChain = new List<ArgumentDefinition<string>>
-        {
-            // Add common arguments
-            CreateAuthMethodArgument(),
-            CreateTenantIdArgument()
-        };
-
-        // Add command-specific arguments
-        var subscriptionArg = CreateSubscriptionIdArgument();
-        if (subscriptionArg != null)
-        {
-            fullChain.Add(subscriptionArg);
-        }
-        fullChain.AddRange(argumentDefinitions);
-
-        _argumentChain = fullChain;
-    }
-
     // Helper methods to create common arguments
     protected ArgumentChain<TArgs> CreateAuthMethodArgument()
     {
@@ -106,20 +85,6 @@ public abstract class BaseCommand<TArgs> : ICommand where TArgs : BaseArguments,
                 return await GetResourceGroupOptions(context, subArgs.Subscription);
             })
             .WithIsRequired(true);
-    }
-
-    protected ArgumentChain<TArgs>? CreateSubscriptionIdArgument()
-    {
-        if (typeof(TArgs).IsSubclassOf(typeof(BaseArgumentsWithSubscription)))
-        {
-            return ArgumentChain<TArgs>
-                .Create(ArgumentDefinitions.Common.Subscription.Name, ArgumentDefinitions.Common.Subscription.Description)
-                .WithCommandExample(ArgumentDefinitions.GetCommandExample(GetCommandPath(), ArgumentDefinitions.Common.Subscription))
-                .WithValueAccessor(args => ((dynamic)args).Subscription ?? string.Empty)
-                .WithIsRequired(ArgumentDefinitions.Common.Subscription.Required);
-        }
-
-        return null;
     }
 
     // Helper method to get auth method options

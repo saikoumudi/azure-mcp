@@ -6,7 +6,7 @@ using System.CommandLine.Parsing;
 
 namespace AzureMCP.Commands.Monitor.Workspace;
 
-public class WorkspaceListCommand : BaseCommand<WorkspaceListArguments>
+public class WorkspaceListCommand : BaseCommandWithSubscription<WorkspaceListArguments>
 {
     public WorkspaceListCommand() : base()
     {

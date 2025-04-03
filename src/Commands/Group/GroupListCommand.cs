@@ -6,7 +6,7 @@ using System.CommandLine.Parsing;
 
 namespace AzureMCP.Commands.Group;
 
-public class GroupListCommand : BaseCommand<BaseArgumentsWithSubscription>
+public class GroupListCommand : BaseCommandWithSubscription<BaseArgumentsWithSubscription>
 {
     public GroupListCommand() : base()
     {

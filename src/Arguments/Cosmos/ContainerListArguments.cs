@@ -1,6 +1,5 @@
 namespace AzureMCP.Arguments.Cosmos;
 
-public class ContainerListArguments : BaseCosmosArguments
+public class ContainerListArguments : BaseDatabaseArguments
 {
-    public string? Database { get; set; }
 }

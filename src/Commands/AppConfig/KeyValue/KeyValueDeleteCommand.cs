@@ -6,7 +6,7 @@ using System.CommandLine.Parsing;
 
 namespace AzureMCP.Commands.AppConfig.KeyValue;
 
-public class KeyValueDeleteCommand : BaseAppConfigCommand<KeyValueDeleteArguments>
+public class KeyValueDeleteCommand : BaseKeyValueCommand<KeyValueDeleteArguments>
 {
     private readonly Option<string> _keyOption;
     private readonly Option<string> _labelOption;

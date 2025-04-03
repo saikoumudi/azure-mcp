@@ -6,7 +6,7 @@ using System.CommandLine.Parsing;
 
 namespace AzureMCP.Commands.Storage.Blob.Container;
 
-public class ContainerDetailsCommand : BaseStorageCommand<ContainerDetailsArguments>
+public class ContainerDetailsCommand : BaseContainerCommand<ContainerDetailsArguments>
 {
     public ContainerDetailsCommand() : base()
     {

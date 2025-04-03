@@ -6,7 +6,7 @@ using System.CommandLine.Parsing;
 
 namespace AzureMCP.Commands.AppConfig.KeyValue;
 
-public class KeyValueSetCommand : BaseAppConfigCommand<KeyValueSetArguments>
+public class KeyValueSetCommand : BaseKeyValueCommand<KeyValueSetArguments>
 {
     private readonly Option<string> _keyOption;
     private readonly Option<string> _valueOption;
@@ -24,6 +24,16 @@ public class KeyValueSetCommand : BaseAppConfigCommand<KeyValueSetArguments>
             CreateValueArgument(),
             CreateLabelArgument()
         );
+    }
+
+    // Helper method for creating value arguments
+    protected ArgumentChain<KeyValueSetArguments> CreateValueArgument()
+    {
+        return ArgumentChain<KeyValueSetArguments>
+            .Create(ArgumentDefinitions.AppConfig.Value.Name, ArgumentDefinitions.AppConfig.Value.Description)
+            .WithCommandExample(ArgumentDefinitions.GetCommandExample(GetCommandPath(), ArgumentDefinitions.AppConfig.Value))
+            .WithValueAccessor(args => args.Value ?? string.Empty)
+            .WithIsRequired(ArgumentDefinitions.AppConfig.Value.Required);
     }
 
     public override Command GetCommand()

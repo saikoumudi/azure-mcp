@@ -6,7 +6,7 @@ using System.CommandLine.Parsing;
 
 namespace AzureMCP.Commands.AppConfig.KeyValue;
 
-public class KeyValueShowCommand : BaseAppConfigCommand<KeyValueShowArguments>
+public class KeyValueShowCommand : BaseKeyValueCommand<KeyValueShowArguments>
 {
     private readonly Option<string> _keyOption;
     private readonly Option<string> _labelOption;

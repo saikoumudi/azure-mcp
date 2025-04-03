@@ -1,11 +1,12 @@
 using AzureMCP.Arguments;
+using AzureMCP.Arguments.Monitor;
 using AzureMCP.Models;
 using AzureMCP.Services.Interfaces;
 using System.CommandLine;
 
 namespace AzureMCP.Commands.Monitor;
 
-public abstract class BaseMonitorCommand<TArgs> : BaseCommand<TArgs> where TArgs : BaseArgumentsWithSubscription, new()
+public abstract class BaseMonitorCommand<TArgs> : BaseCommandWithSubscription<TArgs> where TArgs : BaseArgumentsWithSubscription, new()
 {
     protected readonly Option<string> _workspaceIdOption;
     protected readonly Option<string> _workspaceNameOption;
@@ -31,16 +32,16 @@ public abstract class BaseMonitorCommand<TArgs> : BaseCommand<TArgs> where TArgs
         })];
     }
 
-    protected virtual ArgumentChain<TArgs> CreateWorkspaceIdArgument()
+    protected virtual ArgumentChain<LogQueryArguments> CreateWorkspaceIdArgument()
     {
-        return ArgumentChain<TArgs>
+        return ArgumentChain<LogQueryArguments>
             .Create(ArgumentDefinitions.Monitor.WorkspaceId.Name, ArgumentDefinitions.Monitor.WorkspaceId.Description)
             .WithCommandExample(ArgumentDefinitions.GetCommandExample(GetCommandPath(), ArgumentDefinitions.Monitor.WorkspaceId))
             .WithValueAccessor(args =>
             {
                 try
                 {
-                    return ((dynamic)args).WorkspaceId ?? string.Empty;
+                    return args.WorkspaceId ?? string.Empty;
                 }
                 catch
                 {
@@ -51,16 +52,16 @@ public abstract class BaseMonitorCommand<TArgs> : BaseCommand<TArgs> where TArgs
             .WithIsRequired(ArgumentDefinitions.Monitor.WorkspaceId.Required);
     }
 
-    protected virtual ArgumentChain<TArgs> CreateWorkspaceNameArgument()
+    protected virtual ArgumentChain<TableListArguments> CreateWorkspaceNameArgument()
     {
-        return ArgumentChain<TArgs>
+        return ArgumentChain<TableListArguments>
             .Create(ArgumentDefinitions.Monitor.WorkspaceName.Name, ArgumentDefinitions.Monitor.WorkspaceName.Description)
             .WithCommandExample(ArgumentDefinitions.GetCommandExample(GetCommandPath(), ArgumentDefinitions.Monitor.WorkspaceName))
             .WithValueAccessor(args =>
             {
                 try
                 {
-                    return ((dynamic)args).WorkspaceName ?? string.Empty;
+                    return args.WorkspaceName ?? string.Empty;
                 }
                 catch
                 {
