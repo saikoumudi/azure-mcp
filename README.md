@@ -13,39 +13,24 @@ The Azure MCP Server implements the Model Context Protocol (MCP) specification (
 
 The server acts as a bridge, translating AI agent requests into Azure service operations while maintaining consistent interaction patterns defined by the MCP specification.
 
-## Getting Started
-
-Build the project:
-
-1. Execute `src/build.ps1` to build binary `.dist/azmcp.exe` (`.dist/azmcp` on Linux and MacOS)
-
-Start the MCP server:
-```bash
-azmcp server start
-```
-
-Start the MCP Server (SSE):
-```bash
-azmcp server start --transport sse
-```
-
-## Contributing
-
-We welcome contributions to Azure MCP! Whether you're fixing bugs, adding new features, or improving documentation, your contributions are welcome.
-
-Please read our [Contributing Guide](https://github.com/Azure/azure-mcp/blob/main/CONTRIBUTING.md) for guidelines on:
-- Setting up your development environment
-- Adding new commands
-- Code style and testing requirements
-- Making pull requests
-
-# Using the Azure MCP Server in VS Code with GitHub Copilot
-
-To use the Azure MCP with VS Code Insiders with GitHub Copilot Agent Mode, follow these instructions:
+# Install Azure MCP Server in VS Code with GitHub Copilot
 
 1. Install [VS Code Insiders](https://code.visualstudio.com/insiders/).
 1. Install the pre-release versions of the [GitHub Copilot](https://marketplace.visualstudio.com/items?itemName=GitHub.copilot) and [GitHub Copilot Chat](https://marketplace.visualstudio.com/items?itemName=GitHub.copilot-chat) extensions in VS Code Insiders.
 1. Open VS Code Insiders in an empty folder.
+
+## Temp Auth Setup for Pre-Release Version
+
+1. Run `npm install -g vsts-npm-auth`
+1. Create file `.npmrc`
+```
+registry=https://pkgs.dev.azure.com/azure-sdk/internal/_packaging/azure-sdk-for-js-pr/npm/registry/
+always-auth=true
+```
+1. Run `vsts-npm-auth -config .npmrc`
+
+## Manual Install:
+
 1. Add `.vscode/mcp.json`:
 ```json
 {
@@ -64,20 +49,31 @@ To use the Azure MCP with VS Code Insiders with GitHub Copilot Agent Mode, follo
     }
 }
 ```
-1. Run `npm install -g vsts-npm-auth`
-1. Create file `.npmrc`
-```
-registry=https://pkgs.dev.azure.com/azure-sdk/internal/_packaging/azure-sdk-for-js-pr/npm/registry/
-always-auth=true
-```
-1. Run `vsts-npm-auth -config .npmrc`
+
+## Test the Azure MCP Server
 1. Open GitHub Copilot and switch to Agent mode. You should see Azure MCP Server in the list of tools
 1. Try a prompt that tells the agent to use the Azure MCP server, such as "List my Azure Storage containers."
 1. The agent should be able to use the Azure MCP Server tools to complete your query.
 
-## Using the Azure MCP Server in Cursor
+# Using the Azure MCP Server in Cursor
 
 Cursor support is not available at the moment - we are investigating usage, stay tuned.
+
+# Getting Started with azmcp CLI
+
+Build the project:
+
+1. Execute `src/build.ps1` to build binary `.dist/azmcp.exe` (`.dist/azmcp` on Linux and MacOS)
+
+Start the MCP server:
+```bash
+azmcp server start
+```
+
+Start the MCP Server (SSE):
+```bash
+azmcp server start --transport sse
+```
 
 ## Tools
 
@@ -357,5 +353,17 @@ npx -y --registry https://pkgs.dev.azure.com/azure-sdk/internal/_packaging/azure
 ```
 
 If you still have the `.npmrc` in your local directory, you can omit the `--registry` option.
+
+
+## Contributing
+
+We welcome contributions to Azure MCP! Whether you're fixing bugs, adding new features, or improving documentation, your contributions are welcome.
+
+Please read our [Contributing Guide](https://github.com/Azure/azure-mcp/blob/main/CONTRIBUTING.md) for guidelines on:
+- Setting up your development environment
+- Adding new commands
+- Code style and testing requirements
+- Making pull requests
+
 
 
