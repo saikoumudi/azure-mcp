@@ -63,7 +63,7 @@ For detailed command documentation and examples, see [Azure MCP Commands](docs/a
 1. Run `npm install -g vsts-npm-auth`
 1. Create file `.npmrc`
 
-    ```
+    ```npm
     registry=https://pkgs.dev.azure.com/azure-sdk/internal/_packaging/azure-sdk-for-js-pr/npm/registry/
     always-auth=true
     ```
