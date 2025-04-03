@@ -70,7 +70,7 @@ For detailed command documentation and examples, see [Azure MCP Commands](docs/a
 
 1. Run `vsts-npm-auth -config .npmrc`
 
-    > [!IMPORTANT]
+    > **IMPORTANT**  
     > WSL users need to run `vsts-npm-auth -config .npmrc -target ~/.npmrc`
 
 ## Manual Install:
