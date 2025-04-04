@@ -62,7 +62,7 @@ For detailed command documentation and examples, see [Azure MCP Commands](docs/a
 
 ### Install Script
 
-Copy paste the contents of this install script at a powershell prompt or download and run the script:
+Copy paste the contents of this install script to a powershell prompt or download and run the script:
 
 https://github.com/Azure/azure-mcp/blob/main/eng/scripts/New-Npmrc.ps1 
 
