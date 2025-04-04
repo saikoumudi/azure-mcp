@@ -144,7 +144,7 @@ public class ServiceStartCommand : ICommand
         });
         services.AddSingleton(provider =>
         {
-            var transport = provider.GetService<IServerTransport>();
+            var transport = provider.GetService<ITransport>();
             var options = provider.GetRequiredService<McpServerOptions>();
             var loggerFactory = provider.GetRequiredService<ILoggerFactory>();
 
@@ -161,16 +161,16 @@ public class ServiceStartCommand : ICommand
 
         if (transport != TransportTypes.Sse)
         {
-            services.AddSingleton<IServerTransport>(provider =>
+            services.AddSingleton<ITransport>(provider =>
             {
                 var options = provider.GetRequiredService<McpServerOptions>();
 
-                return new StdioServerTransport(options.ServerInfo.Name,
+                return new StdioServerTransport(options,
                     provider.GetRequiredService<ILoggerFactory>());
             });
-        }
 
-        services.AddHostedService<McpServerHostedService>();
+            services.AddHostedService<StdioMcpServerHostedService>();
+        }
     }
 
     private static void ConfigureServices(IServiceCollection services, IServiceProvider rootServiceProvider)
@@ -183,5 +183,11 @@ public class ServiceStartCommand : ICommand
         services.AddSingleton(rootServiceProvider.GetRequiredService<IMonitorService>());
         services.AddSingleton(rootServiceProvider.GetRequiredService<IResourceGroupService>());
         services.AddSingleton(rootServiceProvider.GetRequiredService<IAppConfigService>());
+    }
+
+    private sealed class StdioMcpServerHostedService(IMcpServer session) : BackgroundService
+    {
+        /// <inheritdoc />
+        protected override Task ExecuteAsync(CancellationToken stoppingToken) => session.RunAsync(stoppingToken);
     }
 }

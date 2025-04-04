@@ -37,7 +37,7 @@ public class AzureMcpServerTests
     {
         var wrapper = new AzureMcpServer(_options, _loggerFactory);
 
-        await wrapper.SetTransportAndStartAsync(_transport);
+        await wrapper.SetTransportAndRunAsync(_transport);
 
         Assert.True(wrapper.IsInitialized);
     }
@@ -46,10 +46,10 @@ public class AzureMcpServerTests
     public async Task SetTransportAndStartAsync_DisposesOldTransport()
     {
         var wrapper = new AzureMcpServer(_options, _loggerFactory);
-        await wrapper.SetTransportAndStartAsync(_transport);
+        await wrapper.SetTransportAndRunAsync(_transport);
         
         var transport2 = Substitute.For<ITransport>();
-        await wrapper.SetTransportAndStartAsync(transport2);
+        await wrapper.SetTransportAndRunAsync(transport2);
 
         await _transport.Received().DisposeAsync();
     }
@@ -71,16 +71,7 @@ public class AzureMcpServerTests
         var request = new JsonRpcRequest { Method = "test" };
 
         await Assert.ThrowsAsync<InvalidOperationException>(
-            () => wrapper.SendRequestAsync<object>(request, CancellationToken.None));
-    }
-
-    [Fact]
-    public void AddNotificationHandler_ThrowsWhenNotInitialized()
-    {
-        var wrapper = new AzureMcpServer(_options);
-
-        Assert.Throws<InvalidOperationException>(
-            () => wrapper.AddNotificationHandler("test", _ => Task.CompletedTask));
+            () => wrapper.SendRequestAsync(request, CancellationToken.None));
     }
 
     [Fact]

@@ -27,7 +27,7 @@ public static class McpEndpointRouteBuilderExtensions
                     + $"Instead it is {mcpServer.GetType()}");
             await using var localTransport = transport = new SseResponseStreamTransport(response.Body);
 
-            await wrapper.SetTransportAndStartAsync(localTransport);
+            await wrapper.SetTransportAndRunAsync(localTransport);
 
             response.Headers.ContentType = "text/event-stream";
             response.Headers.CacheControl = "no-cache";

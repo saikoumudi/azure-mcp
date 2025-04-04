@@ -3,6 +3,7 @@ using ModelContextProtocol.Protocol.Messages;
 using ModelContextProtocol.Protocol.Transport;
 using ModelContextProtocol.Protocol.Types;
 using ModelContextProtocol.Server;
+using System.Diagnostics;
 
 namespace AzureMCP.Commands.Server;
 
@@ -18,6 +19,7 @@ public class AzureMcpServer(McpServerOptions serverOptions,
     private readonly IServiceProvider? _serviceProvider = serviceProvider;
 
     private IMcpServer? _implementation;
+    private ITransport? _implementationTransport;
 
     public Boolean IsInitialized => _implementation != null;
 
@@ -25,32 +27,25 @@ public class AzureMcpServer(McpServerOptions serverOptions,
 
     public Implementation? ClientInfo => _implementation?.ClientInfo;
 
-    public McpServerOptions ServerOptions { get; } = serverOptions;
+    public McpServerOptions ServerOptions => _implementation?.ServerOptions ?? serverOptions;
 
     public IServiceProvider? Services => _implementation?.Services;
 
-    public void AddNotificationHandler(String method, Func<JsonRpcNotification, Task> handler)
-    {
-        if (_implementation is null)
-        {
-            throw new InvalidOperationException("Connect to the /sse endpoint before setting notification handlers.");
-        }
-
-        _implementation.AddNotificationHandler(method, handler);
-    }
-
     /// <summary>
-    /// Sets the transport layer and creates the underlying MCP server.
+    /// Sets the transport layer and runs the underlying MCP server.
     /// </summary>
-    /// <exception cref="InvalidOperationException">If the MCP server has already been set and started.</exception>
-    public async Task SetTransportAndStartAsync(ITransport transport, CancellationToken cancellationToken = default)
+    /// <exception cref="InvalidOperationException">If the MCP server has already been set and run.</exception>
+    public async Task SetTransportAndRunAsync(ITransport transport, CancellationToken cancellationToken = default)
     {
         if (_implementation != null)
         {
-            var oldTransport = _implementation;
+            var oldServer = _implementation;
             try
             {
-                await oldTransport.DisposeAsync().ConfigureAwait(false);
+                await oldServer.DisposeAsync().ConfigureAwait(false);
+
+                Debug.Assert(_implementationTransport is not null);
+                await _implementationTransport.DisposeAsync();
             }
             catch (OperationCanceledException)
             {
@@ -59,9 +54,10 @@ public class AzureMcpServer(McpServerOptions serverOptions,
             }
         }
 
+        _implementationTransport = transport;
         _implementation = McpServerFactory.Create(transport, ServerOptions, _loggerFactory, _serviceProvider);
 
-        await StartAsync(cancellationToken);
+        await RunAsync(cancellationToken);
     }
 
     public ValueTask DisposeAsync()
@@ -79,26 +75,23 @@ public class AzureMcpServer(McpServerOptions serverOptions,
         return _implementation.SendMessageAsync(message, cancellationToken);
     }
 
-    public Task<T> SendRequestAsync<T>(JsonRpcRequest request, CancellationToken cancellationToken)
-        where T : class
+    public Task<JsonRpcResponse> SendRequestAsync(JsonRpcRequest request, CancellationToken cancellationToken = default)
     {
         if (_implementation is null)
         {
             throw new InvalidOperationException("Connect to the /sse endpoint before sending requests.");
         }
 
-        return _implementation.SendRequestAsync<T>(request, cancellationToken);
+        return _implementation.SendRequestAsync(request, cancellationToken);
     }
 
-    public Task StartAsync(CancellationToken cancellationToken = default)
+    public Task RunAsync(CancellationToken cancellationToken = default)
     {
         if (_implementation is null)
         {
             return Task.CompletedTask;
         }
 
-        return _implementation.IsInitialized
-            ? Task.CompletedTask
-            : _implementation.StartAsync(cancellationToken);
+        return _implementation.RunAsync(cancellationToken);
     }
 }
