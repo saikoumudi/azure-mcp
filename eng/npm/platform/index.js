@@ -24,6 +24,7 @@ function debugLog(...args) {
  * @returns {Promise<number>} Returns a Promise that resolves to the exit code
  */
 function runExecutable(args = []) {
+  debugLog('\nPlatform package starting')
   debugLog('All args:')
   args.forEach((val, index) => {
     debugLog(`${index}: ${val}`)

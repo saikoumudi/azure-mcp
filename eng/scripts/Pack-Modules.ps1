@@ -11,7 +11,7 @@ param(
 . "$PSScriptRoot/../common/scripts/common.ps1"
 $RepoRoot = $RepoRoot.Path.Replace('\', '/')
 
-$npmPackagePath = "$RepoRoot/eng/npm-wrapper"
+$npmPackagePath = "$RepoRoot/eng/npm/wrapper"
 
 if(!$Version) {
     $Version = & "$PSScriptRoot/Get-Version.ps1"
@@ -64,9 +64,16 @@ try {
             $package.cpu += $cpu
         }
 
-        if (!$IsWindows -and $os -ne 'win32') {
+        if (!$IsWindows) {
             Write-Host "Setting executable permissions for $packageFolder/azmcp" -ForegroundColor Yellow
-            Invoke-LoggedCommand "chmod +x `"$packageFolder/azmcp`""
+            Invoke-LoggedCommand "chmod +x `"$packageFolder/index.js`""
+
+            if ($os -ne 'win32') {
+                Invoke-LoggedCommand "chmod +x `"$packageFolder/azmcp`""
+            }
+        }
+        else {
+            Write-Warning "Executable permissions are not set when packing on a Windows agent."
         }
 
         Write-Host "Packaging $packageFolder into $OutputPath"

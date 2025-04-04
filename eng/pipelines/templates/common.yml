@@ -1,5 +1,5 @@
 parameters:
-- name: QuickBuild
+- name: SkipSigning
   type: boolean
   default: false
 - name: ReleaseRun
@@ -41,13 +41,16 @@ extends:
               Selection: all
               GenerateVMJobs: true
           AdditionalParameters:
-            QuickBuild: ${{ parameters.QuickBuild }}
+            SkipSigning: ${{ parameters.SkipSigning }}
       - template: /eng/pipelines/templates/jobs/analyze.yml
 
     # All builds in the internal project get signing
     - ${{ if eq(variables['System.TeamProject'], 'internal') }}:
       - stage: Sign
-        displayName: 'Sign and Pack'
+        ${{ if parameters.SkipSigning }}:
+          displayName: 'Pack'
+        ${{ else }}:
+          displayName: 'Sign and Pack'
         dependsOn: Build
         variables:
         - template: /eng/pipelines/templates/variables/image.yml
@@ -57,7 +60,7 @@ extends:
         jobs:
         - template: /eng/pipelines/templates/jobs/sign-and-pack.yml
           parameters:
-            SkipSigning: ${{ parameters.QuickBuild }}
+            SkipSigning: ${{ parameters.SkipSigning }}
 
       - ${{ if eq(parameters.ReleaseRun, 'true') }}:
         - stage: Release

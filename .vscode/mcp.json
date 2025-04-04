@@ -7,9 +7,9 @@
         //         "start"
         //     ]
         // },
-        "Azure MCP Server (SSE)": {
-            "type": "sse",
-            "url": "http://localhost:5008/sse",
-        }
+        // "Azure MCP Server (SSE)": {
+        //     "type": "sse",
+        //     "url": "http://localhost:5008/sse",
+        // }
     }
 }

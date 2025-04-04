@@ -8,7 +8,10 @@ parameters:
 
 jobs:
 - job: SignAndPack
-  displayName: "Sign and Pack"
+  ${{ if parameters.SkipSigning }}:
+    displayName: "Pack"
+  ${{ else }}:
+    displayName: "Sign and Pack"
   condition: and(succeededOrFailed(), ne(variables['Skip.Analyze'], 'true'))
   timeoutInMinutes: ${{ parameters.TimeoutInMinutes }}
   pool:
@@ -35,7 +38,7 @@ jobs:
     displayName: Download artifacts
 
   - task: Powershell@2
-    displayName: "Compress packages for signing"
+    displayName: "Compress packages"
     inputs:
       pwsh: true
       filePath: $(Build.SourcesDirectory)/azure-mcp/eng/scripts/Compress-ForSigning.ps1
@@ -56,7 +59,7 @@ jobs:
         MacPattern: "**/*.zip"
 
   - task: Powershell@2
-    displayName: "Expand packages after signing"
+    displayName: "Expand packages"
     inputs:
       pwsh: true
       filePath: $(Build.SourcesDirectory)/azure-mcp/eng/scripts/Expand-AfterSigning.ps1
@@ -64,7 +67,7 @@ jobs:
         -Path '$(Build.ArtifactStagingDirectory)/signed'
 
   - task: Powershell@2
-    displayName: "npm pack modules"
+    displayName: "Pack modules"
     inputs:
       pwsh: true
       filePath: $(Build.SourcesDirectory)/azure-mcp/eng/scripts/Pack-Modules.ps1
