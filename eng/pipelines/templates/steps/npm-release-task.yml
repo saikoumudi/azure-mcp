@@ -61,8 +61,6 @@ steps:
 
     - pwsh: |
         $markdown = @"
-        # Usage
-        
         To run the dev version of the package, you can use the following command:
         ``````bash
         npx --yes @azure/mcp@$(Version) --version
@@ -78,10 +76,31 @@ steps:
         If you don't have an ``.npmrc`` file in your local directory, you'll need to add the ``--registry`` parameter
         before the package name in the commands:
         ``````bash
-         --registry '${{ parameters.Registry }}'
-        ```````
+        --registry '${{ parameters.Registry }}'
+        ``````
 
-        # Authentication
+        ## mcp.json
+
+        Configure the server in ``.vscode/mcp.json`` with:
+        ``````json
+        {
+          "servers": {
+            "Azure MCP Server": {
+              "command": "npx",
+              "args": [
+                "-y",
+                "--registry",
+                "https://pkgs.dev.azure.com/azure-sdk/internal/_packaging/azure-sdk-for-js-pr/npm/registry/",
+                "@azure/mcp@$(Version)",
+                "server",
+                "start"
+              ]
+            }
+          }
+        }
+        ``````
+
+        ## Authentication
 
         You'll need to authenticate an ``.npmrc`` file to access the feed using ``npm`` or ``npx``.
 
@@ -98,4 +117,3 @@ steps:
         $markdown | Out-File -FilePath $path -Encoding utf8
         Write-Host "##vso[task.uploadsummary]$path"
       displayName: "Document dev version usage"
-
