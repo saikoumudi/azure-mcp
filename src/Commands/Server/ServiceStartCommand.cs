@@ -1,7 +1,9 @@
-﻿using AzureMCP.Arguments.Server;
+﻿using AzureMCP.Arguments;
+using AzureMCP.Arguments.Server;
 using AzureMCP.Models;
 using AzureMCP.Services.Interfaces;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -22,23 +24,33 @@ public class ServiceStartCommand : ICommand
     private readonly IServiceProvider _rootServiceProvider;
     private readonly List<ArgumentDefinition<string>> _arguments = [];
     private readonly Option<string> _transportOption;
+    private readonly Option<int> _portOption;
 
     public ServiceStartCommand(IServiceProvider serviceProvider)
     {
         _arguments.Add(ArgumentDefinitions.Service.Transport);
+        _arguments.Add(GetPortArgument());
+
         _transportOption = ArgumentDefinitions.Service.Transport.ToOption();
+        _portOption = ArgumentDefinitions.Service.Port.ToOption();
+
         _rootServiceProvider = serviceProvider;
 
-        _command = new Command("start", "Starts Azure MCP server.");
+        _command = new Command("start", "Starts Azure MCP Server.");
         _command.AddOption(_transportOption);
+        _command.AddOption(_portOption);
         _command.SetHandler(parsingContext => ExecuteAsync(new CommandContext(_rootServiceProvider), parsingContext.ParseResult));
     }
 
     public async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult commandOptions)
     {
-        var serverOptions = new ServerStartArguments
+        var port = commandOptions.GetValueForOption(_portOption) == default
+            ? ArgumentDefinitions.Service.Port.DefaultValue
+            : commandOptions.GetValueForOption(_portOption);
+        var serverOptions = new ServiceStartArguments
         {
             Transport = commandOptions.GetValueForOption(_transportOption) ?? TransportTypes.StdIo,
+            Port = port
         };
 
         using var host = CreateHost(serverOptions);
@@ -53,14 +65,18 @@ public class ServiceStartCommand : ICommand
 
     public Command GetCommand() => _command;
 
-    private IHost CreateHost(ServerStartArguments serverArguments)
+    private IHost CreateHost(ServiceStartArguments serverArguments)
     {
         if (serverArguments.Transport == TransportTypes.Sse)
         {
             var builder = WebApplication.CreateBuilder([]);
-
             ConfigureServices(builder.Services, _rootServiceProvider);
             ConfigureMcpServer(builder.Services, serverArguments.Transport);
+
+            builder.WebHost.ConfigureKestrel(server =>
+            {
+                server.ListenLocalhost(serverArguments.Port);
+            });
 
             var application = builder.Build();
 
@@ -91,6 +107,12 @@ public class ServiceStartCommand : ICommand
     public void AddArgumentToChain(ArgumentDefinition<string> argument)
     {
         _arguments.Add(argument);
+    }
+
+    private static ArgumentDefinition<string> GetPortArgument()
+    {
+        var definition = ArgumentDefinitions.Service.Port;
+        return new ArgumentDefinition<string>(definition.Name, definition.Description, definition.DefaultValue.ToString());
     }
 
     private static void ConfigureMcpServer(IServiceCollection services, String transport)

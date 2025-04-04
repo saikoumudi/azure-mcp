@@ -25,7 +25,7 @@ public static class McpEndpointRouteBuilderExtensions
             var wrapper = mcpServer as AzureMcpServer
                 ?? throw new InvalidOperationException($"Expected mcpServer to be of type {typeof(AzureMcpServer)}."
                     + $"Instead it is {mcpServer.GetType()}");
-            var localTransport = transport = new SseResponseStreamTransport(response.Body);
+            await using var localTransport = transport = new SseResponseStreamTransport(response.Body);
 
             await wrapper.SetTransportAndStartAsync(localTransport);
 

@@ -43,16 +43,25 @@ public class AzureMcpServer(McpServerOptions serverOptions,
     /// Sets the transport layer and creates the underlying MCP server.
     /// </summary>
     /// <exception cref="InvalidOperationException">If the MCP server has already been set and started.</exception>
-    public Task SetTransportAndStartAsync(ITransport transport, CancellationToken cancellationToken = default)
+    public async Task SetTransportAndStartAsync(ITransport transport, CancellationToken cancellationToken = default)
     {
         if (_implementation != null)
         {
-            throw new InvalidOperationException("Cannot set transport on the same McpServer twice.");
+            var oldTransport = _implementation;
+            try
+            {
+                await oldTransport.DisposeAsync().ConfigureAwait(false);
+            }
+            catch (OperationCanceledException)
+            {
+                // RequestAborted always triggers when the client disconnects before a complete response body is written,
+                // but this is how SSE connections are typically closed.
+            }
         }
 
         _implementation = McpServerFactory.Create(transport, ServerOptions, _loggerFactory, _serviceProvider);
 
-        return StartAsync(cancellationToken);
+        await StartAsync(cancellationToken);
     }
 
     public ValueTask DisposeAsync()

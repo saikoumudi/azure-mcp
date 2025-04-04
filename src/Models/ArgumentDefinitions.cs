@@ -206,11 +206,19 @@ public static class ArgumentDefinitions
     public static class Service
     {
         public const string TransportName = "transport";
+        public const string PortName = "port";
 
         public static readonly ArgumentDefinition<string> Transport = new(
             TransportName,
-            "Transport mechanism to use for MCP server.",
+            "Transport mechanism to use for Azure MCP Server.",
             defaultValue: TransportTypes.StdIo,
+            required: false
+            );
+
+        public static readonly ArgumentDefinition<int> Port = new(
+            PortName,
+            "Port to use for Azure MCP Server.",
+            defaultValue: 5008,
             required: false
             );
     }

@@ -43,13 +43,15 @@ public class AzureMcpServerTests
     }
 
     [Fact]
-    public async Task SetTransportAndStartAsync_ThrowsWhenCalledTwice()
+    public async Task SetTransportAndStartAsync_DisposesOldTransport()
     {
         var wrapper = new AzureMcpServer(_options, _loggerFactory);
         await wrapper.SetTransportAndStartAsync(_transport);
+        
+        var transport2 = Substitute.For<ITransport>();
+        await wrapper.SetTransportAndStartAsync(transport2);
 
-        await Assert.ThrowsAsync<InvalidOperationException>(
-            () => wrapper.SetTransportAndStartAsync(_transport));
+        await _transport.Received().DisposeAsync();
     }
 
     [Fact]

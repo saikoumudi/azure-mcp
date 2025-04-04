@@ -6,8 +6,7 @@ SSE
 dotnet build && ./bin/Debug/net9.0/azmcp.exe server start --transport sse 
 npx @modelcontextprotocol/inspector
 
-Then attach to azmcp process in debugger
-
+Then attach to the azmcp process in debugger.  The default port for SSE is 5008.
 
 
 To set timeout in mcp inspector
