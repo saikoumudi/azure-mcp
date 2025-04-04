@@ -13,6 +13,7 @@ steps:
   - ${{ if eq(parameters.Registry, 'https://registry.npmjs.org/') }}:
     - pwsh: |
         Write-Host "TODO: Uncomment real release task"
+      displayName: "Public Release Blocked"
     # - task: EsrpRelease@9
     #   displayName: 'Publish ${{parameters.Artifact.name}} to ESRP'
     #   inputs:
