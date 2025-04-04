@@ -1,6 +1,7 @@
 using AzureMCP.Arguments.AppConfig.KeyValue;
 using AzureMCP.Models;
 using AzureMCP.Services.Interfaces;
+using ModelContextProtocol.Server;
 using System.CommandLine;
 using System.CommandLine.Parsing;
 
@@ -23,6 +24,7 @@ public class KeyValueUnlockCommand : BaseKeyValueCommand<KeyValueUnlockArguments
         );
     }
 
+    [McpServerTool(Destructive = false, ReadOnly = false)]
     public override Command GetCommand()
     {
         var command = new Command(

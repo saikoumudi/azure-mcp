@@ -1,18 +1,20 @@
-using AzureMCP.Arguments;
+using AzureMCP.Arguments.Group;
 using AzureMCP.Models;
 using AzureMCP.Services.Interfaces;
+using ModelContextProtocol.Server;
 using System.CommandLine;
 using System.CommandLine.Parsing;
 
 namespace AzureMCP.Commands.Group;
 
-public class GroupListCommand : BaseCommandWithSubscription<BaseArgumentsWithSubscription>
+public class GroupListCommand : BaseCommandWithSubscription<BaseGroupArguments>
 {
     public GroupListCommand() : base()
     {
         RegisterArgumentChain();
     }
 
+    [McpServerTool(Destructive = false, ReadOnly = true)]
     public override Command GetCommand()
     {
         var command = new Command(

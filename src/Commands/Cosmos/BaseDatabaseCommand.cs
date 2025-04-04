@@ -1,7 +1,7 @@
 
-using System.CommandLine;
 using AzureMCP.Arguments.Cosmos;
 using AzureMCP.Models;
+using System.CommandLine;
 
 namespace AzureMCP.Commands.Cosmos;
 

@@ -1,6 +1,7 @@
 using AzureMCP.Arguments.Storage.Table;
 using AzureMCP.Models;
 using AzureMCP.Services.Interfaces;
+using ModelContextProtocol.Server;
 using System.CommandLine;
 using System.CommandLine.Parsing;
 
@@ -15,6 +16,7 @@ public class TableListCommand : BaseStorageCommand<TableListArguments>
         );
     }
 
+    [McpServerTool(Destructive = false, ReadOnly = true)]
     public override Command GetCommand()
     {
         var command = new Command("list", "List all tables in a Storage account. This command retrieves and displays all tables available in the specified Storage account. Results include table names and are returned as a JSON array. You must specify an account name and subscription ID. Use this command to explore your Storage resources or to verify table existence before performing operations on specific tables.");

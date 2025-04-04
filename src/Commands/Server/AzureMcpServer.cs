@@ -9,7 +9,7 @@ namespace AzureMCP.Commands.Server;
 
 /// <summary>
 /// Wraps the implementation of an McpServer.  Used when the transport is not immediately available or active. 
-/// (i.e. The user has not instantiated a connection to the MCP server.)
+/// (i.e. The user has not instantiated a connection to the MCP Server.)
 /// </summary>
 public class AzureMcpServer(McpServerOptions serverOptions,
     ILoggerFactory? loggerFactory = null,

@@ -1,6 +1,7 @@
 using AzureMCP.Arguments.Storage.Blob;
 using AzureMCP.Models;
 using AzureMCP.Services.Interfaces;
+using ModelContextProtocol.Server;
 using System.CommandLine;
 using System.CommandLine.Parsing;
 
@@ -17,6 +18,7 @@ public class BlobListCommand : BaseContainerCommand<BlobListArguments>
         );
     }
 
+    [McpServerTool(Destructive = false, ReadOnly = true)]
     public override Command GetCommand()
     {
         var command = new Command("list", "List all blobs in a Storage container. This command retrieves and displays all blobs available in the specified container and Storage account. Results include blob names, sizes, and content types, returned as a JSON array. You must specify both an account name and a container name. Use this command to explore your container contents or to verify blob existence before performing operations on specific blobs.");

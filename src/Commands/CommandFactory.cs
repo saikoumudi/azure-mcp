@@ -2,7 +2,6 @@ using AzureMCP.Commands.Cosmos;
 using AzureMCP.Commands.Server;
 using AzureMCP.Commands.Storage.Blob;
 using AzureMCP.Commands.Subscription;
-using AzureMCP.Commands.Tools;
 using AzureMCP.Models;
 using System.CommandLine;
 using System.CommandLine.Invocation;
@@ -48,6 +47,7 @@ public class CommandFactory
         RegisterMonitorCommands();
         RegisterAppConfigCommands();
         RegisterToolsCommands();
+        RegisterExtensionCommands();
         RegisterSubscriptionCommands();
         RegisterGroupCommands();
         RegisterMcpServerCommands();
@@ -160,9 +160,15 @@ public class CommandFactory
         var tools = new CommandGroup("tools", "CLI tools operations - Commands for discovering and exploring the functionality available in this CLI tool.");
         _rootGroup.AddSubGroup(tools);
 
-        // Register Tools commands
-        tools.AddCommand("list", new ToolsListCommand());
+        tools.AddCommand("list", new Tools.ToolsListCommand());
+    }
 
+    private void RegisterExtensionCommands()
+    {
+        var extension = new CommandGroup("extension", "Extension commands for additional functionality");
+        _rootGroup.AddSubGroup(extension);
+
+        extension.AddCommand("az", new Extension.AzCommand());
     }
 
     private void RegisterSubscriptionCommands()
@@ -188,7 +194,7 @@ public class CommandFactory
     private void RegisterMcpServerCommands()
     {
         // Create MCP Server command group
-        var mcpServer = new CommandGroup("server", "MCP server operations - Commands for managing and interacting with the MCP server.");
+        var mcpServer = new CommandGroup("server", "MCP Server operations - Commands for managing and interacting with the MCP Server.");
         _rootGroup.AddSubGroup(mcpServer);
 
         // Register MCP Server commands
@@ -221,7 +227,7 @@ public class CommandFactory
 
     private RootCommand CreateRootCommand()
     {
-        var rootCommand = new RootCommand("Azure AI Data Plane CLI - A comprehensive command-line interface for interacting with Azure data services. This CLI provides direct access to Azure data plane operations, allowing you to manage and query your Azure resources efficiently without switching between multiple tools.");
+        var rootCommand = new RootCommand("Azure MCP Server - A Model Context Protocol (MCP) server that enables AI agents to interact with Azure services through standardized communication patterns.");
 
         RegisterCommandGroup();
 

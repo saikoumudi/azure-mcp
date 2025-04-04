@@ -268,7 +268,7 @@ private static void ConfigureServices(IServiceCollection services)
 using AzureMCP.Services.Azure.YourService;  // For YourService implementation
 ```
 
-3. After registering the command, update the MCP server service registration:
+3. After registering the command, update the MCP Server service registration:
 
 Location: `src/Commands/Server/ServiceStartCommand.cs`
 
@@ -291,7 +291,7 @@ private static void ConfigureServices(IServiceCollection services, IServiceProvi
 }
 ```
 
-This ensures your service is available when the MCP server is running in both STDIO and SSE modes.
+This ensures your service is available when the MCP Server is running in both STDIO and SSE modes.
 
 ## Step 7: Update README.md Documentation
 

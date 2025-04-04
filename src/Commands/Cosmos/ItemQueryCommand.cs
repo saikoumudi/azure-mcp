@@ -1,6 +1,7 @@
 using AzureMCP.Arguments.Cosmos;
 using AzureMCP.Models;
 using AzureMCP.Services.Interfaces;
+using ModelContextProtocol.Server;
 using System.CommandLine;
 using System.CommandLine.Parsing;
 
@@ -44,6 +45,7 @@ public class ItemQueryCommand : BaseDatabaseCommand<ItemQueryArguments>
             .WithIsRequired(ArgumentDefinitions.Cosmos.Query.Required);
     }
 
+    [McpServerTool(Destructive = false, ReadOnly = true)]
     public override Command GetCommand()
     {
         var command = new Command(

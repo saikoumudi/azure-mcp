@@ -50,6 +50,13 @@ The Azure MCP Server provides tools for interacting with the following Azure ser
 - List resource groups
 - Resource group management operations
 
+### Azure CLI Extension
+
+- Execute Azure CLI commands directly
+- Support for all Azure CLI functionality
+- JSON output formatting
+- Cross-platform compatibility
+
 For detailed command documentation and examples, see [Azure MCP Commands](docs/azmcp-commands.md).
 
 # Install Azure MCP Server in VS Code with GitHub Copilot
@@ -106,7 +113,7 @@ https://github.com/Azure/azure-mcp/blob/main/eng/scripts/New-Npmrc.ps1
 ## Test the Azure MCP Server
 
 1. Open GitHub Copilot and switch to Agent mode. You should see Azure MCP Server in the list of tools
-1. Try a prompt that tells the agent to use the Azure MCP server, such as "List my Azure Storage containers."
+1. Try a prompt that tells the agent to use the Azure MCP Server, such as "List my Azure Storage containers."
 1. The agent should be able to use the Azure MCP Server tools to complete your query.
 
 # Using the Azure MCP Server in Cursor

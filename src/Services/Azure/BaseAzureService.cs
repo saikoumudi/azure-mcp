@@ -23,7 +23,7 @@ public abstract class BaseAzureService
         try
         {
             // Create new credential and cache it
-            _credential = tenantId == null
+            _credential = string.IsNullOrEmpty(tenantId)
                 ? new DefaultAzureCredential()
                 : new DefaultAzureCredential(new DefaultAzureCredentialOptions { TenantId = tenantId });
             _lastTenantId = tenantId;

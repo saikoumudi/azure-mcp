@@ -13,7 +13,7 @@ public class CommandGroup(string name, string description)
     public void AddCommand(string path, ICommand command)
     {
         // Split on first dot to get group and remaining path
-        var parts = path.Split(new[] { '.' }, 2);
+        var parts = path.Split(['.'], 2);
 
         if (parts.Length == 1)
         {
@@ -43,7 +43,7 @@ public class CommandGroup(string name, string description)
     public ICommand GetCommand(string path)
     {
         // Split on first dot to get group and remaining path
-        var parts = path.Split(new[] { '.' }, 2);
+        var parts = path.Split(['.'], 2);
 
         if (parts.Length == 1)
         {

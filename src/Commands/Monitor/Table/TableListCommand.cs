@@ -1,6 +1,7 @@
 using AzureMCP.Arguments.Monitor;
 using AzureMCP.Models;
 using AzureMCP.Services.Interfaces;
+using ModelContextProtocol.Server;
 using System.CommandLine;
 using System.CommandLine.Parsing;
 
@@ -21,6 +22,7 @@ public class TableListCommand : BaseMonitorCommand<TableListArguments>
        );
     }
 
+    [McpServerTool(Destructive = false, ReadOnly = true)]
     public override Command GetCommand()
     {
         var command = new Command(

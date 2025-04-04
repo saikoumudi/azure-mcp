@@ -197,4 +197,3 @@ public class CosmosService(ISubscriptionService subscriptionService) : BaseAzure
         GC.SuppressFinalize(this);
     }
 }
-

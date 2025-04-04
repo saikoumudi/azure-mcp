@@ -1,5 +1,6 @@
 using AzureMCP.Arguments;
 using AzureMCP.Models;
+using ModelContextProtocol.Server;
 using System.CommandLine;
 using System.CommandLine.Parsing;
 
@@ -8,7 +9,7 @@ namespace AzureMCP.Commands.Tools;
 [HiddenCommand]
 public class ToolsListCommand : BaseCommandWithoutArgs
 {
-
+    [McpServerTool(Destructive = false, ReadOnly = true)]
     public override Command GetCommand()
     {
         return new Command("list", "List all available commands and their tools in a hierarchical structure. This command returns detailed information about each command, including its name, description, full command path, available subcommands, and all supported arguments. Use this to explore the CLI's functionality or to build interactive command interfaces.");

@@ -269,4 +269,18 @@ public static class ArgumentDefinitions
             );
         }
     }
+
+    public static class Extension
+    {
+        public static class Az
+        {
+            public const string CommandName = "command";
+
+            public static readonly ArgumentDefinition<string> Command = new(
+                CommandName,
+                "The Azure CLI command to execute (without the 'az' prefix). For example: 'group list'.",
+                required: true
+            );
+        }
+    }
 }

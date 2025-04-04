@@ -78,7 +78,7 @@ public abstract class BaseCommand<TArgs> : ICommand where TArgs : BaseArguments,
             .WithValueLoader(async (context, args) =>
             {
                 var subArgs = args as BaseArgumentsWithSubscription;
-                if (subArgs?.Subscription == null)
+                if (string.IsNullOrEmpty(subArgs?.Subscription))
                 {
                     return [];
                 }
@@ -132,7 +132,7 @@ public abstract class BaseCommand<TArgs> : ICommand where TArgs : BaseArguments,
         string serviceName = "";
 
         // Extract service name from namespace (e.g., AzureMCP.Commands.Cosmos -> cosmos)
-        if (namespaceName.Contains(".Commands."))
+        if (!string.IsNullOrEmpty(namespaceName) && namespaceName.Contains(".Commands."))
         {
             string[] parts = namespaceName.Split(".Commands.");
             if (parts.Length > 1)
@@ -164,7 +164,7 @@ public abstract class BaseCommand<TArgs> : ICommand where TArgs : BaseArguments,
     protected async Task<bool> ProcessArgumentChain(CommandContext context, TArgs args)
     {
         // Ensure we have arguments to process
-        if (_argumentChain == null || !_argumentChain.Any())
+        if (_argumentChain == null || _argumentChain.Count == 0)
         {
             return true;
         }
@@ -174,8 +174,21 @@ public abstract class BaseCommand<TArgs> : ICommand where TArgs : BaseArguments,
         {
             if (argDef is ArgumentChain<TArgs> typedArgDef)
             {
-                // Get the current value
+                // Get the current value and handle "null" string case
                 string value = typedArgDef.ValueAccessor(args) ?? string.Empty;
+                value = value.Equals("null", StringComparison.OrdinalIgnoreCase) ? string.Empty : value;
+
+                // Special handling for subscription when it's "default"
+                if (typedArgDef.Name.Equals("subscription", StringComparison.OrdinalIgnoreCase) && 
+                    value.Equals("default", StringComparison.OrdinalIgnoreCase))
+                {
+                    value = string.Empty;
+                    // Update the args object if it's a subscription-based argument type
+                    if (args is BaseArgumentsWithSubscription baseArgs)
+                    {
+                        baseArgs.Subscription = string.Empty;
+                    }
+                }
 
                 // If the value is empty but there's a default value, use the default value
                 if (string.IsNullOrEmpty(value) && !string.IsNullOrEmpty(typedArgDef.DefaultValue))

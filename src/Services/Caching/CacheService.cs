@@ -1,7 +1,5 @@
 using AzureMCP.Services.Interfaces;
 using Microsoft.Extensions.Caching.Memory;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 
 namespace AzureMCP.Services.Caching;
 

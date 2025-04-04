@@ -8,6 +8,7 @@ using AzureMCP.Services.Azure.Storage;
 using AzureMCP.Services.Azure.Subscription;
 using AzureMCP.Services.Caching;
 using AzureMCP.Services.Interfaces;
+using AzureMCP.Services.ProcessExecution;
 using Microsoft.Extensions.DependencyInjection;
 using System.CommandLine;
 using System.Text.Json;
@@ -47,6 +48,7 @@ class Program
     {
         services.AddMemoryCache();
         services.AddSingleton<ICacheService, CacheService>();
+        services.AddSingleton<IExternalProcessService, ExternalProcessService>();
         services.AddSingleton<ISubscriptionService, SubscriptionService>();
         services.AddSingleton<ICosmosService, CosmosService>();
         services.AddSingleton<IStorageService, StorageService>();

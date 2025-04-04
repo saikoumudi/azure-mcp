@@ -100,6 +100,29 @@ public class ToolOperations
             Description = underlyingCommand.Description,
         };
 
+        // Get the GetCommand method info to check for McpServerToolAttribute
+        var getCommandMethod = command.GetType().GetMethod(nameof(ICommand.GetCommand));
+        if (getCommandMethod != null)
+        {
+            var mcpServerToolAttr = getCommandMethod.GetCustomAttribute<McpServerToolAttribute>();
+            if (mcpServerToolAttr != null)
+            {
+
+                var annotations = new ToolAnnotations();
+
+                if (mcpServerToolAttr.Destructive)
+                    annotations.DestructiveHint = mcpServerToolAttr.Destructive;
+                if (mcpServerToolAttr.ReadOnly)
+                    annotations.ReadOnlyHint = mcpServerToolAttr.ReadOnly;
+                if (mcpServerToolAttr.Idempotent)
+                    annotations.IdempotentHint = mcpServerToolAttr.Idempotent;
+                if (mcpServerToolAttr.OpenWorld)
+                    annotations.OpenWorldHint = mcpServerToolAttr.OpenWorld;
+
+                tool.Annotations = annotations;
+            }
+        }
+
         var argumentsChain = command.GetArgumentChain()?.ToList();
 
         var schema = new Dictionary<string, object>

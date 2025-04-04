@@ -125,7 +125,7 @@ public class ServiceStartCommand : ICommand
 
             var entryAssembly = Assembly.GetEntryAssembly();
             var assemblyName = entryAssembly?.GetName();
-            var serverName = entryAssembly?.GetCustomAttribute<AssemblyTitleAttribute>()?.Title ?? "Azure MCP server";
+            var serverName = entryAssembly?.GetCustomAttribute<AssemblyTitleAttribute>()?.Title ?? "Azure MCP Server";
             var mcpServerOptions = new McpServerOptions
             {
                 ServerInfo = new Implementation
@@ -183,6 +183,7 @@ public class ServiceStartCommand : ICommand
         services.AddSingleton(rootServiceProvider.GetRequiredService<IMonitorService>());
         services.AddSingleton(rootServiceProvider.GetRequiredService<IResourceGroupService>());
         services.AddSingleton(rootServiceProvider.GetRequiredService<IAppConfigService>());
+        services.AddSingleton(rootServiceProvider.GetRequiredService<IExternalProcessService>());
     }
 
     private sealed class StdioMcpServerHostedService(IMcpServer session) : BackgroundService

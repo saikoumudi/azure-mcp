@@ -2,6 +2,7 @@ using AzureMCP.Arguments;
 using AzureMCP.Arguments.Subscription;
 using AzureMCP.Models;
 using AzureMCP.Services.Interfaces;
+using ModelContextProtocol.Server;
 using System.CommandLine;
 using System.CommandLine.Parsing;
 
@@ -21,6 +22,7 @@ public class SubscriptionListCommand : BaseSubscriptionCommand<SubscriptionListA
         // Deliberately NOT adding subscription ID or auth method arguments
     }
 
+    [McpServerTool(Destructive = false, ReadOnly = true)]
     public override Command GetCommand()
     {
         var command = new Command(

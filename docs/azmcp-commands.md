@@ -19,7 +19,7 @@ The following args are available for all commands:
 
 ### Server Operations
 ```bash
-# Start the MCP server
+# Start the MCP Server
 azmcp server start [--transport <transport>]
 ```
 
@@ -118,6 +118,22 @@ azmcp appconfig kv delete --subscription <subscription> --account-name <account-
 ```bash
 # List resource groups in a subscription
 azmcp group list --subscription <subscription>
+```
+
+### Azure CLI Extension Operations
+```bash
+# Execute any Azure CLI command
+azmcp extension az --command "<command>"
+
+# Examples:
+# List resource groups
+azmcp extension az --command "group list"
+
+# Get storage account details
+azmcp extension az --command "storage account show --name <account-name> --resource-group <resource-group>"
+
+# List virtual machines
+azmcp extension az --command "vm list --resource-group <resource-group>"
 ```
 
 ## Response Format

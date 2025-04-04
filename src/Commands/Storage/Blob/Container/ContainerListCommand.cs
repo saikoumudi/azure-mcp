@@ -1,6 +1,7 @@
 using AzureMCP.Arguments.Storage.Blob.Container;
 using AzureMCP.Models;
 using AzureMCP.Services.Interfaces;
+using ModelContextProtocol.Server;
 using System.CommandLine;
 using System.CommandLine.Parsing;
 
@@ -15,6 +16,7 @@ public class ContainerListCommand : BaseStorageCommand<ContainerListArguments>
         );
     }
 
+    [McpServerTool(Destructive = false, ReadOnly = true)]
     public override Command GetCommand()
     {
         var command = new Command("list", "List all containers in the specified storage account.");

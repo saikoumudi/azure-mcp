@@ -23,7 +23,7 @@ public class StorageService(ISubscriptionService subscriptionService, ICacheServ
         ValidateRequiredParameters(subscriptionId);
 
         // Create cache key
-        var cacheKey = tenantId == null
+        var cacheKey = string.IsNullOrEmpty(tenantId)
             ? $"{STORAGE_ACCOUNTS_CACHE_KEY}_{subscriptionId}"
             : $"{STORAGE_ACCOUNTS_CACHE_KEY}_{subscriptionId}_{tenantId}";
 

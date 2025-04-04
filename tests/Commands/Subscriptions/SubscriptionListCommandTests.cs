@@ -4,10 +4,10 @@ using AzureMCP.Models;
 using AzureMCP.Services.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using ModelContextProtocol.Server;
-using System.Text.Json;
 using NSubstitute;
 using System.CommandLine;
 using System.CommandLine.Parsing;
+using System.Text.Json;
 using Xunit;
 
 namespace AzureMCP.Tests.Commands.Subscription
@@ -174,7 +174,7 @@ namespace AzureMCP.Tests.Commands.Subscription
             var subscriptions = jsonDoc.RootElement
                 .GetProperty("subscriptions")
                 .Deserialize<List<ArgumentOption>>();
-            
+
             Assert.NotNull(subscriptions);
             Assert.Single(subscriptions);
             Assert.Equal(expectedSubscriptionId, subscriptions[0].Id);
@@ -209,7 +209,7 @@ namespace AzureMCP.Tests.Commands.Subscription
             var subscriptions = jsonDoc.RootElement
                 .GetProperty("subscriptions")
                 .Deserialize<List<ArgumentOption>>();
-            
+
             Assert.NotNull(subscriptions);
             Assert.Single(subscriptions);
             Assert.Equal(expectedSubscriptionName, subscriptions[0].Name);

@@ -15,7 +15,7 @@ public class SubscriptionService(ICacheService cacheService) : BaseAzureService,
     public async Task<List<ArgumentOption>> GetSubscriptions(string? tenantId = null, RetryPolicyArguments? retryPolicy = null)
     {
         // Try to get from cache first
-        var cacheKey = tenantId == null ? CACHE_KEY : $"{CACHE_KEY}_{tenantId}";
+        var cacheKey = string.IsNullOrEmpty(tenantId) ? CACHE_KEY : $"{CACHE_KEY}_{tenantId}";
         var cachedResults = await _cacheService.GetAsync<List<ArgumentOption>>(cacheKey, CACHE_DURATION);
         if (cachedResults != null)
         {
@@ -50,7 +50,9 @@ public class SubscriptionService(ICacheService cacheService) : BaseAzureService,
         var subscriptionId = await GetSubscriptionId(subscription, tenantId, retryPolicy);
 
         // Use subscription ID for cache key
-        var cacheKey = tenantId == null ? $"{SUBSCRIPTION_CACHE_KEY}_{subscriptionId}" : $"{SUBSCRIPTION_CACHE_KEY}_{subscriptionId}_{tenantId}";
+        var cacheKey = string.IsNullOrEmpty(tenantId)
+            ? $"{SUBSCRIPTION_CACHE_KEY}_{subscriptionId}"
+            : $"{SUBSCRIPTION_CACHE_KEY}_{subscriptionId}_{tenantId}";
         var cachedSubscription = await _cacheService.GetAsync<SubscriptionResource>(cacheKey, CACHE_DURATION);
         if (cachedSubscription != null)
         {
