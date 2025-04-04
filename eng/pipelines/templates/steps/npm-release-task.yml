@@ -6,10 +6,6 @@ parameters:
     default: 'https://registry.npmjs.org/'
   - name: Tag
     type: string
-    default: ''
-  - name: NpmrcPath
-    type: string
-    default: '$(Pipeline.Workspace)/.npmrc'
 
 steps:
   - template: /eng/common/pipelines/templates/steps/set-default-branch.yml
@@ -55,10 +51,7 @@ steps:
 
         $tag = '${{parameters.Tag}}'
         foreach ($file in $tgzFiles) {
-          $command = "npm publish $file --access public"
-          if ($tag) {
-            $command += " --tag '$tag'"
-          }
+          $command = "npm publish '$file' --access public --tag '$tag'"
           Write-Host "> $command"
           Invoke-Expression $command
         }

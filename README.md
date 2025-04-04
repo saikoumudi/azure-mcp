@@ -77,23 +77,23 @@ For detailed command documentation and examples, see [Azure MCP Commands](docs/a
 
 1. Add `.vscode/mcp.json`:
 
-```json
-{
-  "servers": {
-    "Azure MCP Server": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "--registry",
-        "https://pkgs.dev.azure.com/azure-sdk/internal/_packaging/azure-sdk-for-js-pr/npm/registry/",
-        "@azure/mcp",
-        "server",
-        "start"
-      ]
+    ```json
+    {
+      "servers": {
+        "Azure MCP Server": {
+          "command": "npx",
+          "args": [
+            "-y",
+            "--registry",
+            "https://pkgs.dev.azure.com/azure-sdk/internal/_packaging/azure-sdk-for-js-pr/npm/registry/",
+            "@azure/mcp@latest",
+            "server",
+            "start"
+          ]
+        }
+      }
     }
-  }
-}
-```
+    ```
 
 ## Test the Azure MCP Server
 

@@ -13,7 +13,8 @@ jobs:
     parameters:
       PathToArtifacts: $(Pipeline.Workspace)/$(PipelineArtifactName)_packed
       Registry: https://pkgs.dev.azure.com/azure-sdk/internal/_packaging/azure-sdk-for-js-pr/npm/registry/
-
+      Tag: prerelease
+      
 # - job: PublishDocsToNightly
 #   displayName: "Update Package Versions"
 #   condition: and(succeeded(), or(eq(variables['SetDevVersion'], 'true'), and(eq(variables['Build.Reason'],'Schedule'), eq(variables['System.TeamProject'], 'internal'))))
