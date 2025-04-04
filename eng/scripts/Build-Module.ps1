@@ -17,7 +17,7 @@ param(
 . "$PSScriptRoot/../common/scripts/common.ps1"
 $RepoRoot = $RepoRoot.Path.Replace('\', '/')
 
-$npmPackagePath = "$RepoRoot/eng/npm"
+$npmPackagePath = "$RepoRoot/eng/npm-platform"
 $projectFile = "$RepoRoot/src/AzureMCP.csproj"
 
 if(!$Version) {
@@ -59,17 +59,13 @@ try {
         default { $node_os = $os; $extension = '' }
     }
 
-    $package = Get-Content "$npmPackagePath/package.json" -Raw | ConvertFrom-Json -AsHashtable
-
-    Write-Host "Building version $Version, $os-$arch" -ForegroundColor Green
 
     $outputDir = "$OutputPath/$os-$arch"
+    Write-Host "Building version $Version, $os-$arch in $outputDir" -ForegroundColor Green
     
     # Clear and recreate the package output directory
     Remove-Item -Path $outputDir -Recurse -Force -ErrorAction SilentlyContinue
     New-Item -ItemType Directory -Force -Path $outputDir | Out-Null
-
-    Write-Host "Building azmcp for $os-$arch..." -ForegroundColor Green
 
     $command = "dotnet publish '$projectFile' --runtime '$os-$arch' --output '$outputDir' /p:Version=$Version" 
     
@@ -82,26 +78,26 @@ try {
     }
 
     Invoke-LoggedCommand $command -GroupOutput
+    
+    # Copy the platform package files to the output directory
+    Copy-Item -Path "$npmPackagePath/*" -Recurse -Destination $outputDir -Force
 
-    # create a package.json in the output directory with a bin entry for the executable
-    $platformPackageJson = [ordered]@{
-        name        = "$($package.name)-$node_os-$arch"
-        version     = $Version
-        description = "$($package.description) for $node_os-$arch"
-        repository  = $package.repository
-        author      = $package.author
-        bugs        = $package.bugs
-        license     = $package.license
-        bin         = @{ "azmcp-$node_os-$arch" = "azmcp$extension" }
-        os          = @( $node_os )
-        cpu         = @( $arch )
+    $package = Get-Content "$outputDir/package.json" -Raw
+    $package = $package.Replace('{os}', $node_os)
+    $package = $package.Replace('{cpu}', $arch)
+    $package = $package.Replace('{version}', $Version)
+    $package = $package.Replace('{executable}', "azmcp$extension")
+
+    # confirm all the placeholders are replaced
+    if ($package -match '\{\w+\}') {
+        Write-Error "Failed to replace $($Matches[0]) in package.json"
+        return
     }
 
-    $platformPackageJson
-    | ConvertTo-Json -Depth 10
+    $package
     | Out-File -FilePath "$outputDir/package.json" -Encoding utf8
 
-    Write-Host "Created package.json in $outputDir" -ForegroundColor Yellow
+    Write-Host "Updated package.json in $outputDir" -ForegroundColor Yellow
 
     Write-Host "`nBuild completed successfully!" -ForegroundColor Green
 }

@@ -11,7 +11,7 @@ param(
 . "$PSScriptRoot/../common/scripts/common.ps1"
 $RepoRoot = $RepoRoot.Path.Replace('\', '/')
 
-$npmPackagePath = "$RepoRoot/eng/npm"
+$npmPackagePath = "$RepoRoot/eng/npm-wrapper"
 
 if(!$Version) {
     $Version = & "$PSScriptRoot/Get-Version.ps1"

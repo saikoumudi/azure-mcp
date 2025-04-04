@@ -2,7 +2,10 @@
   "name": "@azure/mcp",
   "version": "0.0.0",
   "description": "Azure MCP Server - Model Context Protocol implementation for Azure",
-  "repository": "github:Azure/azure-mcp",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Azure/azure-mcp.git"
+  },
   "author": "Microsoft Corporation",
   "license": "MIT",
   "keywords": [

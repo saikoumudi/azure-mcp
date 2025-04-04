@@ -5,7 +5,7 @@ param(
     [switch] $SelfContained,
     [switch] $ReadyToRun,
     [switch] $UsePaths,
-    [switch] $SingleRid
+    [switch] $AllPlatforms
 )
 
 $RepoRoot = (Resolve-Path "$PSScriptRoot/../..").Path.Replace('\', '/')
@@ -25,7 +25,14 @@ function Build($os, $arch) {
 Remove-Item -Path $packagesPath -Recurse -Force -ErrorAction SilentlyContinue
 Remove-Item -Path $distPath -Recurse -Force -ErrorAction SilentlyContinue
 
-if($SingleRid) {
+if($AllPlatforms) {
+    Build -os linux -arch x64
+    Build -os windows -arch x64
+    Build -os windows -arch arm64
+    Build -os macos -arch x64
+    Build -os macos -arch arm64
+}
+else {
     $runtime = $([System.Runtime.InteropServices.RuntimeInformation]::RuntimeIdentifier)
     $parts = $runtime.Split('-')
     $os = $parts[0]
@@ -38,13 +45,6 @@ if($SingleRid) {
     }
 
     Build -os $os -arch $arch
-}
-else {
-    Build -os linux -arch x64
-    Build -os windows -arch x64
-    Build -os windows -arch arm64
-    Build -os macos -arch x64
-    Build -os macos -arch arm64
 }
 
 & "$RepoRoot/eng/scripts/Pack-Modules.ps1" `
