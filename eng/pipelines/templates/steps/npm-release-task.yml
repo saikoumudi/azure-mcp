@@ -40,6 +40,8 @@ steps:
 
     - pwsh: |
         $tgzFiles = Get-ChildItem -Path ${{parameters.PathToArtifacts}} -Filter *.tgz
+        | Sort-Object -Descending
+        
         if ($tgzFiles.Count -eq 0) {
           Write-Host "No .tgz files found in ${{parameters.PathToArtifacts}}"
           exit 1
