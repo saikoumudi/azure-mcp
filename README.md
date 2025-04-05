@@ -67,36 +67,23 @@ For detailed command documentation and examples, see [Azure MCP Commands](docs/a
 
 ## Temp Auth Setup for Pre-Release Version
 
-### Windows setup
-
-#### Install Script
+### Windows auth setup
 
 Copy paste the contents of this install script to a powershell prompt or download and run the script:
 
 https://github.com/Azure/azure-mcp/blob/main/eng/scripts/New-Npmrc.ps1 
 
-#### Or, manual steps
-
-1. Run `npm install -g vsts-npm-auth`
-1. Create file `.npmrc`
-
-    ```npm
-    registry=https://pkgs.dev.azure.com/azure-sdk/internal/_packaging/azure-sdk-for-js-pr/npm/registry/
-    always-auth=true
-    ```
-
-1. Run `vsts-npm-auth -config .npmrc`
-
-    > **IMPORTANT**  
-    > WSL users need to run `vsts-npm-auth -config .npmrc -target ~/.npmrc`
-
-### Linux setup (including Codespaces, Dev Containers)
+### Linux auth setup (including Codespaces, Dev Containers)
 
 >[!IMPORTANT]
 >`vsts-npm-auth` only works on Windows, so you'll need to first generate the auth token on a Windows machine and then copy it to your Linux system.
 
-1. On a Windows machine, follow the [Windows setup steps](#windows-setup) above.
+1. On a Windows machine, follow the [Windows setup steps](#windows-auth-setup) above.
 2. Copy the contents from `%USERPROFILE%\.npmrc` on the Windows machine to `~/.npmrc` on your Linux system.
+
+## Manual auth setup
+
+If you don't have a Windows machine, you can follow the manual steps listed in the "Other" section of the feed's [connection instructions for npm](https://dev.azure.com/azure-sdk/internal/_artifacts/feed/azure-sdk-for-js-pr/connect)
 
 ## Manual Install:
 
