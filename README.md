@@ -81,7 +81,7 @@ https://github.com/Azure/azure-mcp/blob/main/eng/scripts/New-Npmrc.ps1
 1. On a Windows machine, follow the [Windows setup steps](#windows-auth-setup) above.
 2. Copy the contents from `%USERPROFILE%\.npmrc` on the Windows machine to `~/.npmrc` on your Linux system.
 
-## Manual auth setup
+### Manual auth setup
 
 If you don't have a Windows machine, you can follow the manual steps listed in the "Other" section of the feed's [connection instructions for npm](https://dev.azure.com/azure-sdk/internal/_artifacts/feed/azure-sdk-for-js-pr/connect)
 
