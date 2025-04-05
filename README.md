@@ -67,13 +67,15 @@ For detailed command documentation and examples, see [Azure MCP Commands](docs/a
 
 ## Temp Auth Setup for Pre-Release Version
 
-### Install Script
+### Windows setup
+
+#### Install Script
 
 Copy paste the contents of this install script to a powershell prompt or download and run the script:
 
 https://github.com/Azure/azure-mcp/blob/main/eng/scripts/New-Npmrc.ps1 
 
-### Or, manual steps
+#### Or, manual steps
 
 1. Run `npm install -g vsts-npm-auth`
 1. Create file `.npmrc`
@@ -87,6 +89,14 @@ https://github.com/Azure/azure-mcp/blob/main/eng/scripts/New-Npmrc.ps1
 
     > **IMPORTANT**  
     > WSL users need to run `vsts-npm-auth -config .npmrc -target ~/.npmrc`
+
+### Linux setup (including Codespaces, Dev Containers)
+
+>[!IMPORTANT]
+>`vsts-npm-auth` only works on Windows, so you'll need to first generate the auth token on a Windows machine and then copy it to your Linux system.
+
+1. On a Windows machine, follow the [Windows setup steps](#windows-setup) above.
+2. Copy the contents from `%USERPROFILE%\.npmrc` on the Windows machine to `~/.npmrc` on your Linux system.
 
 ## Manual Install:
 
