@@ -5,7 +5,8 @@ param(
     [switch] $SelfContained,
     [switch] $ReadyToRun,
     [switch] $UsePaths,
-    [switch] $AllPlatforms
+    [switch] $AllPlatforms,
+    [switch] $VerifyNpx
 )
 
 $RepoRoot = (Resolve-Path "$PSScriptRoot/../..").Path.Replace('\', '/')
@@ -51,3 +52,18 @@ else {
     -ArtifactsPath $packagesPath `
     -UsePaths:$UsePaths `
     -OutputPath $distPath
+
+if ($VerifyNpx) {
+    Push-Location -Path $RepoRoot
+    try {
+        $tgzFile = Get-ChildItem -Path $distPath
+        | Where-Object -Property 'Name' -Match '^azure-mcp-[\d\.]+\.tgz$'
+        | Select-Object -ExpandProperty 'Name' -First 1
+    
+        Write-Host "> npx -y .dist/$tgzFile --help"
+        npx -y ".dist/$tgzFile" --help
+    }
+    finally {
+        Pop-Location
+    }
+}

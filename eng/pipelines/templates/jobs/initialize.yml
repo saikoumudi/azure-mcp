@@ -32,6 +32,11 @@ jobs:
       ${{ if eq(parameters.ReleaseRun, true) }}:
         arguments: >
           -Variable 'Version'
+      ${{ elseif and(eq(variables['Build.Reason'], 'IndividualCI'), eq(variables['Build.SourceBranch'], 'refs/heads/main')) }}:
+        arguments: >
+          -Variable 'Version'
+          -PrereleaseLabel 'beta'
+          -PrereleaseNumber '$(Build.BuildId)'
       ${{ else }}:
         arguments: >
           -Variable 'Version'

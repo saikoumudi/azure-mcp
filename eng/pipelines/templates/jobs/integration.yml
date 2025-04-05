@@ -13,7 +13,10 @@ jobs:
     parameters:
       PathToArtifacts: $(Pipeline.Workspace)/$(PipelineArtifactName)_packed
       Registry: https://pkgs.dev.azure.com/azure-sdk/internal/_packaging/azure-sdk-for-js-pr/npm/registry/
-      Tag: dev
+      ${{ if and(eq(variables['Build.SourceBranch'], 'refs/heads/main'), eq(variables['Build.Reason'], 'IndividualCI')) }}:
+        Tag: latest
+      ${{ else }}:
+        Tag: dev
       
 # - job: PublishDocsToNightly
 #   displayName: "Update Package Versions"
