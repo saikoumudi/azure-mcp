@@ -1,6 +1,6 @@
 using Azure.ResourceManager.Resources;
 using AzureMCP.Arguments;
-using AzureMCP.Models;
+using AzureMCP.Models.Argument;
 
 namespace AzureMCP.Services.Interfaces;
 

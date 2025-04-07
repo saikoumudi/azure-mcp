@@ -1,6 +1,8 @@
 using AzureMCP.Arguments;
 using AzureMCP.Commands.Subscription;
 using AzureMCP.Models;
+using AzureMCP.Models.Argument;
+using AzureMCP.Models.Command;
 using AzureMCP.Services.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using ModelContextProtocol.Server;

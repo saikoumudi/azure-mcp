@@ -1,5 +1,6 @@
 using AzureMCP.Arguments.Monitor;
-using AzureMCP.Models;
+using AzureMCP.Models.Argument;
+using AzureMCP.Models.Command;
 using AzureMCP.Services.Interfaces;
 using ModelContextProtocol.Server;
 using System.CommandLine;
@@ -16,7 +17,7 @@ public class TableListCommand : BaseMonitorCommand<TableListArguments>
         _tableTypeOption = ArgumentDefinitions.Monitor.TableType.ToOption();
 
         RegisterArgumentChain(
-           CreateWorkspaceNameArgument(),
+           CreateWorkspaceArgument(),
            CreateResourceGroupArgument()!,
            CreateTableTypeArgument()
        );
@@ -27,11 +28,11 @@ public class TableListCommand : BaseMonitorCommand<TableListArguments>
     {
         var command = new Command(
             "list",
-            $"List all tables in a Log Analytics workspace. Requires {ArgumentDefinitions.Monitor.WorkspaceNameName}. " +
+            $"List all tables in a Log Analytics workspace. Requires {ArgumentDefinitions.Monitor.WorkspaceIdOrName}. " +
             "Returns table names and schemas that can be used for constructing KQL queries.");
 
         AddBaseOptionsToCommand(command);
-        command.AddOption(_workspaceNameOption);
+        command.AddOption(_workspaceOption);
         command.AddOption(_resourceGroupOption);
         command.AddOption(_tableTypeOption);
         return command;
@@ -40,7 +41,7 @@ public class TableListCommand : BaseMonitorCommand<TableListArguments>
     protected override TableListArguments BindArguments(ParseResult parseResult)
     {
         var args = base.BindArguments(parseResult);
-        args.WorkspaceName = parseResult.GetValueForOption(_workspaceNameOption);
+        args.Workspace = parseResult.GetValueForOption(_workspaceOption);
         args.ResourceGroup = parseResult.GetValueForOption(_resourceGroupOption);
         args.TableType = parseResult.GetValueForOption(_tableTypeOption);
         return args;
@@ -61,7 +62,7 @@ public class TableListCommand : BaseMonitorCommand<TableListArguments>
             var tables = await monitorService.ListTables(
                 options.Subscription!,
                 options.ResourceGroup!,
-                options.WorkspaceName!,
+                options.Workspace!,
                 options.TableType,
                 options.TenantId,
                 options.RetryPolicy);

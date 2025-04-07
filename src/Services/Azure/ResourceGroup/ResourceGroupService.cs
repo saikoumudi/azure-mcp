@@ -1,3 +1,4 @@
+using Azure.ResourceManager.Resources;
 using AzureMCP.Arguments;
 using AzureMCP.Models.ResourceGroup;
 using AzureMCP.Services.Interfaces;
@@ -11,9 +12,12 @@ public class ResourceGroupService(ICacheService cacheService, ISubscriptionServi
     private const string CACHE_KEY = "resourcegroups";
     private static readonly TimeSpan CACHE_DURATION = TimeSpan.FromHours(1);
 
-    public async Task<List<ResourceGroupInfo>> GetResourceGroups(string subscriptionId, string? tenantId = null, RetryPolicyArguments? retryPolicy = null)
+    public async Task<List<ResourceGroupInfo>> GetResourceGroups(string subscription, string? tenantId = null, RetryPolicyArguments? retryPolicy = null)
     {
-        ValidateRequiredParameters(subscriptionId);
+        ValidateRequiredParameters(subscription);
+
+        var subscriptionResource = await _subscriptionService.GetSubscription(subscription, tenantId, retryPolicy);
+        var subscriptionId = subscriptionResource.Data.SubscriptionId;
 
         // Try to get from cache first
         var cacheKey = $"{CACHE_KEY}_{subscriptionId}_{tenantId ?? "default"}";
@@ -26,8 +30,7 @@ public class ResourceGroupService(ICacheService cacheService, ISubscriptionServi
         // If not in cache, fetch from Azure
         try
         {
-            var subscription = await _subscriptionService.GetSubscription(subscriptionId, tenantId, retryPolicy);
-            var resourceGroups = await subscription.GetResourceGroups()
+            var resourceGroups = await subscriptionResource.GetResourceGroups()
                 .GetAllAsync()
                 .Select(rg => new ResourceGroupInfo(
                     rg.Data.Name,
@@ -43,6 +46,59 @@ public class ResourceGroupService(ICacheService cacheService, ISubscriptionServi
         catch (Exception ex)
         {
             throw new Exception($"Error retrieving resource groups: {ex.Message}", ex);
+        }
+    }
+
+    public async Task<ResourceGroupInfo?> GetResourceGroup(string subscription, string resourceGroupName, string? tenantId = null, RetryPolicyArguments? retryPolicy = null)
+    {
+        ValidateRequiredParameters(subscription, resourceGroupName);
+
+        var subscriptionResource = await _subscriptionService.GetSubscription(subscription, tenantId, retryPolicy);
+        var subscriptionId = subscriptionResource.Data.SubscriptionId;
+
+        // Try to get from cache first
+        var cacheKey = $"{CACHE_KEY}_{subscriptionId}_{tenantId ?? "default"}";
+        var cachedResults = await _cacheService.GetAsync<List<ResourceGroupInfo>>(cacheKey, CACHE_DURATION);
+        if (cachedResults != null)
+        {
+            return cachedResults.FirstOrDefault(rg => rg.Name.Equals(resourceGroupName, StringComparison.OrdinalIgnoreCase));
+        }
+
+        try
+        {
+            var rg = await GetResourceGroupResource(subscription, resourceGroupName, tenantId, retryPolicy);
+            if (rg == null)
+            {
+                return null;
+            }
+
+            return new ResourceGroupInfo(
+                rg.Data.Name,
+                rg.Data.Id.ToString(),
+                rg.Data.Location.ToString());
+        }
+        catch (Exception ex)
+        {
+            throw new Exception($"Error retrieving resource group {resourceGroupName}: {ex.Message}", ex);
+        }
+    }
+
+    public async Task<ResourceGroupResource?> GetResourceGroupResource(string subscription, string resourceGroupName, string? tenantId = null, RetryPolicyArguments? retryPolicy = null)
+    {
+        ValidateRequiredParameters(subscription, resourceGroupName);
+
+        try
+        {
+            var subscriptionResource = await _subscriptionService.GetSubscription(subscription, tenantId, retryPolicy);
+            var resourceGroupResponse = await subscriptionResource.GetResourceGroups()
+                .GetAsync(resourceGroupName)
+                .ConfigureAwait(false);
+
+            return resourceGroupResponse?.Value;
+        }
+        catch (Exception ex)
+        {
+            throw new Exception($"Error retrieving resource group {resourceGroupName}: {ex.Message}", ex);
         }
     }
 }

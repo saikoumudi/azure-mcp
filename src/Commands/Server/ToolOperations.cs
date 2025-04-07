@@ -1,4 +1,5 @@
 ﻿using AzureMCP.Models;
+using AzureMCP.Models.Command;
 using ModelContextProtocol.Protocol.Types;
 using ModelContextProtocol.Server;
 using ModelContextProtocol.Utils.Json;

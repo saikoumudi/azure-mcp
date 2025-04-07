@@ -1,13 +1,13 @@
-﻿using AzureMCP.Arguments;
-using AzureMCP.Arguments.Server;
+﻿using AzureMCP.Arguments.Server;
 using AzureMCP.Models;
+using AzureMCP.Models.Argument;
+using AzureMCP.Models.Command;
 using AzureMCP.Services.Interfaces;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using ModelContextProtocol.Hosting;
 using ModelContextProtocol.Protocol.Transport;
 using ModelContextProtocol.Protocol.Types;
 using ModelContextProtocol.Server;
@@ -175,6 +175,7 @@ public class ServiceStartCommand : ICommand
 
     private static void ConfigureServices(IServiceCollection services, IServiceProvider rootServiceProvider)
     {
+        services.AddMemoryCache();
         services.AddSingleton(rootServiceProvider.GetRequiredService<CommandFactory>());
         services.AddSingleton(rootServiceProvider.GetRequiredService<ICacheService>());
         services.AddSingleton(rootServiceProvider.GetRequiredService<ISubscriptionService>());

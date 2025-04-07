@@ -1,7 +1,7 @@
 
 using AzureMCP.Arguments;
 using AzureMCP.Commands;
-using AzureMCP.Models;
+using AzureMCP.Models.Argument;
 
 public abstract class BaseCommandWithSubscription<TArgs> : BaseCommand<TArgs>
     where TArgs : BaseArgumentsWithSubscription, new()

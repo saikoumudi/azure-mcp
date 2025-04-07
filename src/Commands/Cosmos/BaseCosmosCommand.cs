@@ -1,5 +1,6 @@
 using AzureMCP.Arguments.Cosmos;
-using AzureMCP.Models;
+using AzureMCP.Models.Argument;
+using AzureMCP.Models.Command;
 using AzureMCP.Services.Interfaces;
 using Microsoft.Azure.Cosmos;
 using System.CommandLine;

@@ -1,7 +1,7 @@
 using Azure.Core;
 using ModelContextProtocol.Protocol.Transport;
 
-namespace AzureMCP.Models;
+namespace AzureMCP.Models.Argument;
 
 public static class ArgumentDefinitions
 {
@@ -149,25 +149,19 @@ public static class ArgumentDefinitions
 
     public static class Monitor
     {
-        public const string WorkspaceIdName = "workspace-id";
-        public const string WorkspaceNameName = "workspace-name";
+        public const string WorkspaceIdOrName = "workspace";
         public const string TableNameName = "table-name";
         public const string TableTypeName = "table-type";
         public const string QueryTextName = "query";
         public const string HoursName = "hours";
         public const string LimitName = "limit";
 
-        public static readonly ArgumentDefinition<string> WorkspaceId = new(
-            WorkspaceIdName,
-            "The Log Analytics workspace ID to query. This is the unique identifier for your workspace.",
+        public static readonly ArgumentDefinition<string> Workspace = new(
+            WorkspaceIdOrName,
+            "The Log Analytics workspace ID or name. This can be either the unique identifier (GUID) or the display name of your workspace.",
             required: true
         );
 
-        public static readonly ArgumentDefinition<string> WorkspaceName = new(
-            WorkspaceNameName,
-            "The name of the Log Analytics workspace to query.",
-            required: true
-        );
 
         public static readonly ArgumentDefinition<string> TableType = new(
             TableTypeName,
@@ -184,7 +178,10 @@ public static class ArgumentDefinitions
 
         public static readonly ArgumentDefinition<string> Query = new(
             QueryTextName,
-            "The KQL query to execute against the Log Analytics workspace.",
+            "The KQL query to execute against the Log Analytics workspace. You can use predefined queries by name:\n" +
+            "- 'recent': Shows most recent logs ordered by TimeGenerated\n" +
+            "- 'errors': Shows error-level logs ordered by TimeGenerated\n" +
+            "Otherwise, provide a custom KQL query.",
             required: true
         );
 

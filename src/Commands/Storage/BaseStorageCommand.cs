@@ -1,5 +1,6 @@
 using AzureMCP.Arguments.Storage;
-using AzureMCP.Models;
+using AzureMCP.Models.Argument;
+using AzureMCP.Models.Command;
 using AzureMCP.Services.Interfaces;
 using System.CommandLine;
 using System.CommandLine.Parsing;

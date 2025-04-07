@@ -5,6 +5,7 @@ using Azure.ResourceManager.Resources;
 using AzureMCP.Arguments;
 using AzureMCP.Models;
 using AzureMCP.Models.AppConfig;
+using AzureMCP.Models.Identity;
 using AzureMCP.Services.Interfaces;
 
 
@@ -168,7 +169,7 @@ public class AppConfigService(ISubscriptionService subscriptionService) : BaseAz
         return new ConfigurationClient(new Uri(endpoint), credential);
     }
 
-    private async Task<AppConfigurationStoreResource> FindAppConfigStore(SubscriptionResource subscription, string accountName, string subscriptionId)
+    private static async Task<AppConfigurationStoreResource> FindAppConfigStore(SubscriptionResource subscription, string accountName, string subscriptionId)
     {
         AppConfigurationStoreResource? configStore = null;
         await foreach (var store in subscription.GetAppConfigurationStoresAsync())

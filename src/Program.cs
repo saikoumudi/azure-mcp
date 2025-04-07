@@ -1,5 +1,5 @@
 using AzureMCP.Commands;
-using AzureMCP.Models;
+using AzureMCP.Models.Command;
 using AzureMCP.Services.Azure.AppConfig;
 using AzureMCP.Services.Azure.Cosmos;
 using AzureMCP.Services.Azure.Monitor;

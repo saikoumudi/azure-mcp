@@ -47,7 +47,7 @@ public class AzureMcpServerTests
     {
         var wrapper = new AzureMcpServer(_options, _loggerFactory);
         await wrapper.SetTransportAndRunAsync(_transport);
-        
+
         var transport2 = Substitute.For<ITransport>();
         await wrapper.SetTransportAndRunAsync(transport2);
 

@@ -1,4 +1,4 @@
-namespace AzureMCP.Models;
+namespace AzureMCP.Models.Identity;
 
 public class ManagedIdentityInfo
 {

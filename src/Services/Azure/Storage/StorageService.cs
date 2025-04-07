@@ -265,7 +265,7 @@ public class StorageService(ISubscriptionService subscriptionService, ICacheServ
     }
 
     // Helper method to get storage account
-    private async Task<StorageAccountResource?> GetStorageAccount(SubscriptionResource subscription, string accountName)
+    private static async Task<StorageAccountResource?> GetStorageAccount(SubscriptionResource subscription, string accountName)
     {
         await foreach (var account in subscription.GetStorageAccountsAsync())
         {

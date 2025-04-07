@@ -1,6 +1,7 @@
 using AzureMCP.Arguments;
+using AzureMCP.Models.Command;
 
-namespace AzureMCP.Models;
+namespace AzureMCP.Models.Argument;
 
 /// <summary>
 /// Typed argument definition for a specific argument class

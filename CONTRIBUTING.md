@@ -75,7 +75,7 @@ Test requirements:
 
 ## Code Style
 
-Run `dotnet format src/AzureMCP.csproj` before submitting.
+Run `dotnet format src/AzureMCP.sln` before submitting.
 
 - Follow C# coding conventions
 - No comments in implementation code (code should be self-documenting)

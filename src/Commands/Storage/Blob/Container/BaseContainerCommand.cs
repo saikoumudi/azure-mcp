@@ -1,5 +1,5 @@
 using AzureMCP.Commands.Storage;
-using AzureMCP.Models;
+using AzureMCP.Models.Argument;
 
 public abstract class BaseContainerCommand<TArgs> : BaseStorageCommand<TArgs> where TArgs : BaseContainerArguments, new()
 {

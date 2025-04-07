@@ -1,6 +1,6 @@
 namespace AzureMCP.Extensions;
 
-using AzureMCP.Models;
+using AzureMCP.Models.Argument;
 using System;
 using System.Collections.Generic;
 

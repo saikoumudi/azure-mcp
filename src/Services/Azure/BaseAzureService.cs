@@ -83,7 +83,7 @@ public abstract class BaseAzureService
     /// </summary>
     /// <param name="parameters">Array of parameters to validate</param>
     /// <exception cref="ArgumentException">Thrown when any parameter is null or empty</exception>
-    protected void ValidateRequiredParameters(params string?[] parameters)
+    protected static void ValidateRequiredParameters(params string?[] parameters)
     {
         foreach (var param in parameters)
         {

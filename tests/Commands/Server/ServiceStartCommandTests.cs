@@ -1,4 +1,4 @@
-﻿using AzureMCP.Models;
+﻿using AzureMCP.Models.Argument;
 using AzureMCP.Services.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
@@ -37,7 +37,8 @@ public class ServiceStartCommandTests
         builder.AddSingleton(_mockMonitorService);
         builder.AddSingleton(_mockResourceGroupService);
         builder.AddSingleton(_mockAppConfigService);
-        builder.AddSingleton<CommandFactory>(provider => {
+        builder.AddSingleton(provider =>
+        {
             return new CommandFactory(provider);
         });
 
@@ -93,11 +94,11 @@ public class ServiceStartCommandTests
         var command = new ServiceStartCommand(_serviceProvider);
         var newArg = new ArgumentDefinition<string>("test", "test description");
         var arguments = command.GetArgumentChain();
-        
+
         Assert.NotNull(arguments);
 
         var initialCount = arguments.Count();
-        
+
         // Act
         command.AddArgumentToChain(newArg);
 

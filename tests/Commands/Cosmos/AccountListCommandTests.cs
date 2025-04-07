@@ -1,6 +1,6 @@
 using AzureMCP.Arguments;
 using AzureMCP.Commands.Cosmos;
-using AzureMCP.Models;
+using AzureMCP.Models.Command;
 using AzureMCP.Services.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;

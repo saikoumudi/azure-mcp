@@ -1,6 +1,6 @@
 
 using AzureMCP.Arguments.Storage;
-using AzureMCP.Models;
+using AzureMCP.Models.Argument;
 using System.Text.Json.Serialization;
 
 public class BaseContainerArguments : BaseStorageArguments

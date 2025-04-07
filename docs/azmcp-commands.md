@@ -72,11 +72,11 @@ azmcp storage blob container details --subscription <subscription> --account-nam
 azmcp monitor workspace list --subscription <subscription>
 
 # List tables in a Log Analytics workspace
-azmcp monitor table list --subscription <subscription> --workspace-name <workspace-name> --resource-group <resource-group>
+azmcp monitor table list --subscription <subscription> --workspace <workspace> --resource-group <resource-group>
 
 # Query logs from Azure Monitor using KQL
 azmcp monitor log query --subscription <subscription> \
-                        --workspace-id <workspace-id> \
+                        --workspace <workspace> \
                         --table-name <table-name> \
                         --query "<kql-query>" \
                         [--hours <hours>] \
@@ -85,7 +85,7 @@ azmcp monitor log query --subscription <subscription> \
 # Examples:
 # Query logs from a specific table
 azmcp monitor log query --subscription <subscription> \
-                        --workspace-id <workspace-id> \
+                        --workspace <workspace> \
                         --table-name "AppEvents_CL" \
                         --query "| order by TimeGenerated desc"
 ```

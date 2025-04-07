@@ -1,6 +1,7 @@
+using AzureMCP.Models.Argument;
 using System.Text.Json.Serialization;
 
-namespace AzureMCP.Models;
+namespace AzureMCP.Models.Command;
 
 public class CommandInfo
 {

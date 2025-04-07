@@ -8,15 +8,10 @@ using System.Text.Json;
 
 namespace AzureMCP.Services.Azure.Monitor;
 
-public class MonitorService(ISubscriptionService subscriptionService) : BaseAzureService, IMonitorService
+public class MonitorService(ISubscriptionService subscriptionService, IResourceGroupService resourceGroupService) : BaseAzureService, IMonitorService
 {
     private readonly ISubscriptionService _subscriptionService = subscriptionService ?? throw new ArgumentNullException(nameof(subscriptionService));
-
-    private const string ListTablesQuery = @"
-        search *
-        | distinct $table
-        | sort by $table asc
-    ";
+    private readonly IResourceGroupService _resourceGroupService = resourceGroupService ?? throw new ArgumentNullException(nameof(resourceGroupService));
 
     private const string TablePlaceholder = "{tableName}";
 
@@ -28,24 +23,20 @@ public class MonitorService(ISubscriptionService subscriptionService) : BaseAzur
         ",
         ["errors"] = @"
             {tableName}
-            | where level == ""ERROR""
-            | order by TimeGenerated desc
-        ",
-        ["summary"] = @"
-            {tableName}
-            | summarize count() by level, bin(TimeGenerated, 1h)
+            | where Level == ""ERROR""
             | order by TimeGenerated desc
         "
     };
 
     public async Task<List<JsonDocument>> QueryWorkspace(
-        string workspaceId,
+        string subscription,
+        string workspace,
         string query,
         int timeSpanDays = 1,
         string? tenantId = null,
         RetryPolicyArguments? retryPolicy = null)
     {
-        ValidateRequiredParameters(workspaceId, query);
+        ValidateRequiredParameters(subscription, workspace, query);
 
         var credential = GetCredential(tenantId);
         var options = new LogsQueryClientOptions();
@@ -61,6 +52,8 @@ public class MonitorService(ISubscriptionService subscriptionService) : BaseAzur
 
         try
         {
+            var (workspaceId, _) = await GetWorkspaceInfo(workspace, subscription, tenantId, retryPolicy);
+
             var response = await client.QueryWorkspaceAsync(
                 workspaceId,
                 query,
@@ -95,39 +88,35 @@ public class MonitorService(ISubscriptionService subscriptionService) : BaseAzur
     }
 
     public async Task<List<string>> ListTables(
-        string subscriptionId,
+        string subscription,
         string resourceGroup,
-        string workspaceName,
+        string workspace,
         string? tableType = "CustomLog",
         string? tenantId = null,
         RetryPolicyArguments? retryPolicy = null)
     {
-        ValidateRequiredParameters(subscriptionId, resourceGroup, workspaceName);
+        ValidateRequiredParameters(subscription, resourceGroup, workspace);
 
         try
         {
-            var subscription = await _subscriptionService.GetSubscription(subscriptionId, tenantId, retryPolicy);
+            var (_, resolvedWorkspaceName) = await GetWorkspaceInfo(workspace, subscription, tenantId, retryPolicy);
 
-            var resourceGroupResponse = await subscription.GetResourceGroups()
-                .GetAsync(resourceGroup)
-                .ConfigureAwait(false);
-
-            if (resourceGroupResponse?.Value == null)
+            var resourceGroupResource = await _resourceGroupService.GetResourceGroupResource(subscription, resourceGroup, tenantId, retryPolicy);
+            if (resourceGroupResource == null)
             {
-                throw new Exception($"Resource group {resourceGroup} not found in subscription {subscriptionId}");
+                throw new Exception($"Resource group {resourceGroup} not found in subscription {subscription}");
             }
 
-            var resourceGroupResource = resourceGroupResponse.Value;
-            var workspaceResponse = await resourceGroupResource.GetOperationalInsightsWorkspaceAsync(workspaceName)
+            var workspaceResponse = await resourceGroupResource.GetOperationalInsightsWorkspaceAsync(resolvedWorkspaceName)
                 .ConfigureAwait(false);
 
             if (workspaceResponse?.Value == null)
             {
-                throw new Exception($"Workspace {workspaceName} not found in resource group {resourceGroup}");
+                throw new Exception($"Workspace {resolvedWorkspaceName} not found in resource group {resourceGroup}");
             }
 
-            var workspace = workspaceResponse.Value;
-            var tableOperations = workspace.GetOperationalInsightsTables();
+            var workspaceResource = workspaceResponse.Value;
+            var tableOperations = workspaceResource.GetOperationalInsightsTables();
             var tables = await tableOperations.GetAllAsync()
                 .ToListAsync()
                 .ConfigureAwait(false);
@@ -143,16 +132,18 @@ public class MonitorService(ISubscriptionService subscriptionService) : BaseAzur
         }
     }
 
-    public async Task<List<WorkspaceInfo>> ListWorkspaces(string subscriptionId, string? tenantId = null,
+    public async Task<List<WorkspaceInfo>> ListWorkspaces(
+        string subscription,
+        string? tenantId = null,
         RetryPolicyArguments? retryPolicy = null)
     {
-        ValidateRequiredParameters(subscriptionId);
+        ValidateRequiredParameters(subscription);
 
         try
         {
-            var subscription = await _subscriptionService.GetSubscription(subscriptionId, tenantId, retryPolicy);
+            var subscriptionResource = await _subscriptionService.GetSubscription(subscription, tenantId, retryPolicy);
 
-            var workspaces = await subscription
+            var workspaces = await subscriptionResource
                 .GetOperationalInsightsWorkspacesAsync()
                 .Select(workspace => new WorkspaceInfo
                 {
@@ -171,16 +162,19 @@ public class MonitorService(ISubscriptionService subscriptionService) : BaseAzur
     }
 
     public async Task<object> QueryLogs(
-        string workspaceId,
+        string subscription,
+        string workspace,
         string query,
         string table,
         int? hours = 24,
         int? limit = 20,
-        string? subscriptionId = null,
         string? tenantId = null,
         RetryPolicyArguments? retryPolicy = null)
     {
-        ValidateRequiredParameters(workspaceId, table);
+        ValidateRequiredParameters(subscription, workspace, table);
+
+        // Get the workspace ID regardless of what was passed
+        var (workspaceId, _) = await GetWorkspaceInfo(workspace, subscription, tenantId, retryPolicy);
 
         // Check if the query is a predefined query name
         if (!string.IsNullOrEmpty(query) && PredefinedQueries.ContainsKey(query.Trim().ToLower()))
@@ -205,6 +199,7 @@ public class MonitorService(ISubscriptionService subscriptionService) : BaseAzur
 
             // Call QueryWorkspace with the prepared query
             var jsonResults = await QueryWorkspace(
+                subscription,
                 workspaceId,
                 query,
                 (int)Math.Ceiling(days), // Round up to ensure we cover the full time range
@@ -275,5 +270,34 @@ public class MonitorService(ISubscriptionService subscriptionService) : BaseAzur
             default:
                 return null;
         }
+    }
+
+    private static bool IsWorkspaceId(string workspace)
+    {
+        // Workspace IDs are GUIDs
+        return Guid.TryParse(workspace, out _);
+    }
+
+    private async Task<(string id, string name)> GetWorkspaceInfo(
+        string workspace,
+        string subscriptionId,
+        string? tenantId = null,
+        RetryPolicyArguments? retryPolicy = null)
+    {
+        // If we're given an ID and need an ID, or given a name and need a name, return as is
+        bool isId = IsWorkspaceId(workspace);
+        var workspaces = await ListWorkspaces(subscriptionId, tenantId, retryPolicy);
+
+        // Find the workspace
+        var matchingWorkspace = workspaces.FirstOrDefault(w =>
+            isId ? w.CustomerId.Equals(workspace, StringComparison.OrdinalIgnoreCase)
+                : w.Name.Equals(workspace, StringComparison.OrdinalIgnoreCase));
+
+        if (matchingWorkspace == null)
+        {
+            throw new Exception($"Could not find workspace with {(isId ? "ID" : "name")} {workspace}");
+        }
+
+        return (matchingWorkspace.CustomerId, matchingWorkspace.Name);
     }
 }

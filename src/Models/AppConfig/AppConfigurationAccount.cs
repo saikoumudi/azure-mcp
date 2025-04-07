@@ -1,3 +1,5 @@
+using AzureMCP.Models.Identity;
+
 namespace AzureMCP.Models.AppConfig;
 
 public class AppConfigurationAccount

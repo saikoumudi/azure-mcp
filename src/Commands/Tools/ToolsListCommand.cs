@@ -1,5 +1,7 @@
 using AzureMCP.Arguments;
 using AzureMCP.Models;
+using AzureMCP.Models.Argument;
+using AzureMCP.Models.Command;
 using ModelContextProtocol.Server;
 using System.CommandLine;
 using System.CommandLine.Parsing;

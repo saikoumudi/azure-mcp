@@ -1,7 +1,7 @@
 using System.CommandLine;
 using System.Text.Json.Serialization;
 
-namespace AzureMCP.Models;
+namespace AzureMCP.Models.Argument;
 
 public class ArgumentDefinition<T>(string name, string description, string? value = "", string? command = "", T? defaultValue = default, List<ArgumentOption>? values = null, bool required = false)
 {

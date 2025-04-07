@@ -4,6 +4,8 @@ using Azure.Identity;
 using AzureMCP.Arguments;
 using AzureMCP.Extensions;
 using AzureMCP.Models;
+using AzureMCP.Models.Argument;
+using AzureMCP.Models.Command;
 using AzureMCP.Services.Interfaces;
 using System.CommandLine;
 using System.CommandLine.Parsing;
@@ -179,7 +181,7 @@ public abstract class BaseCommand<TArgs> : ICommand where TArgs : BaseArguments,
                 value = value.Equals("null", StringComparison.OrdinalIgnoreCase) ? string.Empty : value;
 
                 // Special handling for subscription when it's "default"
-                if (typedArgDef.Name.Equals("subscription", StringComparison.OrdinalIgnoreCase) && 
+                if (typedArgDef.Name.Equals("subscription", StringComparison.OrdinalIgnoreCase) &&
                     value.Equals("default", StringComparison.OrdinalIgnoreCase))
                 {
                     value = string.Empty;

@@ -1,5 +1,5 @@
 using AzureMCP.Arguments.AppConfig.KeyValue;
-using AzureMCP.Models;
+using AzureMCP.Models.Argument;
 
 namespace AzureMCP.Commands.AppConfig;
 

@@ -2,9 +2,8 @@ using AzureMCP.Commands.Cosmos;
 using AzureMCP.Commands.Server;
 using AzureMCP.Commands.Storage.Blob;
 using AzureMCP.Commands.Subscription;
-using AzureMCP.Models;
+using AzureMCP.Models.Command;
 using System.CommandLine;
-using System.CommandLine.Invocation;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -13,10 +12,10 @@ namespace AzureMCP.Commands;
 
 public class CommandFactory
 {
-
     private readonly IServiceProvider _serviceProvider;
     private readonly RootCommand _rootCommand;
     private readonly CommandGroup _rootGroup;
+    private readonly JsonSerializerOptions _jsonOptions;
 
     internal static readonly char Separator = '-';
 
@@ -31,6 +30,13 @@ public class CommandFactory
         _rootGroup = new CommandGroup("azmcp", "Azure MCP Server");
         _rootCommand = CreateRootCommand();
         _commandMap = CreateCommmandDictionary(_rootGroup, string.Empty);
+        _jsonOptions = new JsonSerializerOptions
+        {
+            WriteIndented = true,
+            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+        };
     }
 
     public RootCommand RootCommand => _rootCommand;
@@ -245,7 +251,7 @@ public class CommandFactory
 
     private void ConfigureCommandHandler(Command command, ICommand implementation)
     {
-        command.SetHandler(async (InvocationContext context) =>
+        command.SetHandler(async context =>
         {
             var startTime = DateTime.UtcNow;
             var cmdContext = new CommandContext(_serviceProvider);
@@ -255,18 +261,16 @@ public class CommandFactory
             var endTime = DateTime.UtcNow;
             response.Duration = (long)(endTime - startTime).TotalMilliseconds;
 
-            var options = new JsonSerializerOptions
+            if (response.Status == 200 && response.Results == null)
             {
-                WriteIndented = true,
-                Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
-            };
-            Console.WriteLine(JsonSerializer.Serialize(response, options));
+                response.Results = new List<object>();
+            }
+
+            Console.WriteLine(JsonSerializer.Serialize(response, _jsonOptions));
         });
     }
 
-    private ICommand? FindCommandInGroup(CommandGroup group, Queue<string> nameParts)
+    private static ICommand? FindCommandInGroup(CommandGroup group, Queue<string> nameParts)
     {
         // If we've processed all parts and this group has a matching command, return it
         if (nameParts.Count == 1)
@@ -287,7 +291,7 @@ public class CommandFactory
         return _commandMap.GetValueOrDefault(hyphenatedName);
     }
 
-    private Dictionary<string, ICommand> CreateCommmandDictionary(CommandGroup node, string prefix)
+    private static Dictionary<string, ICommand> CreateCommmandDictionary(CommandGroup node, string prefix)
     {
         var aggregated = new Dictionary<string, ICommand>();
         var updatedPrefix = GetPrefix(prefix, node.Name);

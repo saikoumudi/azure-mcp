@@ -1,5 +1,4 @@
-
-using AzureMCP.Models;
+using AzureMCP.Models.Argument;
 using System.Text.Json.Serialization;
 
 namespace AzureMCP.Arguments.AppConfig.KeyValue;

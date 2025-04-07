@@ -1,7 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
-using System.Text.Json;
 
-namespace AzureMCP.Models;
+namespace AzureMCP.Models.Command;
 
 /// <summary>
 /// Provides context for command execution including service access and response management
@@ -12,11 +11,6 @@ public class CommandContext
     /// The service provider for dependency injection
     /// </summary>
     private readonly IServiceProvider _serviceProvider;
-
-    /// <summary>
-    /// JSON serialization options for command output
-    /// </summary>
-    public JsonSerializerOptions JsonOptions { get; }
 
     /// <summary>
     /// The response object that will be returned to the client
@@ -30,7 +24,6 @@ public class CommandContext
     public CommandContext(IServiceProvider serviceProvider)
     {
         _serviceProvider = serviceProvider;
-        JsonOptions = new JsonSerializerOptions { WriteIndented = true };
         Response = new CommandResponse
         {
             Status = 200,

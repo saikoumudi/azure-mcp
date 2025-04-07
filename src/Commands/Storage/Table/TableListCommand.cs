@@ -1,5 +1,6 @@
 using AzureMCP.Arguments.Storage.Table;
 using AzureMCP.Models;
+using AzureMCP.Models.Command;
 using AzureMCP.Services.Interfaces;
 using ModelContextProtocol.Server;
 using System.CommandLine;

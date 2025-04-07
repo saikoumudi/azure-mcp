@@ -1,21 +1,20 @@
 using AzureMCP.Arguments;
 using AzureMCP.Arguments.Monitor;
-using AzureMCP.Models;
+using AzureMCP.Models.Argument;
+using AzureMCP.Models.Command;
 using AzureMCP.Services.Interfaces;
 using System.CommandLine;
 
 namespace AzureMCP.Commands.Monitor;
 
-public abstract class BaseMonitorCommand<TArgs> : BaseCommandWithSubscription<TArgs> where TArgs : BaseArgumentsWithSubscription, new()
+public abstract class BaseMonitorCommand<TArgs> : BaseCommandWithSubscription<TArgs> where TArgs : BaseArgumentsWithSubscription, IWorkspaceArguments, new()
 {
-    protected readonly Option<string> _workspaceIdOption;
-    protected readonly Option<string> _workspaceNameOption;
+    protected readonly Option<string> _workspaceOption;
 
     protected BaseMonitorCommand()
         : base()
     {
-        _workspaceIdOption = ArgumentDefinitions.Monitor.WorkspaceId.ToOption();
-        _workspaceNameOption = ArgumentDefinitions.Monitor.WorkspaceName.ToOption();
+        _workspaceOption = ArgumentDefinitions.Monitor.Workspace.ToOption();
     }
 
     protected async Task<List<ArgumentOption>> GetWorkspaceOptions(CommandContext context, string subscriptionId)
@@ -32,43 +31,13 @@ public abstract class BaseMonitorCommand<TArgs> : BaseCommandWithSubscription<TA
         })];
     }
 
-    protected virtual ArgumentChain<LogQueryArguments> CreateWorkspaceIdArgument()
+    protected virtual ArgumentChain<TArgs> CreateWorkspaceArgument()
     {
-        return ArgumentChain<LogQueryArguments>
-            .Create(ArgumentDefinitions.Monitor.WorkspaceId.Name, ArgumentDefinitions.Monitor.WorkspaceId.Description)
-            .WithCommandExample(ArgumentDefinitions.GetCommandExample(GetCommandPath(), ArgumentDefinitions.Monitor.WorkspaceId))
-            .WithValueAccessor(args =>
-            {
-                try
-                {
-                    return args.WorkspaceId ?? string.Empty;
-                }
-                catch
-                {
-                    return string.Empty;
-                }
-            })
+        return ArgumentChain<TArgs>
+            .Create(ArgumentDefinitions.Monitor.Workspace.Name, ArgumentDefinitions.Monitor.Workspace.Description)
+            .WithCommandExample(ArgumentDefinitions.GetCommandExample(GetCommandPath(), ArgumentDefinitions.Monitor.Workspace))
+            .WithValueAccessor(args => args.Workspace ?? string.Empty)
             .WithValueLoader(async (context, args) => await GetWorkspaceOptions(context, args.Subscription ?? string.Empty))
-            .WithIsRequired(ArgumentDefinitions.Monitor.WorkspaceId.Required);
-    }
-
-    protected virtual ArgumentChain<TableListArguments> CreateWorkspaceNameArgument()
-    {
-        return ArgumentChain<TableListArguments>
-            .Create(ArgumentDefinitions.Monitor.WorkspaceName.Name, ArgumentDefinitions.Monitor.WorkspaceName.Description)
-            .WithCommandExample(ArgumentDefinitions.GetCommandExample(GetCommandPath(), ArgumentDefinitions.Monitor.WorkspaceName))
-            .WithValueAccessor(args =>
-            {
-                try
-                {
-                    return args.WorkspaceName ?? string.Empty;
-                }
-                catch
-                {
-                    return string.Empty;
-                }
-            })
-            .WithValueLoader(async (context, args) => await GetWorkspaceOptions(context, args.Subscription ?? string.Empty))
-            .WithIsRequired(ArgumentDefinitions.Monitor.WorkspaceName.Required);
+            .WithIsRequired(ArgumentDefinitions.Monitor.Workspace.Required);
     }
 }
