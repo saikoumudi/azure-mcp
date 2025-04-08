@@ -23,7 +23,8 @@ public class TenantService(ICacheService cacheService) : BaseAzureService, ITena
         // If not in cache, fetch from Azure
         var results = new List<ArgumentOption>();
         var credential = new DefaultAzureCredential();
-        var client = new ArmClient(credential);
+        var options = AddDefaultPolicies(new ArmClientOptions());
+        var client = new ArmClient(credential, default, options);
 
         await foreach (var tenant in client.GetTenants())
         {

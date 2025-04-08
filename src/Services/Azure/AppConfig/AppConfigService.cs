@@ -167,6 +167,8 @@ public class AppConfigService(
         var configStore = await FindAppConfigStore(subscription, accountName, subscriptionId);
         var endpoint = configStore.Data.Endpoint;
         var credential = GetCredential(tenant);
+        var options = AddDefaultPolicies(new ConfigurationClientOptions());
+         
         return new ConfigurationClient(new Uri(endpoint), credential);
     }
 

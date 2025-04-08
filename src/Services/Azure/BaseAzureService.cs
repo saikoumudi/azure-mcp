@@ -1,18 +1,37 @@
+using Azure.Core;
 using Azure.Identity;
 using Azure.ResourceManager;
 using AzureMCP.Arguments;
 using AzureMCP.Services.Interfaces;
+using System.Reflection;
+using System.Runtime.Versioning;
 
 namespace AzureMCP.Services.Azure;
 
 public abstract class BaseAzureService(ITenantService? tenantService = null)
 {
+    private static readonly UserAgentPolicy SharedUserAgentPolicy;
+    private static readonly string DefaultUserAgent;
+
     private DefaultAzureCredential? _credential;
     private string? _lastTenantId;
     private ArmClient? _armClient;
     private string? _lastArmClientTenantId;
     private RetryPolicyArguments? _lastRetryPolicy;
     private readonly ITenantService? _tenantService = tenantService;
+
+    static BaseAzureService()
+    {
+        var assembly = typeof(BaseAzureService).Assembly;
+        var version = assembly.GetCustomAttribute<AssemblyFileVersionAttribute>()?.Version;
+        var framework = assembly.GetCustomAttribute<TargetFrameworkAttribute>()?.FrameworkName;
+        var platform = System.Runtime.InteropServices.RuntimeInformation.OSDescription;
+
+        DefaultUserAgent = $"azmcp/{version} ({framework}; {platform})";
+        SharedUserAgentPolicy = new UserAgentPolicy(DefaultUserAgent);
+    }
+
+    protected string UserAgent { get; } = DefaultUserAgent;
 
     protected async Task<string?> ResolveTenantId(string? tenant)
     {
@@ -46,6 +65,13 @@ public abstract class BaseAzureService(ITenantService? tenantService = null)
         }
     }
 
+    protected T AddDefaultPolicies<T>(T clientOptions) where T : ClientOptions
+    {
+        clientOptions.AddPolicy(SharedUserAgentPolicy, HttpPipelinePosition.BeforeTransport);
+
+        return clientOptions;
+    }
+
     /// <summary>
     /// Creates an Azure Resource Manager client with optional retry policy
     /// </summary>
@@ -66,7 +92,7 @@ public abstract class BaseAzureService(ITenantService? tenantService = null)
         try
         {
             var credential = GetCredential(tenantId);
-            var options = new ArmClientOptions();
+            var options = AddDefaultPolicies(new ArmClientOptions());
 
             // Configure retry policy if provided
             if (retryPolicy != null)

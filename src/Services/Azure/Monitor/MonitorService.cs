@@ -39,7 +39,8 @@ public class MonitorService(ISubscriptionService subscriptionService, IResourceG
         ValidateRequiredParameters(subscription, workspace, query);
 
         var credential = GetCredential(tenant);
-        var options = new LogsQueryClientOptions();
+        var options = AddDefaultPolicies(new LogsQueryClientOptions());
+
         if (retryPolicy != null)
         {
             options.Retry.Delay = TimeSpan.FromSeconds(retryPolicy.DelaySeconds);

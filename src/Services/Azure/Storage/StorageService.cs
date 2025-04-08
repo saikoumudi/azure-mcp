@@ -285,7 +285,8 @@ public class StorageService(ISubscriptionService subscriptionService, ICacheServ
         string? tenant = null,
         RetryPolicyArguments? retryPolicy = null)
     {
-        var options = new TableClientOptions();
+        var options = AddDefaultPolicies(new TableClientOptions());
+
         if (retryPolicy != null)
         {
             options.Retry.Delay = TimeSpan.FromSeconds(retryPolicy.DelaySeconds);
@@ -316,7 +317,8 @@ public class StorageService(ISubscriptionService subscriptionService, ICacheServ
     private BlobServiceClient CreateBlobServiceClient(string accountName, string? tenant = null, RetryPolicyArguments? retryPolicy = null)
     {
         var uri = $"https://{accountName}.blob.core.windows.net";
-        var options = new BlobClientOptions();
+        var options = AddDefaultPolicies(new BlobClientOptions());
+
         if (retryPolicy != null)
         {
             options.Retry.Delay = TimeSpan.FromSeconds(retryPolicy.DelaySeconds);

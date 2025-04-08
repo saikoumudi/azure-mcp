@@ -46,6 +46,8 @@ public class CosmosService(
         var keys = await cosmosAccount.GetKeysAsync();
 
         var clientOptions = new CosmosClientOptions { AllowBulkExecution = true };
+        clientOptions.CustomHandlers.Add(new UserPolicyRequestHandler(UserAgent));
+
         if (retryPolicy != null)
         {
             clientOptions.MaxRetryAttemptsOnRateLimitedRequests = retryPolicy.MaxRetries;
@@ -197,5 +199,18 @@ public class CosmosService(
     {
         Dispose(disposing: true);
         GC.SuppressFinalize(this);
+    }
+
+    internal class UserPolicyRequestHandler : RequestHandler
+    {
+        private readonly string userAgent;
+
+        internal UserPolicyRequestHandler(string userAgent) => this.userAgent = userAgent;
+
+        public override Task<ResponseMessage> SendAsync(RequestMessage request, CancellationToken cancellationToken)
+        {
+            request.Headers.Set(UserAgentPolicy.UserAgentHeader, userAgent);
+            return base.SendAsync(request, cancellationToken);
+        }
     }
 }
