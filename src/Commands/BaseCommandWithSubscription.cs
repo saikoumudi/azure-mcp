@@ -1,7 +1,7 @@
-
 using AzureMCP.Arguments;
-using AzureMCP.Commands;
 using AzureMCP.Models.Argument;
+
+namespace AzureMCP.Commands;
 
 public abstract class BaseCommandWithSubscription<TArgs> : BaseCommand<TArgs>
     where TArgs : BaseArgumentsWithSubscription, new()
@@ -18,11 +18,11 @@ public abstract class BaseCommandWithSubscription<TArgs> : BaseCommand<TArgs>
         {
             // Add common arguments
             CreateAuthMethodArgument(),
-            CreateTenantIdArgument()
+            CreateTenantArgument()
         };
 
         // Add command-specific arguments
-        var subscriptionArg = CreateSubscriptionIdArgument();
+        var subscriptionArg = CreateSubscriptionArgument();
         if (subscriptionArg != null)
         {
             fullChain.Add(subscriptionArg);
@@ -32,7 +32,7 @@ public abstract class BaseCommandWithSubscription<TArgs> : BaseCommand<TArgs>
         _argumentChain = fullChain;
     }
 
-    protected ArgumentChain<TArgs>? CreateSubscriptionIdArgument()
+    protected ArgumentChain<TArgs>? CreateSubscriptionArgument()
     {
         if (typeof(TArgs).IsSubclassOf(typeof(BaseArgumentsWithSubscription)))
         {

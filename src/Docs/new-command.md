@@ -184,11 +184,11 @@ public class {Resource}{Operation}Command : Base{Service}Command<{Resource}{Oper
 
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
-        var options = BindArguments(parseResult);
+        var args = BindArguments(parseResult);
 
         try
         {
-            if (!await ProcessArgumentChain(context, options))
+            if (!await ProcessArgumentChain(context, args))
             {
                 return context.Response;
             }
@@ -608,7 +608,7 @@ public class ContainersListCommand : BaseStorageCommand
 
         try
         {
-            if (!await ProcessArgumentChain(context, options))
+            if (!await ProcessArgumentChain(context, args))
             {
                 return context.Response;
             }
@@ -962,11 +962,11 @@ public class ContainersListCommand : BaseStorageCommand<ContainersListArguments>
 
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
-        var options = BindArguments(parseResult);
+        var args = BindArguments(parseResult);
 
         try
         {
-            if (!await ProcessArgumentChain(context, options))
+            if (!await ProcessArgumentChain(context, args))
             {
                 return context.Response;
             }
@@ -1024,7 +1024,7 @@ public class ContainerListCommand : BaseStorageCommand<ContainerListArguments>
 
         try
         {
-            if (!await ProcessArgumentChain(context, options))
+            if (!await ProcessArgumentChain(context, args))
             {
                 return context.Response;
             }

@@ -49,23 +49,23 @@ public class TableListCommand : BaseMonitorCommand<TableListArguments>
 
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
-        var options = BindArguments(parseResult);
+        var args = BindArguments(parseResult);
 
         try
         {
-            if (!await ProcessArgumentChain(context, options))
+            if (!await ProcessArgumentChain(context, args))
             {
                 return context.Response;
             }
 
             var monitorService = context.GetService<IMonitorService>();
             var tables = await monitorService.ListTables(
-                options.Subscription!,
-                options.ResourceGroup!,
-                options.Workspace!,
-                options.TableType,
-                options.TenantId,
-                options.RetryPolicy);
+                args.Subscription!,
+                args.ResourceGroup!,
+                args.Workspace!,
+                args.TableType,
+                args.Tenant,
+                args.RetryPolicy);
 
             context.Response.Results = tables?.Count > 0 ?
                 new { tables } :

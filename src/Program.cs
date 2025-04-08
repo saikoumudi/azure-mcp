@@ -6,6 +6,7 @@ using AzureMCP.Services.Azure.Monitor;
 using AzureMCP.Services.Azure.ResourceGroup;
 using AzureMCP.Services.Azure.Storage;
 using AzureMCP.Services.Azure.Subscription;
+using AzureMCP.Services.Azure.Tenant;
 using AzureMCP.Services.Caching;
 using AzureMCP.Services.Interfaces;
 using AzureMCP.Services.ProcessExecution;
@@ -50,6 +51,7 @@ class Program
         services.AddSingleton<ICacheService, CacheService>();
         services.AddSingleton<IExternalProcessService, ExternalProcessService>();
         services.AddSingleton<ISubscriptionService, SubscriptionService>();
+        services.AddSingleton<ITenantService, TenantService>();
         services.AddSingleton<ICosmosService, CosmosService>();
         services.AddSingleton<IStorageService, StorageService>();
         services.AddSingleton<IMonitorService, MonitorService>();

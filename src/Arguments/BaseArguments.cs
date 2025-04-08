@@ -9,8 +9,8 @@ public class BaseArguments
     [JsonPropertyName(ArgumentDefinitions.Common.ResourceGroupName)]
     public string? ResourceGroup { get; set; }
 
-    [JsonPropertyName(ArgumentDefinitions.Common.TenantIdName)]
-    public string? TenantId { get; set; }
+    [JsonPropertyName(ArgumentDefinitions.Common.TenantName)]
+    public string? Tenant { get; set; }
 
     [JsonPropertyName(ArgumentDefinitions.Common.AuthMethodName)]
     public AuthMethod? AuthMethod { get; set; }

@@ -32,20 +32,20 @@ public class AccountListCommand : BaseCommandWithSubscription<AccountListArgumen
 
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
-        var options = BindArguments(parseResult);
+        var args = BindArguments(parseResult);
 
         try
         {
-            if (!await ProcessArgumentChain(context, options))
+            if (!await ProcessArgumentChain(context, args))
             {
                 return context.Response;
             }
 
             var appConfigService = context.GetService<IAppConfigService>();
             var accounts = await appConfigService.GetAppConfigAccounts(
-                options.Subscription!,
-                options.TenantId,
-                options.RetryPolicy);
+                args.Subscription!,
+                args.Tenant,
+                args.RetryPolicy);
 
             context.Response.Results = accounts?.Count > 0 ?
                 new { accounts } :

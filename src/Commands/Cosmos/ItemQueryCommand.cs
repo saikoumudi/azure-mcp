@@ -75,24 +75,24 @@ public class ItemQueryCommand : BaseDatabaseCommand<ItemQueryArguments>
 
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
-        var options = BindArguments(parseResult);
+        var args = BindArguments(parseResult);
 
         try
         {
-            if (!await ProcessArgumentChain(context, options))
+            if (!await ProcessArgumentChain(context, args))
             {
                 return context.Response;
             }
 
             var cosmosService = context.GetService<ICosmosService>();
             var items = await cosmosService.QueryItems(
-                options.Account!,
-                options.Database!,
-                options.Container!,
-                options.Query ?? "SELECT * FROM c",
-                options.Subscription!,
-                options.TenantId,
-                options.RetryPolicy);
+                args.Account!,
+                args.Database!,
+                args.Container!,
+                args.Query ?? "SELECT * FROM c",
+                args.Subscription!,
+                args.Tenant,
+                args.RetryPolicy);
 
             context.Response.Results = items?.Count > 0 ?
                 new { items } :

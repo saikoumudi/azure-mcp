@@ -35,30 +35,30 @@ public class TableListCommand : BaseStorageCommand<TableListArguments>
 
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult commandOptions)
     {
-        var options = BindArguments(commandOptions);
+        var args = BindArguments(commandOptions);
 
         try
         {
-            if (!await ProcessArgumentChain(context, options))
+            if (!await ProcessArgumentChain(context, args))
             {
                 return context.Response;
             }
 
             var storageService = context.GetService<IStorageService>();
             var tables = await storageService.ListTables(
-                options.Account!,
-                options.Subscription!,
-                options.AuthMethod ?? AuthMethod.Credential,
+                args.Account!,
+                args.Subscription!,
+                args.AuthMethod ?? AuthMethod.Credential,
                 null,
-                options.TenantId,
-                options.RetryPolicy);
+                args.Tenant,
+                args.RetryPolicy);
 
             context.Response.Results = tables?.Count > 0 ? new { tables } : null;
 
             // Only show warning if we actually had to fall back to a different auth method
             if (context.Response.Results != null && !string.IsNullOrEmpty(context.Response.Message))
             {
-                var authMethod = options.AuthMethod ?? AuthMethod.Credential;
+                var authMethod = args.AuthMethod ?? AuthMethod.Credential;
 
                 if (authMethod == AuthMethod.Credential)
                 {

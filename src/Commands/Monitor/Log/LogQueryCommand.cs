@@ -53,13 +53,13 @@ public class LogQueryCommand : BaseMonitorCommand<LogQueryArguments>
         return command;
     }
 
-    protected static async Task<List<ArgumentOption>> GetTableNameOptions(CommandContext context, string subscriptionId, string resourceGroup, string workspace, string? tableType = "CustomLog", string? tenantId = null, RetryPolicyArguments? retryPolicy = null)
+    protected static async Task<List<ArgumentOption>> GetTableNameOptions(CommandContext context, string subscriptionId, string resourceGroup, string workspace, string? tableType = "CustomLog", string? tenant = null, RetryPolicyArguments? retryPolicy = null)
     {
         if (string.IsNullOrEmpty(subscriptionId) || string.IsNullOrEmpty(resourceGroup) || string.IsNullOrEmpty(workspace))
             return [];
 
         var monitorService = context.GetService<IMonitorService>();
-        var tables = await monitorService.ListTables(subscriptionId, resourceGroup, workspace, tableType, tenantId, retryPolicy);
+        var tables = await monitorService.ListTables(subscriptionId, resourceGroup, workspace, tableType, tenant, retryPolicy);
 
         return [.. tables.Select(t => new ArgumentOption
         {
@@ -130,25 +130,25 @@ public class LogQueryCommand : BaseMonitorCommand<LogQueryArguments>
 
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
-        var options = BindArguments(parseResult);
+        var args = BindArguments(parseResult);
 
         try
         {
-            if (!await ProcessArgumentChain(context, options))
+            if (!await ProcessArgumentChain(context, args))
             {
                 return context.Response;
             }
 
             var monitorService = context.GetService<IMonitorService>();
             var results = await monitorService.QueryLogs(
-                options.Subscription!,
-                options.Workspace!,
-                options.Query!,
-                options.TableName!,
-                options.Hours,
-                options.Limit,
-                options.TenantId,
-                options.RetryPolicy);
+                args.Subscription!,
+                args.Workspace!,
+                args.Query!,
+                args.TableName!,
+                args.Hours,
+                args.Limit,
+                args.Tenant,
+                args.RetryPolicy);
 
             context.Response.Results = results;
         }

@@ -36,18 +36,18 @@ public class ContainerListCommand : BaseStorageCommand<ContainerListArguments>
 
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult commandOptions)
     {
-        var options = BindArguments(commandOptions);
+        var args = BindArguments(commandOptions);
 
         try
         {
-            if (!await ProcessArgumentChain(context, options))
+            if (!await ProcessArgumentChain(context, args))
             {
                 return context.Response;
             }
 
             var storageService = context.GetService<IStorageService>();
-            var containers = await storageService.ListContainers(options.Account!, options.Subscription!, options.TenantId,
-                options.RetryPolicy);
+            var containers = await storageService.ListContainers(args.Account!, args.Subscription!, args.Tenant,
+                args.RetryPolicy);
 
             context.Response.Results = containers?.Count > 0 ? new { containers } : null;
         }

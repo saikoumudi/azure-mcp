@@ -69,7 +69,7 @@ namespace AzureMCP.Tests.Commands.Subscription
         {
             // Arrange
             var tenantId = "test-tenant-id";
-            var args = _parser.Parse($"--tenant-id {tenantId}");
+            var args = _parser.Parse($"--tenant {tenantId}");
 
             _subscriptionService
                 .GetSubscriptions(Arg.Is<string>(x => x == tenantId), Arg.Any<RetryPolicyArguments>())

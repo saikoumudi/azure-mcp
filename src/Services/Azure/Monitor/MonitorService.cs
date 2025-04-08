@@ -33,12 +33,12 @@ public class MonitorService(ISubscriptionService subscriptionService, IResourceG
         string workspace,
         string query,
         int timeSpanDays = 1,
-        string? tenantId = null,
+        string? tenant = null,
         RetryPolicyArguments? retryPolicy = null)
     {
         ValidateRequiredParameters(subscription, workspace, query);
 
-        var credential = GetCredential(tenantId);
+        var credential = GetCredential(tenant);
         var options = new LogsQueryClientOptions();
         if (retryPolicy != null)
         {
@@ -52,7 +52,7 @@ public class MonitorService(ISubscriptionService subscriptionService, IResourceG
 
         try
         {
-            var (workspaceId, _) = await GetWorkspaceInfo(workspace, subscription, tenantId, retryPolicy);
+            var (workspaceId, _) = await GetWorkspaceInfo(workspace, subscription, tenant, retryPolicy);
 
             var response = await client.QueryWorkspaceAsync(
                 workspaceId,
@@ -92,16 +92,16 @@ public class MonitorService(ISubscriptionService subscriptionService, IResourceG
         string resourceGroup,
         string workspace,
         string? tableType = "CustomLog",
-        string? tenantId = null,
+        string? tenant = null,
         RetryPolicyArguments? retryPolicy = null)
     {
         ValidateRequiredParameters(subscription, resourceGroup, workspace);
 
         try
         {
-            var (_, resolvedWorkspaceName) = await GetWorkspaceInfo(workspace, subscription, tenantId, retryPolicy);
+            var (_, resolvedWorkspaceName) = await GetWorkspaceInfo(workspace, subscription, tenant, retryPolicy);
 
-            var resourceGroupResource = await _resourceGroupService.GetResourceGroupResource(subscription, resourceGroup, tenantId, retryPolicy);
+            var resourceGroupResource = await _resourceGroupService.GetResourceGroupResource(subscription, resourceGroup, tenant, retryPolicy);
             if (resourceGroupResource == null)
             {
                 throw new Exception($"Resource group {resourceGroup} not found in subscription {subscription}");
@@ -134,14 +134,14 @@ public class MonitorService(ISubscriptionService subscriptionService, IResourceG
 
     public async Task<List<WorkspaceInfo>> ListWorkspaces(
         string subscription,
-        string? tenantId = null,
+        string? tenant = null,
         RetryPolicyArguments? retryPolicy = null)
     {
         ValidateRequiredParameters(subscription);
 
         try
         {
-            var subscriptionResource = await _subscriptionService.GetSubscription(subscription, tenantId, retryPolicy);
+            var subscriptionResource = await _subscriptionService.GetSubscription(subscription, tenant, retryPolicy);
 
             var workspaces = await subscriptionResource
                 .GetOperationalInsightsWorkspacesAsync()
@@ -168,13 +168,13 @@ public class MonitorService(ISubscriptionService subscriptionService, IResourceG
         string table,
         int? hours = 24,
         int? limit = 20,
-        string? tenantId = null,
+        string? tenant = null,
         RetryPolicyArguments? retryPolicy = null)
     {
         ValidateRequiredParameters(subscription, workspace, table);
 
         // Get the workspace ID regardless of what was passed
-        var (workspaceId, _) = await GetWorkspaceInfo(workspace, subscription, tenantId, retryPolicy);
+        var (workspaceId, _) = await GetWorkspaceInfo(workspace, subscription, tenant, retryPolicy);
 
         // Check if the query is a predefined query name
         if (!string.IsNullOrEmpty(query) && PredefinedQueries.ContainsKey(query.Trim().ToLower()))
@@ -203,7 +203,7 @@ public class MonitorService(ISubscriptionService subscriptionService, IResourceG
                 workspaceId,
                 query,
                 (int)Math.Ceiling(days), // Round up to ensure we cover the full time range
-                tenantId,
+                tenant,
                 retryPolicy
             );
 
@@ -281,12 +281,12 @@ public class MonitorService(ISubscriptionService subscriptionService, IResourceG
     private async Task<(string id, string name)> GetWorkspaceInfo(
         string workspace,
         string subscriptionId,
-        string? tenantId = null,
+        string? tenant = null,
         RetryPolicyArguments? retryPolicy = null)
     {
         // If we're given an ID and need an ID, or given a name and need a name, return as is
         bool isId = IsWorkspaceId(workspace);
-        var workspaces = await ListWorkspaces(subscriptionId, tenantId, retryPolicy);
+        var workspaces = await ListWorkspaces(subscriptionId, tenant, retryPolicy);
 
         // Find the workspace
         var matchingWorkspace = workspaces.FirstOrDefault(w =>

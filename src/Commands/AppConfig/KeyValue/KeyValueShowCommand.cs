@@ -51,23 +51,23 @@ public class KeyValueShowCommand : BaseKeyValueCommand<KeyValueShowArguments>
 
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
-        var options = BindArguments(parseResult);
+        var args = BindArguments(parseResult);
 
         try
         {
-            if (!await ProcessArgumentChain(context, options))
+            if (!await ProcessArgumentChain(context, args))
             {
                 return context.Response;
             }
 
             var appConfigService = context.GetService<IAppConfigService>();
             var setting = await appConfigService.GetKeyValue(
-                options.Account!,
-                options.Key!,
-                options.Subscription!,
-                options.TenantId,
-                options.RetryPolicy,
-                options.Label);
+                args.Account!,
+                args.Key!,
+                args.Subscription!,
+                args.Tenant,
+                args.RetryPolicy,
+                args.Label);
 
             context.Response.Results = new { setting };
         }

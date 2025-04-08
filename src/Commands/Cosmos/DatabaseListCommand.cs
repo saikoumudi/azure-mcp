@@ -37,21 +37,21 @@ public class DatabaseListCommand : BaseCosmosCommand<DatabaseListArguments>
 
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
-        var options = BindArguments(parseResult);
+        var args = BindArguments(parseResult);
 
         try
         {
-            if (!await ProcessArgumentChain(context, options))
+            if (!await ProcessArgumentChain(context, args))
             {
                 return context.Response;
             }
 
             var cosmosService = context.GetService<ICosmosService>();
             var databases = await cosmosService.ListDatabases(
-                options.Account!,
-                options.Subscription!,
-                options.TenantId,
-                options.RetryPolicy);
+                args.Account!,
+                args.Subscription!,
+                args.Tenant,
+                args.RetryPolicy);
 
             context.Response.Results = databases?.Count > 0 ?
                 new { databases } :

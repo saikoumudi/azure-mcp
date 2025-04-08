@@ -43,7 +43,7 @@ public class AccountListCommand : BaseCommandWithSubscription<AccountListArgumen
             var storageService = context.GetService<IStorageService>();
             var accounts = await storageService.GetStorageAccounts(
                 args.Subscription!,
-                args.TenantId,
+                args.Tenant,
                 args.RetryPolicy);
 
             context.Response.Results = accounts?.Count > 0 ?

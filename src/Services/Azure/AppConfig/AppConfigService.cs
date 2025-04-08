@@ -8,18 +8,19 @@ using AzureMCP.Models.AppConfig;
 using AzureMCP.Models.Identity;
 using AzureMCP.Services.Interfaces;
 
-
 namespace AzureMCP.Services.Azure.AppConfig;
 
-public class AppConfigService(ISubscriptionService subscriptionService) : BaseAzureService, IAppConfigService
+public class AppConfigService(
+    ISubscriptionService subscriptionService,
+    ITenantService tenantService) : BaseAzureService(tenantService), IAppConfigService
 {
     private readonly ISubscriptionService _subscriptionService = subscriptionService ?? throw new ArgumentNullException(nameof(subscriptionService));
 
-    public async Task<List<AppConfigurationAccount>> GetAppConfigAccounts(string subscriptionId, string? tenantId = null, RetryPolicyArguments? retryPolicy = null)
+    public async Task<List<AppConfigurationAccount>> GetAppConfigAccounts(string subscriptionId, string? tenant = null, RetryPolicyArguments? retryPolicy = null)
     {
         ValidateRequiredParameters(subscriptionId);
 
-        var subscription = await _subscriptionService.GetSubscription(subscriptionId, tenantId, retryPolicy);
+        var subscription = await _subscriptionService.GetSubscription(subscriptionId, tenant, retryPolicy);
         var accounts = new List<AppConfigurationAccount>();
 
         await foreach (var account in subscription.GetAppConfigurationStoresAsync())
@@ -79,12 +80,12 @@ public class AppConfigService(ISubscriptionService subscriptionService) : BaseAz
         string subscriptionId,
         string? key = null,
         string? label = null,
-        string? tenantId = null,
+        string? tenant = null,
         RetryPolicyArguments? retryPolicy = null)
     {
         ValidateRequiredParameters(accountName, subscriptionId);
 
-        var client = await GetConfigurationClient(accountName, subscriptionId, tenantId, retryPolicy);
+        var client = await GetConfigurationClient(accountName, subscriptionId, tenant, retryPolicy);
         var settings = new List<KeyValueSetting>();
 
         var selector = new SettingSelector
@@ -110,10 +111,10 @@ public class AppConfigService(ISubscriptionService subscriptionService) : BaseAz
         return settings;
     }
 
-    public async Task<KeyValueSetting> GetKeyValue(string accountName, string key, string subscriptionId, string? tenantId = null, RetryPolicyArguments? retryPolicy = null, string? label = null)
+    public async Task<KeyValueSetting> GetKeyValue(string accountName, string key, string subscriptionId, string? tenant = null, RetryPolicyArguments? retryPolicy = null, string? label = null)
     {
         ValidateRequiredParameters(accountName, key, subscriptionId);
-        var client = await GetConfigurationClient(accountName, subscriptionId, tenantId, retryPolicy);
+        var client = await GetConfigurationClient(accountName, subscriptionId, tenant, retryPolicy);
         var response = await client.GetConfigurationSettingAsync(key, label, cancellationToken: default);
         var setting = response.Value;
 
@@ -129,43 +130,43 @@ public class AppConfigService(ISubscriptionService subscriptionService) : BaseAz
         };
     }
 
-    public async Task LockKeyValue(string accountName, string key, string subscriptionId, string? tenantId = null, RetryPolicyArguments? retryPolicy = null, string? label = null)
+    public async Task LockKeyValue(string accountName, string key, string subscriptionId, string? tenant = null, RetryPolicyArguments? retryPolicy = null, string? label = null)
     {
-        await SetKeyValueReadOnlyState(accountName, key, subscriptionId, tenantId, retryPolicy, label, true);
+        await SetKeyValueReadOnlyState(accountName, key, subscriptionId, tenant, retryPolicy, label, true);
     }
 
-    public async Task UnlockKeyValue(string accountName, string key, string subscriptionId, string? tenantId = null, RetryPolicyArguments? retryPolicy = null, string? label = null)
+    public async Task UnlockKeyValue(string accountName, string key, string subscriptionId, string? tenant = null, RetryPolicyArguments? retryPolicy = null, string? label = null)
     {
-        await SetKeyValueReadOnlyState(accountName, key, subscriptionId, tenantId, retryPolicy, label, false);
+        await SetKeyValueReadOnlyState(accountName, key, subscriptionId, tenant, retryPolicy, label, false);
     }
 
-    public async Task SetKeyValue(string accountName, string key, string value, string subscriptionId, string? tenantId = null, RetryPolicyArguments? retryPolicy = null, string? label = null)
+    public async Task SetKeyValue(string accountName, string key, string value, string subscriptionId, string? tenant = null, RetryPolicyArguments? retryPolicy = null, string? label = null)
     {
         ValidateRequiredParameters(accountName, key, value, subscriptionId);
-        var client = await GetConfigurationClient(accountName, subscriptionId, tenantId, retryPolicy);
+        var client = await GetConfigurationClient(accountName, subscriptionId, tenant, retryPolicy);
         await client.SetConfigurationSettingAsync(key, value, label, cancellationToken: default);
     }
 
-    public async Task DeleteKeyValue(string accountName, string key, string subscriptionId, string? tenantId = null, RetryPolicyArguments? retryPolicy = null, string? label = null)
+    public async Task DeleteKeyValue(string accountName, string key, string subscriptionId, string? tenant = null, RetryPolicyArguments? retryPolicy = null, string? label = null)
     {
         ValidateRequiredParameters(accountName, key, subscriptionId);
-        var client = await GetConfigurationClient(accountName, subscriptionId, tenantId, retryPolicy);
+        var client = await GetConfigurationClient(accountName, subscriptionId, tenant, retryPolicy);
         await client.DeleteConfigurationSettingAsync(key, label, cancellationToken: default);
     }
 
-    private async Task SetKeyValueReadOnlyState(string accountName, string key, string subscriptionId, string? tenantId, RetryPolicyArguments? retryPolicy, string? label, bool isReadOnly)
+    private async Task SetKeyValueReadOnlyState(string accountName, string key, string subscriptionId, string? tenant, RetryPolicyArguments? retryPolicy, string? label, bool isReadOnly)
     {
         ValidateRequiredParameters(accountName, key, subscriptionId);
-        var client = await GetConfigurationClient(accountName, subscriptionId, tenantId, retryPolicy);
+        var client = await GetConfigurationClient(accountName, subscriptionId, tenant, retryPolicy);
         await client.SetReadOnlyAsync(key, label, isReadOnly, cancellationToken: default);
     }
 
-    private async Task<ConfigurationClient> GetConfigurationClient(string accountName, string subscriptionId, string? tenantId, RetryPolicyArguments? retryPolicy)
+    private async Task<ConfigurationClient> GetConfigurationClient(string accountName, string subscriptionId, string? tenant, RetryPolicyArguments? retryPolicy)
     {
-        var subscription = await _subscriptionService.GetSubscription(subscriptionId, tenantId, retryPolicy);
+        var subscription = await _subscriptionService.GetSubscription(subscriptionId, tenant, retryPolicy);
         var configStore = await FindAppConfigStore(subscription, accountName, subscriptionId);
         var endpoint = configStore.Data.Endpoint;
-        var credential = GetCredential(tenantId);
+        var credential = GetCredential(tenant);
         return new ConfigurationClient(new Uri(endpoint), credential);
     }
 

@@ -28,20 +28,20 @@ public class WorkspaceListCommand : BaseCommandWithSubscription<WorkspaceListArg
 
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
-        var options = BindArguments(parseResult);
+        var args = BindArguments(parseResult);
 
         try
         {
-            if (!await ProcessArgumentChain(context, options))
+            if (!await ProcessArgumentChain(context, args))
             {
                 return context.Response;
             }
 
             var monitorService = context.GetService<IMonitorService>();
             var workspaces = await monitorService.ListWorkspaces(
-                options.Subscription!,
-                options.TenantId,
-                options.RetryPolicy);
+                args.Subscription!,
+                args.Tenant,
+                args.RetryPolicy);
 
             context.Response.Results = workspaces?.Count > 0 ?
                 new { workspaces } :

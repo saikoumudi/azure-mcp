@@ -13,14 +13,14 @@ public static class ArgumentDefinitions
 
     public static class Common
     {
-        public const string TenantIdName = "tenant-id";
+        public const string TenantName = "tenant";
         public const string SubscriptionName = "subscription";
         public const string ResourceGroupName = "resource-group";
         public const string AuthMethodName = "auth-method";
 
-        public static readonly ArgumentDefinition<string> TenantId = new(
-            TenantIdName,
-            "The Azure Active Directory (tenant) ID. This is a unique identifier for your Azure AD instance.",
+        public static readonly ArgumentDefinition<string> Tenant = new(
+            TenantName,
+            "The Azure Active Directory tenant ID or name. This can be either the GUID identifier or the display name of your Azure AD tenant.",
             required: false
         );
 

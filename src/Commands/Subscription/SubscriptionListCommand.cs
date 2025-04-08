@@ -19,7 +19,7 @@ public class SubscriptionListCommand : BaseSubscriptionCommand<SubscriptionListA
 
         // Instead, we'll manually add only the tenant ID argument
         _argumentChain.Clear(); // Clear any existing arguments
-        _argumentChain.Add(CreateTenantIdArgument());
+        _argumentChain.Add(CreateTenantArgument());
         // Deliberately NOT adding subscription ID or auth method arguments
     }
 
@@ -28,7 +28,7 @@ public class SubscriptionListCommand : BaseSubscriptionCommand<SubscriptionListA
     {
         var command = new Command(
             "list",
-            $"List all Azure subscriptions accessible to your account. Optionally specify {ArgumentDefinitions.Common.TenantIdName} " +
+            $"List all Azure subscriptions accessible to your account. Optionally specify {ArgumentDefinitions.Common.TenantName} " +
             $"and {ArgumentDefinitions.Common.AuthMethodName}. Results include subscription names and IDs, returned as a JSON array.");
 
         // Add both tenant and auth method options
@@ -47,7 +47,7 @@ public class SubscriptionListCommand : BaseSubscriptionCommand<SubscriptionListA
 
         if (parseResult != null)
         {
-            args.TenantId = parseResult.GetValueForOption(_tenantOption);
+            args.Tenant = parseResult.GetValueForOption(_tenantOption);
             args.AuthMethod = parseResult.GetValueForOption(_authMethodOption);
 
             if (parseResult.HasAnyRetryOptions())
@@ -61,20 +61,20 @@ public class SubscriptionListCommand : BaseSubscriptionCommand<SubscriptionListA
 
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult commandOptions)
     {
-        var options = BindArguments(commandOptions);
+        var args = BindArguments(commandOptions);
 
         try
         {
             // Process the argument chain and return early if any required arguments are missing
-            if (!await ProcessArgumentChain(context, options))
+            if (!await ProcessArgumentChain(context, args))
             {
                 return context.Response;
             }
 
             // All required arguments are provided, execute the command
             var subscriptionService = context.GetService<ISubscriptionService>();
-            var subscriptions = await subscriptionService.GetSubscriptions(options.TenantId,
-                options.RetryPolicy);
+            var subscriptions = await subscriptionService.GetSubscriptions(args.Tenant,
+                args.RetryPolicy);
 
             context.Response.Results = subscriptions?.Count > 0 ? new { subscriptions } : null;
         }

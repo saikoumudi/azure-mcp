@@ -66,26 +66,26 @@ public class KeyValueSetCommand : BaseKeyValueCommand<KeyValueSetArguments>
 
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
-        var options = BindArguments(parseResult);
+        var args = BindArguments(parseResult);
 
         try
         {
-            if (!await ProcessArgumentChain(context, options))
+            if (!await ProcessArgumentChain(context, args))
             {
                 return context.Response;
             }
 
             var appConfigService = context.GetService<IAppConfigService>();
             await appConfigService.SetKeyValue(
-                options.Account!,
-                options.Key!,
-                options.Value!,
-                options.Subscription!,
-                options.TenantId,
-                options.RetryPolicy,
-                options.Label);
+                args.Account!,
+                args.Key!,
+                args.Value!,
+                args.Subscription!,
+                args.Tenant,
+                args.RetryPolicy,
+                args.Label);
 
-            context.Response.Results = new { key = options.Key, value = options.Value, label = options.Label };
+            context.Response.Results = new { key = args.Key, value = args.Value, label = args.Label };
         }
         catch (Exception ex)
         {

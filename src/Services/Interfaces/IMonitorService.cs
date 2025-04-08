@@ -11,20 +11,19 @@ public interface IMonitorService
         string workspace,
         string query,
         int timeSpanDays = 1,
-        string? tenantId = null,
+        string? tenant = null,
         RetryPolicyArguments? retryPolicy = null);
 
     Task<List<string>> ListTables(
         string subscription,
         string resourceGroup,
-        string workspace,
-        string? tableType = "CustomLog",
-        string? tenantId = null,
+        string workspace, string? tableType = "CustomLog",
+        string? tenant = null,
         RetryPolicyArguments? retryPolicy = null);
 
     Task<List<WorkspaceInfo>> ListWorkspaces(
         string subscription,
-        string? tenantId = null,
+        string? tenant = null,
         RetryPolicyArguments? retryPolicy = null);
 
     Task<object> QueryLogs(
@@ -32,8 +31,7 @@ public interface IMonitorService
         string workspace,
         string query,
         string table,
-        int? hours = 24,
-        int? limit = 20,
-        string? tenantId = null,
+        int? hours = 24, int? limit = 20,
+        string? tenant = null,
         RetryPolicyArguments? retryPolicy = null);
 }

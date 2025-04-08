@@ -179,6 +179,7 @@ public class ServiceStartCommand : ICommand
         services.AddSingleton(rootServiceProvider.GetRequiredService<CommandFactory>());
         services.AddSingleton(rootServiceProvider.GetRequiredService<ICacheService>());
         services.AddSingleton(rootServiceProvider.GetRequiredService<ISubscriptionService>());
+        services.AddSingleton(rootServiceProvider.GetRequiredService<ITenantService>());
         services.AddSingleton(rootServiceProvider.GetRequiredService<IStorageService>());
         services.AddSingleton(rootServiceProvider.GetRequiredService<ICosmosService>());
         services.AddSingleton(rootServiceProvider.GetRequiredService<IMonitorService>());

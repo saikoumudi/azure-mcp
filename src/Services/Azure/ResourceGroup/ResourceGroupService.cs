@@ -12,15 +12,15 @@ public class ResourceGroupService(ICacheService cacheService, ISubscriptionServi
     private const string CACHE_KEY = "resourcegroups";
     private static readonly TimeSpan CACHE_DURATION = TimeSpan.FromHours(1);
 
-    public async Task<List<ResourceGroupInfo>> GetResourceGroups(string subscription, string? tenantId = null, RetryPolicyArguments? retryPolicy = null)
+    public async Task<List<ResourceGroupInfo>> GetResourceGroups(string subscription, string? tenant = null, RetryPolicyArguments? retryPolicy = null)
     {
         ValidateRequiredParameters(subscription);
 
-        var subscriptionResource = await _subscriptionService.GetSubscription(subscription, tenantId, retryPolicy);
+        var subscriptionResource = await _subscriptionService.GetSubscription(subscription, tenant, retryPolicy);
         var subscriptionId = subscriptionResource.Data.SubscriptionId;
 
         // Try to get from cache first
-        var cacheKey = $"{CACHE_KEY}_{subscriptionId}_{tenantId ?? "default"}";
+        var cacheKey = $"{CACHE_KEY}_{subscriptionId}_{tenant ?? "default"}";
         var cachedResults = await _cacheService.GetAsync<List<ResourceGroupInfo>>(cacheKey, CACHE_DURATION);
         if (cachedResults != null)
         {
@@ -49,15 +49,15 @@ public class ResourceGroupService(ICacheService cacheService, ISubscriptionServi
         }
     }
 
-    public async Task<ResourceGroupInfo?> GetResourceGroup(string subscription, string resourceGroupName, string? tenantId = null, RetryPolicyArguments? retryPolicy = null)
+    public async Task<ResourceGroupInfo?> GetResourceGroup(string subscription, string resourceGroupName, string? tenant = null, RetryPolicyArguments? retryPolicy = null)
     {
         ValidateRequiredParameters(subscription, resourceGroupName);
 
-        var subscriptionResource = await _subscriptionService.GetSubscription(subscription, tenantId, retryPolicy);
+        var subscriptionResource = await _subscriptionService.GetSubscription(subscription, tenant, retryPolicy);
         var subscriptionId = subscriptionResource.Data.SubscriptionId;
 
         // Try to get from cache first
-        var cacheKey = $"{CACHE_KEY}_{subscriptionId}_{tenantId ?? "default"}";
+        var cacheKey = $"{CACHE_KEY}_{subscriptionId}_{tenant ?? "default"}";
         var cachedResults = await _cacheService.GetAsync<List<ResourceGroupInfo>>(cacheKey, CACHE_DURATION);
         if (cachedResults != null)
         {
@@ -66,7 +66,7 @@ public class ResourceGroupService(ICacheService cacheService, ISubscriptionServi
 
         try
         {
-            var rg = await GetResourceGroupResource(subscription, resourceGroupName, tenantId, retryPolicy);
+            var rg = await GetResourceGroupResource(subscription, resourceGroupName, tenant, retryPolicy);
             if (rg == null)
             {
                 return null;
@@ -83,13 +83,13 @@ public class ResourceGroupService(ICacheService cacheService, ISubscriptionServi
         }
     }
 
-    public async Task<ResourceGroupResource?> GetResourceGroupResource(string subscription, string resourceGroupName, string? tenantId = null, RetryPolicyArguments? retryPolicy = null)
+    public async Task<ResourceGroupResource?> GetResourceGroupResource(string subscription, string resourceGroupName, string? tenant = null, RetryPolicyArguments? retryPolicy = null)
     {
         ValidateRequiredParameters(subscription, resourceGroupName);
 
         try
         {
-            var subscriptionResource = await _subscriptionService.GetSubscription(subscription, tenantId, retryPolicy);
+            var subscriptionResource = await _subscriptionService.GetSubscription(subscription, tenant, retryPolicy);
             var resourceGroupResponse = await subscriptionResource.GetResourceGroups()
                 .GetAsync(resourceGroupName)
                 .ConfigureAwait(false);

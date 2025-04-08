@@ -69,23 +69,23 @@ public class KeyValueListCommand : BaseAppConfigCommand<KeyValueListArguments>
 
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
-        var options = BindArguments(parseResult);
+        var args = BindArguments(parseResult);
 
         try
         {
-            if (!await ProcessArgumentChain(context, options))
+            if (!await ProcessArgumentChain(context, args))
             {
                 return context.Response;
             }
 
             var appConfigService = context.GetService<IAppConfigService>();
             var settings = await appConfigService.ListKeyValues(
-                options.Account!,
-                options.Subscription!,
-                options.Key,
-                options.Label,
-                options.TenantId,
-                options.RetryPolicy);
+                args.Account!,
+                args.Subscription!,
+                args.Key,
+                args.Label,
+                args.Tenant,
+                args.RetryPolicy);
 
             context.Response.Results = settings?.Count > 0 ?
                 new { settings } :

@@ -32,7 +32,7 @@ public abstract class BaseCommand<TArgs> : ICommand where TArgs : BaseArguments,
     protected BaseCommand()
     {
         // Initialize options
-        _tenantOption = ArgumentDefinitions.Common.TenantId.ToOption();
+        _tenantOption = ArgumentDefinitions.Common.Tenant.ToOption();
         _subscriptionOption = ArgumentDefinitions.Common.Subscription.ToOption();
         _authMethodOption = ArgumentDefinitions.Common.AuthMethod.ToOption();
         _resourceGroupOption = ArgumentDefinitions.Common.ResourceGroup.ToOption();
@@ -56,14 +56,20 @@ public abstract class BaseCommand<TArgs> : ICommand where TArgs : BaseArguments,
             .WithDefaultValue(AuthMethodArguments.GetDefaultAuthMethod().ToString())
             .WithIsRequired(false);
     }
-
-    protected ArgumentChain<TArgs> CreateTenantIdArgument()
+    protected ArgumentChain<TArgs> CreateTenantArgument()
     {
         return ArgumentChain<TArgs>
-            .Create(ArgumentDefinitions.Common.TenantId.Name, ArgumentDefinitions.Common.TenantId.Description)
-            .WithCommandExample(ArgumentDefinitions.GetCommandExample(GetCommandPath(), ArgumentDefinitions.Common.TenantId))
-            .WithValueAccessor(args => args.TenantId ?? string.Empty)
-            .WithIsRequired(false);
+            .Create(ArgumentDefinitions.Common.Tenant.Name, ArgumentDefinitions.Common.Tenant.Description)
+            .WithCommandExample(ArgumentDefinitions.GetCommandExample(GetCommandPath(), ArgumentDefinitions.Common.Tenant))
+            .WithValueAccessor(args => args.Tenant ?? string.Empty)
+            .WithValueLoader(async (context, args) => await BaseCommand<TArgs>.GetTenantOptions(context))
+            .WithIsRequired(ArgumentDefinitions.Common.Tenant.Required);
+    }
+
+    private static async Task<List<ArgumentOption>> GetTenantOptions(CommandContext context)
+    {
+        var tenantService = context.GetService<ITenantService>();
+        return await tenantService.GetTenants();
     }
 
     protected ArgumentChain<TArgs>? CreateResourceGroupArgument()
@@ -320,7 +326,7 @@ public abstract class BaseCommand<TArgs> : ICommand where TArgs : BaseArguments,
     {
         var args = new TArgs
         {
-            TenantId = parseResult.GetValueForOption(_tenantOption),
+            Tenant = parseResult.GetValueForOption(_tenantOption),
             AuthMethod = parseResult.GetValueForOption(_authMethodOption)
         };
 

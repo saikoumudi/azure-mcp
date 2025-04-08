@@ -6,7 +6,7 @@ namespace AzureMCP.Services.Interfaces;
 
 public interface IResourceGroupService
 {
-    Task<List<ResourceGroupInfo>> GetResourceGroups(string subscriptionId, string? tenantId = null, RetryPolicyArguments? retryPolicy = null);
-    Task<ResourceGroupInfo?> GetResourceGroup(string subscriptionId, string resourceGroupName, string? tenantId = null, RetryPolicyArguments? retryPolicy = null);
-    Task<ResourceGroupResource?> GetResourceGroupResource(string subscriptionId, string resourceGroupName, string? tenantId = null, RetryPolicyArguments? retryPolicy = null);
+    Task<List<ResourceGroupInfo>> GetResourceGroups(string subscriptionId, string? tenant = null, RetryPolicyArguments? retryPolicy = null);
+    Task<ResourceGroupInfo?> GetResourceGroup(string subscriptionId, string resourceGroupName, string? tenant = null, RetryPolicyArguments? retryPolicy = null);
+    Task<ResourceGroupResource?> GetResourceGroupResource(string subscriptionId, string resourceGroupName, string? tenant = null, RetryPolicyArguments? retryPolicy = null);
 }

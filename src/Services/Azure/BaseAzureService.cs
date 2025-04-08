@@ -1,19 +1,29 @@
 using Azure.Identity;
 using Azure.ResourceManager;
 using AzureMCP.Arguments;
+using AzureMCP.Services.Interfaces;
 
 namespace AzureMCP.Services.Azure;
 
-public abstract class BaseAzureService
+public abstract class BaseAzureService(ITenantService? tenantService = null)
 {
     private DefaultAzureCredential? _credential;
     private string? _lastTenantId;
     private ArmClient? _armClient;
     private string? _lastArmClientTenantId;
     private RetryPolicyArguments? _lastRetryPolicy;
+    private readonly ITenantService? _tenantService = tenantService;
 
-    protected DefaultAzureCredential GetCredential(string? tenantId = null)
+    protected async Task<string?> ResolveTenantId(string? tenant)
     {
+        if (tenant == null || _tenantService == null) return tenant;
+        return await _tenantService.GetTenantId(tenant);
+    }
+
+    protected DefaultAzureCredential GetCredential(string? tenant = null)
+    {
+        var tenantId = tenant != null ? Task.Run(() => ResolveTenantId(tenant)).GetAwaiter().GetResult() : null;
+
         // Return cached credential if it exists and tenant ID hasn't changed
         if (_credential != null && _lastTenantId == tenantId)
         {
@@ -39,10 +49,12 @@ public abstract class BaseAzureService
     /// <summary>
     /// Creates an Azure Resource Manager client with optional retry policy
     /// </summary>
-    /// <param name="tenantId">Optional Azure tenant ID</param>
+    /// <param name="tenant">Optional Azure tenant ID or name</param>
     /// <param name="retryPolicy">Optional retry policy configuration</param>
-    protected ArmClient CreateArmClient(string? tenantId = null, RetryPolicyArguments? retryPolicy = null)
+    protected async Task<ArmClient> CreateArmClientAsync(string? tenant = null, RetryPolicyArguments? retryPolicy = null)
     {
+        var tenantId = await ResolveTenantId(tenant);
+
         // Return cached client if parameters match
         if (_armClient != null &&
             _lastArmClientTenantId == tenantId &&

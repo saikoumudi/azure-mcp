@@ -38,22 +38,22 @@ public class BlobListCommand : BaseContainerCommand<BlobListArguments>
 
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult commandOptions)
     {
-        var options = BindArguments(commandOptions);
+        var args = BindArguments(commandOptions);
 
         try
         {
-            if (!await ProcessArgumentChain(context, options))
+            if (!await ProcessArgumentChain(context, args))
             {
                 return context.Response;
             }
 
             var storageService = context.GetService<IStorageService>();
             var blobs = await storageService.ListBlobs(
-                options.Account!,
-                options.Container!,
-                options.Subscription!,
-                options.TenantId,
-                options.RetryPolicy);
+                args.Account!,
+                args.Container!,
+                args.Subscription!,
+                args.Tenant,
+                args.RetryPolicy);
 
             context.Response.Results = blobs?.Count > 0 ? new { blobs } : null;
         }

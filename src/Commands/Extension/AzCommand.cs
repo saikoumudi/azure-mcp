@@ -110,16 +110,16 @@ public class AzCommand : BaseCommand<AzArguments>
 
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
-        var options = BindArguments(parseResult);
+        var args = BindArguments(parseResult);
 
         try
         {
-            if (!await ProcessArgumentChain(context, options))
+            if (!await ProcessArgumentChain(context, args))
             {
                 return context.Response;
             }
 
-            var command = options.Command ?? throw new ArgumentNullException(nameof(options.Command), "Command cannot be null");
+            var command = args.Command ?? throw new ArgumentNullException(nameof(args.Command), "Command cannot be null");
             var processService = context.GetService<IExternalProcessService>();
 
             var azPath = FindAzCliPath() ?? throw new FileNotFoundException("Azure CLI executable not found in PATH or common installation locations. Please ensure Azure CLI is installed.");

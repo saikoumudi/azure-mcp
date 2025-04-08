@@ -6,7 +6,9 @@ using System.Text.Json;
 
 namespace AzureMCP.Services.Azure.Cosmos;
 
-public class CosmosService(ISubscriptionService subscriptionService) : BaseAzureService, ICosmosService, IDisposable
+public class CosmosService(
+    ISubscriptionService subscriptionService,
+    ITenantService tenantService) : BaseAzureService(tenantService), ICosmosService, IDisposable
 {
     private const string CosmosBaseUri = "https://{0}.documents.azure.com:443/";
     private CosmosClient? _cosmosClient;
@@ -16,12 +18,12 @@ public class CosmosService(ISubscriptionService subscriptionService) : BaseAzure
     private async Task<CosmosDBAccountResource> GetCosmosAccountAsync(
         string subscriptionId,
         string accountName,
-        string? tenantId = null,
+        string? tenant = null,
         RetryPolicyArguments? retryPolicy = null)
     {
         ValidateRequiredParameters(subscriptionId, accountName);
 
-        var subscription = await _subscriptionService.GetSubscription(subscriptionId, tenantId, retryPolicy);
+        var subscription = await _subscriptionService.GetSubscription(subscriptionId, tenant, retryPolicy);
 
         await foreach (var account in subscription.GetCosmosDBAccountsAsync())
         {
@@ -33,14 +35,14 @@ public class CosmosService(ISubscriptionService subscriptionService) : BaseAzure
         throw new Exception($"Cosmos DB account '{accountName}' not found in subscription '{subscriptionId}'");
     }
 
-    private async Task<CosmosClient> GetCosmosClientAsync(string accountName, string subscriptionId, string? tenantId = null, RetryPolicyArguments? retryPolicy = null)
+    private async Task<CosmosClient> GetCosmosClientAsync(string accountName, string subscriptionId, string? tenant = null, RetryPolicyArguments? retryPolicy = null)
     {
         ValidateRequiredParameters(accountName, subscriptionId);
 
         if (_cosmosClient != null)
             return _cosmosClient;
 
-        var cosmosAccount = await GetCosmosAccountAsync(subscriptionId, accountName, tenantId, retryPolicy);
+        var cosmosAccount = await GetCosmosAccountAsync(subscriptionId, accountName, tenant, retryPolicy);
         var keys = await cosmosAccount.GetKeysAsync();
 
         var clientOptions = new CosmosClientOptions { AllowBulkExecution = true };
@@ -59,11 +61,11 @@ public class CosmosService(ISubscriptionService subscriptionService) : BaseAzure
         return _cosmosClient;
     }
 
-    public async Task<List<string>> GetCosmosAccounts(string subscriptionId, string? tenantId = null, RetryPolicyArguments? retryPolicy = null)
+    public async Task<List<string>> GetCosmosAccounts(string subscriptionId, string? tenant = null, RetryPolicyArguments? retryPolicy = null)
     {
         ValidateRequiredParameters(subscriptionId);
 
-        var subscription = await _subscriptionService.GetSubscription(subscriptionId, tenantId, retryPolicy);
+        var subscription = await _subscriptionService.GetSubscription(subscriptionId, tenant, retryPolicy);
         var accounts = new List<string>();
         try
         {
@@ -83,11 +85,11 @@ public class CosmosService(ISubscriptionService subscriptionService) : BaseAzure
         return accounts;
     }
 
-    public async Task<List<string>> ListDatabases(string accountName, string subscriptionId, string? tenantId = null, RetryPolicyArguments? retryPolicy = null)
+    public async Task<List<string>> ListDatabases(string accountName, string subscriptionId, string? tenant = null, RetryPolicyArguments? retryPolicy = null)
     {
         ValidateRequiredParameters(accountName, subscriptionId);
 
-        var client = await GetCosmosClientAsync(accountName, subscriptionId, tenantId, retryPolicy);
+        var client = await GetCosmosClientAsync(accountName, subscriptionId, tenant, retryPolicy);
         var databases = new List<string>();
 
         try
@@ -107,11 +109,11 @@ public class CosmosService(ISubscriptionService subscriptionService) : BaseAzure
         return databases;
     }
 
-    public async Task<List<string>> ListContainers(string accountName, string databaseName, string subscriptionId, string? tenantId = null, RetryPolicyArguments? retryPolicy = null)
+    public async Task<List<string>> ListContainers(string accountName, string databaseName, string subscriptionId, string? tenant = null, RetryPolicyArguments? retryPolicy = null)
     {
         ValidateRequiredParameters(accountName, databaseName, subscriptionId);
 
-        var client = await GetCosmosClientAsync(accountName, subscriptionId, tenantId, retryPolicy);
+        var client = await GetCosmosClientAsync(accountName, subscriptionId, tenant, retryPolicy);
         var containers = new List<string>();
 
         try
@@ -138,12 +140,12 @@ public class CosmosService(ISubscriptionService subscriptionService) : BaseAzure
         string containerName,
         string? query,
         string subscriptionId,
-        string? tenantId = null,
+        string? tenant = null,
         RetryPolicyArguments? retryPolicy = null)
     {
         ValidateRequiredParameters(accountName, databaseName, containerName, subscriptionId);
 
-        var client = await GetCosmosClientAsync(accountName, subscriptionId, tenantId, retryPolicy);
+        var client = await GetCosmosClientAsync(accountName, subscriptionId, tenant, retryPolicy);
 
         try
         {

@@ -60,7 +60,7 @@ public class ContainerDetailsCommand : BaseContainerCommand<ContainerDetailsArgu
                 args.Account!,
                 args.Container!,
                 args.Subscription!,
-                args.TenantId,
+                args.Tenant,
                 args.RetryPolicy
             );
 
