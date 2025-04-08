@@ -113,9 +113,6 @@ If you don't have a Windows machine, you can follow the manual steps listed in t
 1. Try a prompt that tells the agent to use the Azure MCP Server, such as "List my Azure Storage containers."
 1. The agent should be able to use the Azure MCP Server tools to complete your query.
 
-# Using the Azure MCP Server in Cursor
-
-Cursor support is not available at the moment - we are investigating usage, stay tuned.
 
 ## Contributing
 
