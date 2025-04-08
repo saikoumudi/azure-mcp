@@ -61,9 +61,11 @@ For detailed command documentation and examples, see [Azure MCP Commands](docs/a
 
 # Install Azure MCP Server in VS Code with GitHub Copilot
 
-1. Install [VS Code Insiders](https://code.visualstudio.com/insiders/).
-1. Install the pre-release versions of the [GitHub Copilot](https://marketplace.visualstudio.com/items?itemName=GitHub.copilot) and [GitHub Copilot Chat](https://marketplace.visualstudio.com/items?itemName=GitHub.copilot-chat) extensions in VS Code Insiders.
-1. Open VS Code Insiders in an empty folder.
+1. Install either the stable or Insiders release of VS Code.
+   * [Stable release](https://code.visualstudio.com/download)
+   * [Insiders release](https://code.visualstudio.com/insiders)
+2. Install [GitHub Copilot](https://marketplace.visualstudio.com/items?itemName=GitHub.copilot) and [GitHub Copilot Chat](https://marketplace.visualstudio.com/items?itemName=GitHub.copilot-chat) extensions.
+3. Open VS Code in an empty folder.
 
 ## Temp Auth Setup for Pre-Release Version
 
@@ -85,7 +87,7 @@ https://github.com/Azure/azure-mcp/blob/main/eng/scripts/New-Npmrc.ps1
 
 If you don't have a Windows machine, you can follow the manual steps listed in the "Other" section of the feed's [connection instructions for npm](https://dev.azure.com/azure-sdk/internal/_artifacts/feed/azure-sdk-for-js-pr/connect)
 
-## Manual Install:
+## Manual Install
 
 1. Add `.vscode/mcp.json`:
 
@@ -109,9 +111,10 @@ If you don't have a Windows machine, you can follow the manual steps listed in t
 
 ## Test the Azure MCP Server
 
-1. Open GitHub Copilot and switch to Agent mode. You should see Azure MCP Server in the list of tools
-1. Try a prompt that tells the agent to use the Azure MCP Server, such as "List my Azure Storage containers."
-1. The agent should be able to use the Azure MCP Server tools to complete your query.
+1. Open GitHub Copilot and [switch to Agent mode](https://code.visualstudio.com/docs/copilot/chat/chat-agent-mode).
+2. You should see Azure MCP Server in the list of tools.
+3. Try a prompt that tells the agent to use the Azure MCP Server, such as "List my Azure Storage containers."
+4. The agent should be able to use the Azure MCP Server tools to complete your query.
 
 
 ## Contributing
