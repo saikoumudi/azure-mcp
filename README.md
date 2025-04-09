@@ -1,5 +1,7 @@
 # Azure MCP Server
 
+[![Install with NPX in VS Code](https://img.shields.io/badge/VS_Code-Install_Azure_MCP_Server-0098FF?style=flat-square&logo=visualstudiocode&logoColor=white)](https://insiders.vscode.dev/redirect/mcp/install?name=Azure%20MCP%20Server&config=%7B%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22-y%22%2C%22--registry%22%2C%22https%3A%2F%2Fpkgs.dev.azure.com%2Fazure-sdk%2Finternal%2F_packaging%2Fazure-sdk-for-js-pr%2Fnpm%2Fregistry%2F%22%2C%22%40azure%2Fmcp%40latest%22%2C%22server%22%2C%22start%22%5D%7D) [![Install with NPX in VS Code Insiders](https://img.shields.io/badge/VS_Code_Insiders-Install_Azure_MCP_Server-24bfa5?style=flat-square&logo=visualstudiocode&logoColor=white)](https://insiders.vscode.dev/redirect/mcp/install?name=Azure%20MCP%20Server&config=%7B%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22-y%22%2C%22--registry%22%2C%22https%3A%2F%2Fpkgs.dev.azure.com%2Fazure-sdk%2Finternal%2F_packaging%2Fazure-sdk-for-js-pr%2Fnpm%2Fregistry%2F%22%2C%22%40azure%2Fmcp%40latest%22%2C%22server%22%2C%22start%22%5D%7D&quality=insiders)
+
 An MCP Server and command-line interface designed for AI agents to interact with Azure services through standardized JSON communication patterns, following the Model Context Protocol (MCP) specification.
 
 ## Overview
