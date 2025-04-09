@@ -279,5 +279,16 @@ public static class ArgumentDefinitions
                 required: true
             );
         }
+
+        public static class Azd
+        {
+            public const string CommandName = "command";
+
+            public static readonly ArgumentDefinition<string> Command = new(
+                CommandName,
+                "The Azure Developer CLI command to execute (without the 'azd' prefix). For example: 'up'.",
+                required: true
+            );
+        }
     }
 }

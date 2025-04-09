@@ -1,0 +1,257 @@
+using AzureMCP.Arguments.Extension;
+using AzureMCP.Models.Argument;
+using AzureMCP.Models.Command;
+using AzureMCP.Services.Interfaces;
+using ModelContextProtocol.Server;
+using System.CommandLine;
+using System.CommandLine.Parsing;
+using System.Runtime.InteropServices;
+
+namespace AzureMCP.Commands.Extension;
+
+public class AzdCommand : BaseCommand<AzdArguments>
+{
+    private readonly Option<string> _commandOption = ArgumentDefinitions.Extension.Azd.Command.ToOption();
+    private readonly int _processTimeoutSeconds;
+    private static string? _cachedAzdPath;
+
+    private static readonly string[] AzdCliPaths =
+    [
+        // Windows
+        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "AppData", "Local", "Programs", "Azure Dev CLI"),
+        // Linux and MacOS
+        Path.Combine("usr", "local", "bin"),
+    ];
+
+    public AzdCommand(int processTimeoutSeconds = 300) : base()
+    {
+        _processTimeoutSeconds = processTimeoutSeconds;
+
+        // Register the command argument in the chain
+        AddArgumentToChain(CreateCommandArgument());
+    }
+
+    protected ArgumentChain<AzdArguments> CreateCommandArgument() =>
+        ArgumentChain<AzdArguments>
+            .Create(ArgumentDefinitions.Extension.Azd.Command.Name, ArgumentDefinitions.Extension.Azd.Command.Description)
+            .WithCommandExample(ArgumentDefinitions.GetCommandExample(GetCommandPath(), ArgumentDefinitions.Extension.Azd.Command))
+            .WithValueAccessor(args => args.Command ?? string.Empty)
+            .WithIsRequired(ArgumentDefinitions.Extension.Azd.Command.Required);
+
+    [McpServerTool(Destructive = true, ReadOnly = false)]
+    public override Command GetCommand()
+    {
+        var command = new Command(
+            "azd",
+            "Your job is to help accelerate getting users projects up and running in their Azure environments by executing the Azure Developer CLI (azd) commands.\n" +
+            "This tool can help find application templates based on their requirements, manage azd environments and easily provision and deploy them to their Azure environment \n\n" +
+            "You have the following rules:\n\n" +
+            "- Use this tool to execute ALL azd commands: Example: 'up'.\n" +
+            "- If the workspaces contains an 'azure.yaml' files they likely already have an azd project, otherwise you can initialize a new one by calling 'init'.\n" +
+            "- Always confirm with the user before performing destructive commands like 'up', 'down', 'provision' or 'deploy'.\n" +
+            "- Always pass the '--cwd' arguments with the fully qualified path to the workspace.\n" +
+            "- When a command requires an environment, use the '-e' argument to specify the environment name.\n" +
+            "- After executing a command the tool may propose next steps. Confirm if the user wanted to proceed with any suggestions.\n" +
+            "- When an error occurs, try to resolve the error by prompting the user for missing information and retrying the command.\n" +
+            "- This tool can ONLY write code that interacts with Azure. It CANNOT generate charts, tables, graphs, etc.\n" +
+            "- This tool can delete or modify resources in your Azure environment. Always be cautious and include appropriate warnings when providing commands to users.\n\n" +
+            "Be concise, professional and to the point. Do not give generic advice, always reply with detailed & contextual data sourced from the current Azure environment.");
+
+        command.AddOption(_commandOption);
+        return command;
+    }
+
+    protected override AzdArguments BindArguments(ParseResult parseResult)
+    {
+        var args = base.BindArguments(parseResult);
+        args.Command = parseResult.GetValueForOption(_commandOption);
+        return args;
+    }
+
+    private static string? FindAzdCliPath()
+    {
+        // Return cached path if available and still exists
+        if (!string.IsNullOrEmpty(_cachedAzdPath) && File.Exists(_cachedAzdPath))
+        {
+            return _cachedAzdPath;
+        }
+
+        var isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+
+        // Add PATH environment directories followed by the common installation locations
+        // This will capture any custom AZD installations as well as standard installations.
+        var searchPaths = new List<string>();
+        var pathDirs = Environment.GetEnvironmentVariable("PATH")?.Split(Path.PathSeparator);
+        if (pathDirs != null)
+        {
+            searchPaths.AddRange(pathDirs);
+        }
+        
+        searchPaths.AddRange(AzdCliPaths);
+
+        foreach (var dir in searchPaths.Where(d => !string.IsNullOrEmpty(d)))
+        {
+            if (isWindows)
+            {
+                var cmdPath = Path.Combine(dir, "azd.exe");
+                if (File.Exists(cmdPath))
+                {
+                    _cachedAzdPath = cmdPath;
+                    return cmdPath;
+                }
+            }
+            else
+            {
+                var fullPath = Path.Combine(dir, "azd");
+                if (File.Exists(fullPath))
+                {
+                    _cachedAzdPath = fullPath;
+                    return fullPath;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
+    {
+        var args = BindArguments(parseResult);
+
+        try
+        {
+            if (!await ProcessArgumentChain(context, args))
+            {
+                return context.Response;
+            }
+
+            var command = args.Command ?? throw new ArgumentNullException(nameof(args.Command), "Command cannot be null");
+            // We need to always pass the --no-prompt flag to avoid prompting for user input and getting the process stuck
+            command += " --no-prompt";
+
+            var processService = context.GetService<IExternalProcessService>();
+            var azdPath = FindAzdCliPath() ?? throw new FileNotFoundException("Azure Developer CLI executable not found in PATH or common installation locations. Please ensure Azure Developer CLI is installed.");
+            var result = await processService.ExecuteAsync(azdPath, command, _processTimeoutSeconds);
+
+            if (string.IsNullOrWhiteSpace(result.Error) && result.ExitCode == 0)
+            {
+                return HandleSuccess(result, command, context.Response);
+            }
+            else
+            {
+                return HandleError(result, command, context.Response);
+            }
+        }
+        catch (Exception ex)
+        {
+            HandleException(context.Response, ex);
+        }
+
+        return context.Response;
+    }
+
+    private CommandResponse HandleSuccess(ProcessResult result, string command, CommandResponse response)
+    {
+        var contentResults = new List<string>();
+        if (!string.IsNullOrWhiteSpace(result.Output))
+        {
+            contentResults.Add(result.Output);
+        }
+
+        var commandArgs = command.Split(" ");
+
+        // Help the user decide what the next steps might be based on the command they just executed
+        switch (commandArgs[0])
+        {
+            case "init":
+                contentResults.Add(
+                    "Most common commands after initializing a template are the following:\n" +
+                    "- 'azd up': Provision and deploy the application.\n" +
+                    "- 'azd provision': Provision the infrastructure resources.\n" +
+                    "- 'azd deploy': Deploy the application code to the Azure infrastructure.\n"
+                );
+                break;
+            case "provision":
+                contentResults.Add(
+                    "Most common commands after provisioning the application are the following:\n" +
+                    "- 'azd deploy': Deploy the application code to the Azure infrastructure.\n"
+                );
+                break;
+            case "deploy":
+                contentResults.Add(
+                    "Most common commands after deploying the application are the following:\n" +
+                    "- 'azd monitor': Allows the user to monitor the running application and its resources.\n" +
+                    "- 'azd show': Displays the current state of the application and its resources.\n" +
+                    "- 'azd pipeline config': Allows the user to configure a CI/CD pipeline for the application.\n"
+                );
+                break;
+            case "up":
+                contentResults.Add(
+                    "Most common commands after provisioning the application are the following:\n" +
+                    "- 'azd pipeline' config: Allows the user to configure a CI/CD pipeline for the application.\n" +
+                    "- 'azd monitor': Allows the user to monitor the running application and its resources.\n"
+                );
+                break;
+        }
+
+        response.Results = contentResults;
+
+        return response;
+    }
+
+    private CommandResponse HandleError(ProcessResult result, string command, CommandResponse response)
+    {
+        var contentResults = new List<string>
+            {
+                result.Output
+            };
+
+        // Check for specific error messages and provide contextual help
+        if (result.Output.Contains("ERROR: no project exists"))
+        {
+            contentResults.Add(
+                "An azd project is required to run this command. Create a new project by calling 'azd init'"
+            );
+        }
+        else if (result.Output.Contains("ERROR: infrastructure has not been provisioned."))
+        {
+            contentResults.Add(
+                "The azd project has not been provisioned yet. Run 'azd provision' to create the Azure infrastructure resources."
+            );
+        }
+        else if (result.Output.Contains("not logged in") || result.Output.Contains("fetching current principal"))
+        {
+            contentResults.Add(
+                "User is not logged in our auth token is expired. Login by calling 'azd auth login'."
+            );
+        }
+        else if (result.Output.Contains("ERROR: no environment exists"))
+        {
+            contentResults.Add(
+                "An azd environment is required to run this command. Create a new environment by calling 'azd env new'\n" +
+                "- Prompt the user for the environment name if needed.\n"
+            );
+        }
+        else if (result.Output.Contains("no default response for prompt"))
+        {
+            contentResults.Add(
+                "The command requires user input. Prompt the user for the required information.\n" +
+                "- If missing Azure subscription use other tools to query and list available subscriptions for the user to select, then set the subscription ID (UUID) in the azd environment.\n" +
+                "- If missing Azure location, use other tools to query and list available locations for the user to select, then set the location name in the azd environment.\n" +
+                "- To set values in the azd environment use the command 'azd env set' command."
+            );
+        }
+        else if (result.Output.Contains("user denied delete confirmation"))
+        {
+            contentResults.Add(
+                "The command requires user confirmation to delete resources. Prompt the user for confirmation before proceeding.\n" +
+                "- If the user confirms, re-run the command with the '--force' flag to bypass the confirmation prompt.\n" +
+                "- To permanently delete the resources include the '--purge` flag\n"
+            );
+        }
+
+        response.Results = contentResults;
+
+        return response;
+    }
+}

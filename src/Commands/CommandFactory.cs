@@ -175,6 +175,7 @@ public class CommandFactory
         _rootGroup.AddSubGroup(extension);
 
         extension.AddCommand("az", new Extension.AzCommand());
+        extension.AddCommand("azd", new Extension.AzdCommand());
     }
 
     private void RegisterSubscriptionCommands()

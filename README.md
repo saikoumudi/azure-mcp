@@ -57,6 +57,12 @@ The Azure MCP Server provides tools for interacting with the following Azure ser
 - JSON output formatting
 - Cross-platform compatibility
 
+### Azure Developer CLI (azd) Extension
+
+- Execute Azure Developer CLI (azd) commands directly
+- Support for template discovery, template initialization, provisioning and deployment.
+- Cross-platform compatibility
+
 For detailed command documentation and examples, see [Azure MCP Commands](docs/azmcp-commands.md).
 
 # Install Azure MCP Server in VS Code with GitHub Copilot
