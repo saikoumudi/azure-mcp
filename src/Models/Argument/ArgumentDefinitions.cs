@@ -1,5 +1,5 @@
 using Azure.Core;
-using ModelContextProtocol.Protocol.Transport;
+using AzureMCP.Arguments.Server;
 
 namespace AzureMCP.Models.Argument;
 

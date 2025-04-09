@@ -31,6 +31,8 @@ public class AzureMcpServer(McpServerOptions serverOptions,
 
     public IServiceProvider? Services => _implementation?.Services;
 
+    public LoggingLevel? LoggingLevel => _implementation?.LoggingLevel;
+
     /// <summary>
     /// Sets the transport layer and runs the underlying MCP server.
     /// </summary>
@@ -93,5 +95,18 @@ public class AzureMcpServer(McpServerOptions serverOptions,
         }
 
         return _implementation.RunAsync(cancellationToken);
+    }
+
+    public IAsyncDisposable RegisterNotificationHandler(
+        string method, Func<JsonRpcNotification, CancellationToken, Task> handler)
+    {
+        if (_implementation is null)
+        {
+            throw new InvalidOperationException(
+                "Connect to the /sse endpoint before registering notification handlers. " +
+                "Handlers may also be registered when constructing the server via McpServerOptions.");
+        }
+
+        return _implementation.RegisterNotificationHandler(method, handler);
     }
 }

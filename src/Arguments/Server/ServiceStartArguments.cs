@@ -1,5 +1,4 @@
-﻿using ModelContextProtocol.Protocol.Transport;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace AzureMCP.Arguments.Server;
 
