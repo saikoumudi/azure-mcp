@@ -204,6 +204,9 @@ public sealed class AzdCommand(int processTimeoutSeconds = 300) : GlobalCommand<
 
     private static CommandResponse HandleError(ProcessResult result, string command, CommandResponse response)
     {
+        response.Status = 500;
+        response.Message = result.Error;
+
         var contentResults = new List<string>
             {
                 result.Output

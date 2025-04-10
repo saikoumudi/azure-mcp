@@ -98,7 +98,6 @@ public class ExternalProcessService : IExternalProcessService
         {
             var error = new
             {
-                Message = "Process execution failed",
                 result.ExitCode,
                 result.Error,
                 result.Command
@@ -119,7 +118,8 @@ public class ExternalProcessService : IExternalProcessService
 
     public void SetEnvironmentVariables(IDictionary<string, string> variables)
     {
-        if (variables == null) {
+        if (variables == null)
+        {
             return;
         }
 

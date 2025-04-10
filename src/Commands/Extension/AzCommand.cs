@@ -125,6 +125,13 @@ public sealed class AzCommand(int processTimeoutSeconds = 300) : GlobalCommand<A
 
             var azPath = FindAzCliPath() ?? throw new FileNotFoundException("Azure CLI executable not found in PATH or common installation locations. Please ensure Azure CLI is installed.");
             var result = await processService.ExecuteAsync(azPath, command, processTimeoutSeconds);
+
+            if (result.ExitCode != 0)
+            {
+                context.Response.Status = 500;
+                context.Response.Message = result.Error;
+            }
+
             context.Response.Results = processService.ParseJsonOutput(result);
         }
         catch (Exception ex)

@@ -49,7 +49,7 @@ class Program
     private static void ConfigureServices(IServiceCollection services)
     {
         services.AddMemoryCache();
-        services.AddLogging(builder => 
+        services.AddLogging(builder =>
         {
             builder.AddConsole();
             builder.SetMinimumLevel(LogLevel.Information);

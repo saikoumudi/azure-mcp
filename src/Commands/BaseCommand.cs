@@ -41,7 +41,12 @@ public abstract class BaseCommand : IBaseCommand
         // Don't clear arguments when handling exceptions
         response.Status = GetStatusCode(ex);
         response.Message = GetErrorMessage(ex);
-        response.Results = null;
+        response.Results = new
+        {
+            ex.Message,
+            ex.StackTrace,
+            Type = ex.GetType().Name
+        };
     }
 
     protected virtual string GetErrorMessage(Exception ex) => ex.Message;
