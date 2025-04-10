@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 using AzureMCP.Arguments.Storage.Blob;
 using AzureMCP.Commands.Storage.Blob.Container;
 using AzureMCP.Models.Command;

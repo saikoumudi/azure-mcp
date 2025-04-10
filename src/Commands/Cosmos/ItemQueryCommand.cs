@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 using AzureMCP.Arguments.Cosmos;
 using AzureMCP.Models.Argument;
 using AzureMCP.Models.Command;

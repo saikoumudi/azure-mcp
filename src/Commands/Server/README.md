@@ -1,3 +1,6 @@
+<!-- Copyright (c) Microsoft Corporation.
+<!-- Licensed under the MIT License. -->
+
 STDIO
 dotnet build && npx @modelcontextprotocol/inspector ./bin/Debug/net9.0/azmcp.exe server start
 

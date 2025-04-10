@@ -1,4 +1,7 @@
-﻿using Azure.Core;
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
+using Azure.Core;
 using AzureMCP.Services.Azure;
 using System.Diagnostics.CodeAnalysis;
 using Xunit;

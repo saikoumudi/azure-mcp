@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 using Azure.ResourceManager.CosmosDB;
 using AzureMCP.Arguments;
 using AzureMCP.Services.Interfaces;

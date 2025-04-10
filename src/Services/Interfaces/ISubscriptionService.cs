@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 using Azure.ResourceManager.Resources;
 using AzureMCP.Arguments;
 using AzureMCP.Models.Argument;

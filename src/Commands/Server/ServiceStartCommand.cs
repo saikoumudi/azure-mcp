@@ -1,4 +1,7 @@
-﻿using AzureMCP.Arguments.Server;
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
+using AzureMCP.Arguments.Server;
 using AzureMCP.Models;
 using AzureMCP.Models.Argument;
 using AzureMCP.Models.Command;

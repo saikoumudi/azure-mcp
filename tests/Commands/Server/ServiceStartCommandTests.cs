@@ -1,4 +1,7 @@
-﻿using AzureMCP.Models.Argument;
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
+using AzureMCP.Models.Argument;
 using AzureMCP.Services.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;

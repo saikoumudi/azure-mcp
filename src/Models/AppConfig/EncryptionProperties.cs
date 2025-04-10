@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 namespace AzureMCP.Models.AppConfig;
 
 public class EncryptionProperties

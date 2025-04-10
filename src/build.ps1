@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
 #!/bin/env pwsh
 $currentDirectory = $PSScriptRoot
 $projectFile = Join-Path $currentDirectory "AzureMCP.csproj"

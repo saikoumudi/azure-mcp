@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 using AzureMCP.Arguments.Storage.Table;
 using AzureMCP.Models;
 using AzureMCP.Models.Command;

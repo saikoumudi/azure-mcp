@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 using AzureMCP.Commands.Cosmos;
 using AzureMCP.Commands.Server;
 using AzureMCP.Commands.Storage.Blob;

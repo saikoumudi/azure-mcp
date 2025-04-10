@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 using AzureMCP.Services.Interfaces;
 using Microsoft.Extensions.Caching.Memory;
 

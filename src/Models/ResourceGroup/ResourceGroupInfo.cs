@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 namespace AzureMCP.Models.ResourceGroup;
 
 public class ResourceGroupInfo(string name, string id, string location)

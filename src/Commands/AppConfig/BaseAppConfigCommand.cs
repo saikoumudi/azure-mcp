@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 using AzureMCP.Arguments.AppConfig;
 using AzureMCP.Models.Argument;
 using AzureMCP.Services.Interfaces;

@@ -1,4 +1,7 @@
-﻿using AzureMCP.Commands;
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
+using AzureMCP.Commands;
 using AzureMCP.Commands.Server;
 using ModelContextProtocol.Protocol.Types;
 using ModelContextProtocol.Server;

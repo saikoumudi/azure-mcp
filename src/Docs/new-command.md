@@ -1,3 +1,6 @@
+<!-- Copyright (c) Microsoft Corporation.
+<!-- Licensed under the MIT License. -->
+
 # azmcp Command Implementation Guide for AI Assistants
 
 ## Command Structure
