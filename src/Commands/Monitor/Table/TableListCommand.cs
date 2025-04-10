@@ -8,52 +8,40 @@ using System.CommandLine.Parsing;
 
 namespace AzureMCP.Commands.Monitor.Table;
 
-public class TableListCommand : BaseMonitorCommand<TableListArguments>
+public sealed class TableListCommand() : BaseMonitorCommand<TableListArguments>
 {
-    private readonly Option<string> _tableTypeOption;
+    private readonly Option<string> _tableTypeOption = ArgumentDefinitions.Monitor.TableType.ToOption();
 
-    public TableListCommand() : base()
+    protected override string GetCommandName() => "list";
+
+    protected override string GetCommandDescription() =>
+        $"""
+        List all tables in a Log Analytics workspace. Requires {ArgumentDefinitions.Monitor.WorkspaceIdOrName}.
+        Returns table names and schemas that can be used for constructing KQL queries.
+        """;
+
+    protected override void RegisterOptions(Command command)
     {
-        _tableTypeOption = ArgumentDefinitions.Monitor.TableType.ToOption();
+        base.RegisterOptions(command);
+        command.AddOption(_tableTypeOption);
+        command.AddOption(_resourceGroupOption);
+    }
 
-        RegisterArgumentChain(
-           CreateWorkspaceArgument(),
-           CreateResourceGroupArgument()!,
-           CreateTableTypeArgument()
-       );
+    protected override void RegisterArguments()
+    {
+        base.RegisterArguments();
+        AddArgument(CreateTableTypeArgument());
+        AddArgument(CreateResourceGroupArgument());
     }
 
     [McpServerTool(Destructive = false, ReadOnly = true)]
-    public override Command GetCommand()
-    {
-        var command = new Command(
-            "list",
-            $"List all tables in a Log Analytics workspace. Requires {ArgumentDefinitions.Monitor.WorkspaceIdOrName}. " +
-            "Returns table names and schemas that can be used for constructing KQL queries.");
-
-        AddBaseOptionsToCommand(command);
-        command.AddOption(_workspaceOption);
-        command.AddOption(_resourceGroupOption);
-        command.AddOption(_tableTypeOption);
-        return command;
-    }
-
-    protected override TableListArguments BindArguments(ParseResult parseResult)
-    {
-        var args = base.BindArguments(parseResult);
-        args.Workspace = parseResult.GetValueForOption(_workspaceOption);
-        args.ResourceGroup = parseResult.GetValueForOption(_resourceGroupOption);
-        args.TableType = parseResult.GetValueForOption(_tableTypeOption);
-        return args;
-    }
-
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
         var args = BindArguments(parseResult);
 
         try
         {
-            if (!await ProcessArgumentChain(context, args))
+            if (!await ProcessArguments(context, args))
             {
                 return context.Response;
             }
@@ -79,14 +67,21 @@ public class TableListCommand : BaseMonitorCommand<TableListArguments>
         return context.Response;
     }
 
-    protected ArgumentChain<TableListArguments> CreateTableTypeArgument()
+    private static ArgumentBuilder<TableListArguments> CreateTableTypeArgument()
     {
         var defaultValue = ArgumentDefinitions.Monitor.TableType.DefaultValue ?? "CustomLog";
-        return ArgumentChain<TableListArguments>
+        return ArgumentBuilder<TableListArguments>
             .Create(ArgumentDefinitions.Monitor.TableType.Name, ArgumentDefinitions.Monitor.TableType.Description)
-            .WithCommandExample(ArgumentDefinitions.GetCommandExample(GetCommandPath(), ArgumentDefinitions.Monitor.TableType))
             .WithValueAccessor(args => args.TableType ?? defaultValue)
             .WithDefaultValue(defaultValue)
             .WithIsRequired(ArgumentDefinitions.Monitor.TableType.Required);
     }
+
+    protected override TableListArguments BindArguments(ParseResult parseResult)
+    {
+        var args = base.BindArguments(parseResult);
+        args.TableType = parseResult.GetValueForOption(_tableTypeOption) ?? ArgumentDefinitions.Monitor.TableType.DefaultValue;
+        return args;
+    }
+
 }

@@ -7,21 +7,20 @@ public class UserAgentPolicy : HttpPipelineSynchronousPolicy
 {
     public const string UserAgentHeader = "User-Agent";
 
-    private readonly string userAgent;
+    private readonly string _userAgent;
 
     public UserAgentPolicy(string userAgent)
     {
-        if (string.IsNullOrEmpty(userAgent))
+        if (string.IsNullOrWhiteSpace(userAgent))
         {
-            throw new ArgumentException(nameof(userAgent) + " cannot be empty.");
+            throw new ArgumentException("User agent cannot be empty", nameof(userAgent));
         }
-
-        this.userAgent = userAgent;
+        _userAgent = userAgent;
     }
 
     public override void OnSendingRequest(HttpMessage message)
     {
-        message.Request.Headers.SetValue(UserAgentHeader, userAgent);
+        message.Request.Headers.SetValue(UserAgentHeader, _userAgent);
 
         base.OnSendingRequest(message);
     }

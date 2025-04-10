@@ -20,9 +20,9 @@ public class CommandFactory
     internal static readonly char Separator = '-';
 
     /// <summary>
-    /// Mapping of hyphenated command names to their <see cref="ICommand" />
+    /// Mapping of hyphenated command names to their <see cref="IBaseCommand" />
     /// </summary>
-    private readonly Dictionary<string, ICommand> _commandMap;
+    private readonly Dictionary<string, IBaseCommand> _commandMap;
 
     public CommandFactory(IServiceProvider serviceProvider)
     {
@@ -43,7 +43,7 @@ public class CommandFactory
 
     public CommandGroup RootGroup => _rootGroup;
 
-    public IReadOnlyDictionary<string, ICommand> AllCommands => _commandMap;
+    public IReadOnlyDictionary<string, IBaseCommand> AllCommands => _commandMap;
 
     private void RegisterCommandGroup()
     {
@@ -250,7 +250,7 @@ public class CommandFactory
         return rootCommand;
     }
 
-    private void ConfigureCommandHandler(Command command, ICommand implementation)
+    private void ConfigureCommandHandler(Command command, IBaseCommand implementation)
     {
         command.SetHandler(async context =>
         {
@@ -271,7 +271,7 @@ public class CommandFactory
         });
     }
 
-    private static ICommand? FindCommandInGroup(CommandGroup group, Queue<string> nameParts)
+    private static IBaseCommand? FindCommandInGroup(CommandGroup group, Queue<string> nameParts)
     {
         // If we've processed all parts and this group has a matching command, return it
         if (nameParts.Count == 1)
@@ -287,14 +287,14 @@ public class CommandFactory
         return nextGroup != null ? FindCommandInGroup(nextGroup, nameParts) : null;
     }
 
-    public ICommand? FindCommandByName(string hyphenatedName)
+    public IBaseCommand? FindCommandByName(string hyphenatedName)
     {
         return _commandMap.GetValueOrDefault(hyphenatedName);
     }
 
-    private static Dictionary<string, ICommand> CreateCommmandDictionary(CommandGroup node, string prefix)
+    private static Dictionary<string, IBaseCommand> CreateCommmandDictionary(CommandGroup node, string prefix)
     {
-        var aggregated = new Dictionary<string, ICommand>();
+        var aggregated = new Dictionary<string, IBaseCommand>();
         var updatedPrefix = GetPrefix(prefix, node.Name);
 
         if (node.Commands != null)

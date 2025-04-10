@@ -1,26 +1,40 @@
-
 using AzureMCP.Arguments.Cosmos;
 using AzureMCP.Models.Argument;
 using System.CommandLine;
+using System.CommandLine.Parsing;
 
 namespace AzureMCP.Commands.Cosmos;
 
 public abstract class BaseDatabaseCommand<TArgs> : BaseCosmosCommand<TArgs> where TArgs : BaseDatabaseArguments, new()
 {
-    protected readonly Option<string> _databaseOption;
+    protected readonly Option<string> _databaseOption = ArgumentDefinitions.Cosmos.Database.ToOption();
 
-    protected BaseDatabaseCommand() : base()
+    protected override void RegisterOptions(Command command)
     {
-        _databaseOption = ArgumentDefinitions.Cosmos.Database.ToOption();
+        base.RegisterOptions(command);
+        command.AddOption(_databaseOption);
     }
 
-    protected ArgumentChain<TArgs> CreateDatabaseArgument()
+    protected override void RegisterArguments()
     {
-        return ArgumentChain<TArgs>
+        base.RegisterArguments();
+        AddArgument(CreateDatabaseArgument());
+
+    }
+
+    protected override TArgs BindArguments(ParseResult parseResult)
+    {
+        var args = base.BindArguments(parseResult);
+        args.Database = parseResult.GetValueForOption(_databaseOption);
+        return args;
+    }
+
+    protected ArgumentBuilder<TArgs> CreateDatabaseArgument()
+    {
+        return ArgumentBuilder<TArgs>
             .Create(ArgumentDefinitions.Cosmos.Database.Name, ArgumentDefinitions.Cosmos.Database.Description)
-            .WithCommandExample(ArgumentDefinitions.GetCommandExample(GetCommandPath(), ArgumentDefinitions.Cosmos.Database))
             .WithValueAccessor(args => args.Database ?? string.Empty)
-            .WithValueLoader(async (context, args) =>
+            .WithSuggestedValuesLoader(async (context, args) =>
                 await GetDatabaseOptions(context, args.Account ?? string.Empty, args.Subscription ?? string.Empty))
             .WithIsRequired(ArgumentDefinitions.Cosmos.Database.Required);
     }

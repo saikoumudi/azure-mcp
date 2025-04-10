@@ -92,7 +92,7 @@ public class ToolOperations
 
     }
 
-    private static Tool GetTool(string fullName, ICommand command)
+    private static Tool GetTool(string fullName, IBaseCommand command)
     {
         var underlyingCommand = command.GetCommand();
         var tool = new Tool
@@ -102,7 +102,7 @@ public class ToolOperations
         };
 
         // Get the GetCommand method info to check for McpServerToolAttribute
-        var getCommandMethod = command.GetType().GetMethod(nameof(ICommand.GetCommand));
+        var getCommandMethod = command.GetType().GetMethod(nameof(IBaseCommand.GetCommand));
         if (getCommandMethod != null)
         {
             var mcpServerToolAttr = getCommandMethod.GetCustomAttribute<McpServerToolAttribute>();
@@ -124,16 +124,16 @@ public class ToolOperations
             }
         }
 
-        var argumentsChain = command.GetArgumentChain()?.ToList();
+        var args = command.GetArguments()?.ToList();
 
         var schema = new Dictionary<string, object>
         {
             ["type"] = "object"
         };
 
-        if (argumentsChain != null && argumentsChain.Count > 0)
+        if (args != null && args.Count > 0)
         {
-            var arguments = argumentsChain.ToDictionary(
+            var arguments = args.ToDictionary(
                     p => p.Name,
                     p => new
                     {
@@ -142,7 +142,7 @@ public class ToolOperations
                     });
 
             schema["properties"] = arguments;
-            schema["required"] = argumentsChain.Where(p => p.Required).Select(p => p.Name).ToArray();
+            schema["required"] = args.Where(p => p.Required).Select(p => p.Name).ToArray();
         }
 
         tool.InputSchema = JsonSerializer.SerializeToElement(schema, McpJsonUtilities.DefaultOptions);

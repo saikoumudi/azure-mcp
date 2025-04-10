@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace AzureMCP.Models.Argument;
 
-public class ArgumentDefinition<T>(string name, string description, string? value = "", string? command = "", T? defaultValue = default, List<ArgumentOption>? values = null, bool required = false)
+public class ArgumentDefinition<T>(string name, string description, string? value = "", T? defaultValue = default, List<ArgumentOption>? suggestedValues = null, bool required = false)
 {
     [JsonPropertyName("name")]
     public string Name { get; set; } = name;
@@ -15,16 +15,13 @@ public class ArgumentDefinition<T>(string name, string description, string? valu
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public string Value { get; set; } = value!;
 
-    [JsonPropertyName("command")]
-    public string Command { get; set; } = command!;
-
     [JsonPropertyName("default")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public T? DefaultValue { get; set; } = defaultValue;
 
-    [JsonPropertyName("values")]
+    [JsonPropertyName("suggestedValues")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public List<ArgumentOption>? Values { get; set; } = values;
+    public List<ArgumentOption>? SuggestedValues { get; set; } = suggestedValues;
 
     [JsonPropertyName("type")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
@@ -34,7 +31,7 @@ public class ArgumentDefinition<T>(string name, string description, string? valu
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public bool Required { get; set; } = required;
 
-    public bool ShouldSerializeValues() => Values?.Count > 0;
+    public bool ShouldSerializeValues() => SuggestedValues?.Count > 0;
 
     public Option<T> ToOption()
     {

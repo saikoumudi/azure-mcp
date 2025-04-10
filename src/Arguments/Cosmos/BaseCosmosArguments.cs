@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace AzureMCP.Arguments.Cosmos;
 
-public class BaseCosmosArguments : BaseArgumentsWithSubscription
+public class BaseCosmosArguments : SubscriptionArguments
 {
     [JsonPropertyName(ArgumentDefinitions.Cosmos.AccountName)]
     public string? Account { get; set; }

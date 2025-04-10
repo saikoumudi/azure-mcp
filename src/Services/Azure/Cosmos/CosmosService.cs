@@ -6,9 +6,8 @@ using System.Text.Json;
 
 namespace AzureMCP.Services.Azure.Cosmos;
 
-public class CosmosService(
-    ISubscriptionService subscriptionService,
-    ITenantService tenantService) : BaseAzureService(tenantService), ICosmosService, IDisposable
+public class CosmosService(ISubscriptionService subscriptionService, ITenantService tenantService)
+    : BaseAzureService(tenantService), ICosmosService, IDisposable
 {
     private const string CosmosBaseUri = "https://{0}.documents.azure.com:443/";
     private CosmosClient? _cosmosClient;

@@ -1,48 +1,32 @@
 using AzureMCP.Arguments.Storage.Blob;
+using AzureMCP.Commands.Storage.Blob.Container;
 using AzureMCP.Models.Command;
 using AzureMCP.Services.Interfaces;
 using ModelContextProtocol.Server;
-using System.CommandLine;
 using System.CommandLine.Parsing;
 
 namespace AzureMCP.Commands.Storage.Blob;
 
-public class BlobListCommand : BaseContainerCommand<BlobListArguments>
+public sealed class BlobListCommand : BaseContainerCommand<BlobListArguments>
 {
-    public BlobListCommand()
-        : base()
-    {
-        RegisterArgumentChain(
-            CreateAccountArgument(),
-            CreateContainerArgument()
-        );
-    }
+    protected override string GetCommandName() => "list";
+
+    protected override string GetCommandDescription() =>
+        $"""
+        List all blobs in a Storage container. This command retrieves and displays all blobs available
+        in the specified container and Storage account. Results include blob names, sizes, and content types,
+        returned as a JSON array. Requires {Models.Argument.ArgumentDefinitions.Storage.AccountName} and 
+        {Models.Argument.ArgumentDefinitions.Storage.ContainerName}.
+        """;
 
     [McpServerTool(Destructive = false, ReadOnly = true)]
-    public override Command GetCommand()
-    {
-        var command = new Command("list", "List all blobs in a Storage container. This command retrieves and displays all blobs available in the specified container and Storage account. Results include blob names, sizes, and content types, returned as a JSON array. You must specify both an account name and a container name. Use this command to explore your container contents or to verify blob existence before performing operations on specific blobs.");
-        AddBaseOptionsToCommand(command);
-        command.AddOption(_accountOption);
-        command.AddOption(_containerOption);
-        return command;
-    }
-
-    protected override BlobListArguments BindArguments(ParseResult parseResult)
-    {
-        var args = base.BindArguments(parseResult);
-        args.Account = parseResult.GetValueForOption(_accountOption);
-        args.Container = parseResult.GetValueForOption(_containerOption);
-        return args;
-    }
-
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult commandOptions)
     {
         var args = BindArguments(commandOptions);
 
         try
         {
-            if (!await ProcessArgumentChain(context, args))
+            if (!await ProcessArguments(context, args))
             {
                 return context.Response;
             }

@@ -10,16 +10,9 @@ namespace AzureMCP.Commands.Server.Tests;
 
 public class AzureMcpServerTests
 {
-    private readonly McpServerOptions _options;
-    private readonly ILoggerFactory _loggerFactory;
-    private readonly ITransport _transport;
-
-    public AzureMcpServerTests()
-    {
-        _options = new McpServerOptions { ServerInfo = new Implementation { Name = "test", Version = "1.0.0-beta" } };
-        _loggerFactory = Substitute.For<ILoggerFactory>();
-        _transport = Substitute.For<ITransport>();
-    }
+    private readonly McpServerOptions _options = new() { ServerInfo = new() { Name = "test", Version = "1.0.0-beta" } };
+    private readonly ILoggerFactory _loggerFactory = Substitute.For<ILoggerFactory>();
+    private readonly ITransport _transport = Substitute.For<ITransport>();
 
     [Fact]
     public void Constructor_InitializesPropertiesCorrectly()

@@ -10,9 +10,8 @@ using AzureMCP.Services.Interfaces;
 
 namespace AzureMCP.Services.Azure.AppConfig;
 
-public class AppConfigService(
-    ISubscriptionService subscriptionService,
-    ITenantService tenantService) : BaseAzureService(tenantService), IAppConfigService
+public class AppConfigService(ISubscriptionService subscriptionService, ITenantService tenantService)
+    : BaseAzureService(tenantService), IAppConfigService
 {
     private readonly ISubscriptionService _subscriptionService = subscriptionService ?? throw new ArgumentNullException(nameof(subscriptionService));
 
@@ -168,7 +167,7 @@ public class AppConfigService(
         var endpoint = configStore.Data.Endpoint;
         var credential = GetCredential(tenant);
         var options = AddDefaultPolicies(new ConfigurationClientOptions());
-         
+
         return new ConfigurationClient(new Uri(endpoint), credential);
     }
 

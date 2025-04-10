@@ -8,54 +8,25 @@ using System.CommandLine.Parsing;
 
 namespace AzureMCP.Commands.AppConfig.KeyValue;
 
-public class KeyValueDeleteCommand : BaseKeyValueCommand<KeyValueDeleteArguments>
+public sealed class KeyValueDeleteCommand : BaseKeyValueCommand<KeyValueDeleteArguments>
 {
-    private readonly Option<string> _keyOption;
-    private readonly Option<string> _labelOption;
+    protected override string GetCommandName() => "delete";
 
-    public KeyValueDeleteCommand() : base()
-    {
-        _keyOption = ArgumentDefinitions.AppConfig.Key.ToOption();
-        _labelOption = ArgumentDefinitions.AppConfig.Label.ToOption();
-
-        RegisterArgumentChain(
-            CreateAccountArgument(),
-            CreateKeyArgument(),
-            CreateLabelArgument()
-        );
-    }
+    protected override string GetCommandDescription() =>
+        """
+        Delete a key-value pair from an App Configuration store. This command removes the specified key-value pair from the store. 
+        If a label is specified, only the labeled version is deleted. If no label is specified, the key-value with the matching 
+        key and the default label will be deleted.
+        """;
 
     [McpServerTool(Destructive = true, ReadOnly = false)]
-    public override Command GetCommand()
-    {
-        var command = new Command(
-            "delete",
-            "Delete a key-value pair from an App Configuration store. This command removes the specified key-value pair from the store. If a label is specified, only the labeled version is deleted. If no label is specified, the key-value with the matching key and the default label will be deleted.");
-
-        AddBaseOptionsToCommand(command);
-        command.AddOption(_accountOption);
-        command.AddOption(_keyOption);
-        command.AddOption(_labelOption);
-
-        return command;
-    }
-
-    protected override KeyValueDeleteArguments BindArguments(ParseResult parseResult)
-    {
-        var args = base.BindArguments(parseResult);
-        args.Account = parseResult.GetValueForOption(_accountOption);
-        args.Key = parseResult.GetValueForOption(_keyOption);
-        args.Label = parseResult.GetValueForOption(_labelOption);
-        return args;
-    }
-
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
         var args = BindArguments(parseResult);
 
         try
         {
-            if (!await ProcessArgumentChain(context, args))
+            if (!await ProcessArguments(context, args))
             {
                 return context.Response;
             }

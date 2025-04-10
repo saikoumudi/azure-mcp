@@ -28,14 +28,14 @@ namespace AzureMCP.Tests.Commands.Subscription
             _mcpServer = Substitute.For<IMcpServer>();
             _subscriptionService = Substitute.For<ISubscriptionService>();
 
-            var collection = new ServiceCollection();
-            collection.AddSingleton(_mcpServer);
-            collection.AddSingleton(_subscriptionService);
+            var collection = new ServiceCollection()
+                .AddSingleton(_mcpServer)
+                .AddSingleton(_subscriptionService);
 
             _serviceProvider = collection.BuildServiceProvider();
-            _command = new SubscriptionListCommand();
-            _context = new CommandContext(_serviceProvider);
-            _parser = new Parser(_command.GetCommand());
+            _command = new();
+            _context = new(_serviceProvider);
+            _parser = new(_command.GetCommand());
         }
 
         [Fact]

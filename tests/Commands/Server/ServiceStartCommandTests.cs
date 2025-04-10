@@ -9,40 +9,22 @@ namespace AzureMCP.Commands.Server.Tests;
 public class ServiceStartCommandTests
 {
     private readonly IServiceProvider _serviceProvider;
-    private readonly ICacheService _mockCacheService;
-    private readonly ISubscriptionService _mockSubscriptionService;
-    private readonly IStorageService _mockStorageService;
-    private readonly ICosmosService _mockCosmosService;
-    private readonly IMonitorService _mockMonitorService;
-    private readonly IResourceGroupService _mockResourceGroupService;
-    private readonly IAppConfigService _mockAppConfigService;
+    private readonly ServiceStartCommand _command;
 
     public ServiceStartCommandTests()
     {
-        // Setup mocks
-        var builder = new ServiceCollection();
-        _mockCacheService = Substitute.For<ICacheService>();
-        _mockSubscriptionService = Substitute.For<ISubscriptionService>();
-        _mockStorageService = Substitute.For<IStorageService>();
-        _mockCosmosService = Substitute.For<ICosmosService>();
-        _mockMonitorService = Substitute.For<IMonitorService>();
-        _mockResourceGroupService = Substitute.For<IResourceGroupService>();
-        _mockAppConfigService = Substitute.For<IAppConfigService>();
+        var services = new ServiceCollection();
+        services.AddSingleton(Substitute.For<ICacheService>());
+        services.AddSingleton(Substitute.For<ISubscriptionService>());
+        services.AddSingleton(Substitute.For<IStorageService>());
+        services.AddSingleton(Substitute.For<ICosmosService>());
+        services.AddSingleton(Substitute.For<IMonitorService>());
+        services.AddSingleton(Substitute.For<IResourceGroupService>());
+        services.AddSingleton(Substitute.For<IAppConfigService>());
+        services.AddSingleton<CommandFactory>();
 
-        // Configure service provider
-        builder.AddSingleton(_mockCacheService);
-        builder.AddSingleton(_mockSubscriptionService);
-        builder.AddSingleton(_mockStorageService);
-        builder.AddSingleton(_mockCosmosService);
-        builder.AddSingleton(_mockMonitorService);
-        builder.AddSingleton(_mockResourceGroupService);
-        builder.AddSingleton(_mockAppConfigService);
-        builder.AddSingleton(provider =>
-        {
-            return new CommandFactory(provider);
-        });
-
-        _serviceProvider = builder.BuildServiceProvider();
+        _serviceProvider = services.BuildServiceProvider();
+        _command = new(_serviceProvider);
     }
 
     [Fact]
@@ -57,13 +39,13 @@ public class ServiceStartCommandTests
     }
 
     [Fact]
-    public void GetArgumentChain_ReturnsExpectedArguments()
+    public void GetArguments_ReturnsExpectedArguments()
     {
         // Arrange
         var command = new ServiceStartCommand(_serviceProvider);
 
         // Act
-        var args = command.GetArgumentChain()?.ToList();
+        var args = command.GetArguments()?.ToList();
 
         // Assert
         Assert.NotNull(args);
@@ -73,34 +55,34 @@ public class ServiceStartCommandTests
     }
 
     [Fact]
-    public void ClearArgumentChain_RemovesAllArguments()
+    public void ClearArguments_RemovesAllArguments()
     {
         // Arrange
         var command = new ServiceStartCommand(_serviceProvider);
 
         // Act
-        command.ClearArgumentChain();
+        command.ClearArguments();
 
         // Assert
-        var arguments = command.GetArgumentChain();
+        var arguments = command.GetArguments();
         Assert.NotNull(arguments);
         Assert.Empty(arguments);
     }
 
     [Fact]
-    public void AddArgumentToChain_AddsNewArgument()
+    public void AddArgument_AddsNewArgument()
     {
         // Arrange
         var command = new ServiceStartCommand(_serviceProvider);
         var newArg = new ArgumentDefinition<string>("test", "test description");
-        var arguments = command.GetArgumentChain();
+        var arguments = command.GetArguments();
 
         Assert.NotNull(arguments);
 
         var initialCount = arguments.Count();
 
         // Act
-        command.AddArgumentToChain(newArg);
+        command.AddArgument(newArg);
 
         // Assert
         Assert.Equal(initialCount + 1, arguments.Count());

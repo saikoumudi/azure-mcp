@@ -6,9 +6,9 @@ using System.CommandLine.Parsing;
 namespace AzureMCP.Commands;
 
 /// <summary>
-/// Interface for all commands including argument chain functionality
+/// Interface for all commands
 /// </summary>
-public interface ICommand
+public interface IBaseCommand
 {
     /// <summary>
     /// Gets the command definition
@@ -21,17 +21,17 @@ public interface ICommand
     Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult commandOptions);
 
     /// <summary>
-    /// Gets the current argument chain
+    /// Gets the current arguments
     /// </summary>
-    IEnumerable<ArgumentDefinition<string>>? GetArgumentChain();
+    IEnumerable<ArgumentDefinition<string>>? GetArguments();
 
     /// <summary>
-    /// Clears the current argument chain
+    /// Clears the current arguments
     /// </summary>
-    void ClearArgumentChain();
+    void ClearArguments();
 
     /// <summary>
-    /// Adds an argument to the chain
+    /// Adds an argument
     /// </summary>
-    void AddArgumentToChain(ArgumentDefinition<string> argument);
+    void AddArgument(ArgumentDefinition<string> argument);
 }

@@ -9,10 +9,9 @@ using System.Runtime.InteropServices;
 
 namespace AzureMCP.Commands.Extension;
 
-public class AzdCommand : BaseCommand<AzdArguments>
+public sealed class AzdCommand(int processTimeoutSeconds = 300) : GlobalCommand<AzdArguments>
 {
     private readonly Option<string> _commandOption = ArgumentDefinitions.Extension.Azd.Command.ToOption();
-    private readonly int _processTimeoutSeconds;
     private static string? _cachedAzdPath;
 
     private static readonly string[] AzdCliPaths =
@@ -23,49 +22,83 @@ public class AzdCommand : BaseCommand<AzdArguments>
         Path.Combine("usr", "local", "bin"),
     ];
 
-    public AzdCommand(int processTimeoutSeconds = 300) : base()
-    {
-        _processTimeoutSeconds = processTimeoutSeconds;
+    protected override string GetCommandName() => "azd";
 
-        // Register the command argument in the chain
-        AddArgumentToChain(CreateCommandArgument());
+    protected override string GetCommandDescription() =>
+        "Your job is to help accelerate getting users projects up and running in their Azure environments by executing the Azure Developer CLI (azd) commands.\n" +
+        "This tool can help find application templates based on their requirements, manage azd environments and easily provision and deploy them to their Azure environment \n\n" +
+        "You have the following rules:\n\n" +
+        "- Use this tool to execute ALL azd commands: Example: 'up'.\n" +
+        "- If the workspaces contains an 'azure.yaml' files they likely already have an azd project, otherwise you can initialize a new one by calling 'init'.\n" +
+        "- Always confirm with the user before performing destructive commands like 'up', 'down', 'provision' or 'deploy'.\n" +
+        "- Always pass the '--cwd' arguments with the fully qualified path to the workspace.\n" +
+        "- When a command requires an environment, use the '-e' argument to specify the environment name.\n" +
+        "- After executing a command the tool may propose next steps. Confirm if the user wanted to proceed with any suggestions.\n" +
+        "- When an error occurs, try to resolve the error by prompting the user for missing information and retrying the command.\n" +
+        "- This tool can ONLY write code that interacts with Azure. It CANNOT generate charts, tables, graphs, etc.\n" +
+        "- This tool can delete or modify resources in your Azure environment. Always be cautious and include appropriate warnings when providing commands to users.\n\n" +
+        "Be concise, professional and to the point. Do not give generic advice, always reply with detailed & contextual data sourced from the current Azure environment.";
+
+    protected override void RegisterOptions(Command command)
+    {
+        base.RegisterOptions(command);
+        command.AddOption(_commandOption);
     }
 
-    protected ArgumentChain<AzdArguments> CreateCommandArgument() =>
-        ArgumentChain<AzdArguments>
+    protected override void RegisterArguments()
+    {
+        base.RegisterArguments();
+        AddArgument(CreateCommandArgument());
+    }
+
+    private static ArgumentBuilder<AzdArguments> CreateCommandArgument() =>
+        ArgumentBuilder<AzdArguments>
             .Create(ArgumentDefinitions.Extension.Azd.Command.Name, ArgumentDefinitions.Extension.Azd.Command.Description)
-            .WithCommandExample(ArgumentDefinitions.GetCommandExample(GetCommandPath(), ArgumentDefinitions.Extension.Azd.Command))
             .WithValueAccessor(args => args.Command ?? string.Empty)
             .WithIsRequired(ArgumentDefinitions.Extension.Azd.Command.Required);
-
-    [McpServerTool(Destructive = true, ReadOnly = false)]
-    public override Command GetCommand()
-    {
-        var command = new Command(
-            "azd",
-            "Your job is to help accelerate getting users projects up and running in their Azure environments by executing the Azure Developer CLI (azd) commands.\n" +
-            "This tool can help find application templates based on their requirements, manage azd environments and easily provision and deploy them to their Azure environment \n\n" +
-            "You have the following rules:\n\n" +
-            "- Use this tool to execute ALL azd commands: Example: 'up'.\n" +
-            "- If the workspaces contains an 'azure.yaml' files they likely already have an azd project, otherwise you can initialize a new one by calling 'init'.\n" +
-            "- Always confirm with the user before performing destructive commands like 'up', 'down', 'provision' or 'deploy'.\n" +
-            "- Always pass the '--cwd' arguments with the fully qualified path to the workspace.\n" +
-            "- When a command requires an environment, use the '-e' argument to specify the environment name.\n" +
-            "- After executing a command the tool may propose next steps. Confirm if the user wanted to proceed with any suggestions.\n" +
-            "- When an error occurs, try to resolve the error by prompting the user for missing information and retrying the command.\n" +
-            "- This tool can ONLY write code that interacts with Azure. It CANNOT generate charts, tables, graphs, etc.\n" +
-            "- This tool can delete or modify resources in your Azure environment. Always be cautious and include appropriate warnings when providing commands to users.\n\n" +
-            "Be concise, professional and to the point. Do not give generic advice, always reply with detailed & contextual data sourced from the current Azure environment.");
-
-        command.AddOption(_commandOption);
-        return command;
-    }
 
     protected override AzdArguments BindArguments(ParseResult parseResult)
     {
         var args = base.BindArguments(parseResult);
         args.Command = parseResult.GetValueForOption(_commandOption);
         return args;
+    }
+
+    [McpServerTool(Destructive = true, ReadOnly = false)]
+    public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
+    {
+        var args = BindArguments(parseResult);
+
+        try
+        {
+            if (!await ProcessArguments(context, args))
+            {
+                return context.Response;
+            }
+
+            var command = args.Command ?? throw new ArgumentNullException(nameof(args.Command), "Command cannot be null");
+            // We need to always pass the --no-prompt flag to avoid prompting for user input and getting the process stuck
+            command += " --no-prompt";
+
+            var processService = context.GetService<IExternalProcessService>();
+            var azdPath = FindAzdCliPath() ?? throw new FileNotFoundException("Azure Developer CLI executable not found in PATH or common installation locations. Please ensure Azure Developer CLI is installed.");
+            var result = await processService.ExecuteAsync(azdPath, command, processTimeoutSeconds);
+
+            if (string.IsNullOrWhiteSpace(result.Error) && result.ExitCode == 0)
+            {
+                return HandleSuccess(result, command, context.Response);
+            }
+            else
+            {
+                return HandleError(result, command, context.Response);
+            }
+        }
+        catch (Exception ex)
+        {
+            HandleException(context.Response, ex);
+        }
+
+        return context.Response;
     }
 
     private static string? FindAzdCliPath()
@@ -86,7 +119,7 @@ public class AzdCommand : BaseCommand<AzdArguments>
         {
             searchPaths.AddRange(pathDirs);
         }
-        
+
         searchPaths.AddRange(AzdCliPaths);
 
         foreach (var dir in searchPaths.Where(d => !string.IsNullOrEmpty(d)))
@@ -114,43 +147,7 @@ public class AzdCommand : BaseCommand<AzdArguments>
         return null;
     }
 
-    public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
-    {
-        var args = BindArguments(parseResult);
-
-        try
-        {
-            if (!await ProcessArgumentChain(context, args))
-            {
-                return context.Response;
-            }
-
-            var command = args.Command ?? throw new ArgumentNullException(nameof(args.Command), "Command cannot be null");
-            // We need to always pass the --no-prompt flag to avoid prompting for user input and getting the process stuck
-            command += " --no-prompt";
-
-            var processService = context.GetService<IExternalProcessService>();
-            var azdPath = FindAzdCliPath() ?? throw new FileNotFoundException("Azure Developer CLI executable not found in PATH or common installation locations. Please ensure Azure Developer CLI is installed.");
-            var result = await processService.ExecuteAsync(azdPath, command, _processTimeoutSeconds);
-
-            if (string.IsNullOrWhiteSpace(result.Error) && result.ExitCode == 0)
-            {
-                return HandleSuccess(result, command, context.Response);
-            }
-            else
-            {
-                return HandleError(result, command, context.Response);
-            }
-        }
-        catch (Exception ex)
-        {
-            HandleException(context.Response, ex);
-        }
-
-        return context.Response;
-    }
-
-    private CommandResponse HandleSuccess(ProcessResult result, string command, CommandResponse response)
+    private static CommandResponse HandleSuccess(ProcessResult result, string command, CommandResponse response)
     {
         var contentResults = new List<string>();
         if (!string.IsNullOrWhiteSpace(result.Output))
@@ -199,7 +196,7 @@ public class AzdCommand : BaseCommand<AzdArguments>
         return response;
     }
 
-    private CommandResponse HandleError(ProcessResult result, string command, CommandResponse response)
+    private static CommandResponse HandleError(ProcessResult result, string command, CommandResponse response)
     {
         var contentResults = new List<string>
             {

@@ -3,39 +3,29 @@ using AzureMCP.Models.Argument;
 using AzureMCP.Models.Command;
 using AzureMCP.Services.Interfaces;
 using ModelContextProtocol.Server;
-using System.CommandLine;
 using System.CommandLine.Parsing;
 
 namespace AzureMCP.Commands.Storage.Account;
 
-public class AccountListCommand : BaseCommandWithSubscription<AccountListArguments>
+public sealed class AccountListCommand : SubscriptionCommand<AccountListArguments>
 {
-    public AccountListCommand() : base()
-    {
-        RegisterArgumentChain();
-    }
+    protected override string GetCommandName() => "list";
+
+    protected override string GetCommandDescription() =>
+        $"""
+        List all Storage accounts in a subscription. This command retrieves all Storage accounts available
+        in the specified {ArgumentDefinitions.Common.SubscriptionName}. Results include account names and are 
+        returned as a JSON array.
+        """;
 
     [McpServerTool(Destructive = false, ReadOnly = true)]
-    public override Command GetCommand()
-    {
-        var command = new Command(
-            "list",
-            $"List all Storage accounts in a subscription. This command retrieves all Storage accounts available " +
-            $"in the specified {ArgumentDefinitions.Common.SubscriptionName}. Results include account names and are returned as a JSON array.");
-
-        // We only need auth/subscription options for list command
-        AddCommonOptionsToCommand(command);
-        return command;
-    }
-
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
+        var args = BindArguments(parseResult);
+
         try
         {
-            var args = BindArguments(parseResult);
-
-            // Process argument chain and return early if required arguments are missing
-            if (!await ProcessArgumentChain(context, args))
+            if (!await ProcessArguments(context, args))
             {
                 return context.Response;
             }
@@ -46,16 +36,13 @@ public class AccountListCommand : BaseCommandWithSubscription<AccountListArgumen
                 args.Tenant,
                 args.RetryPolicy);
 
-            context.Response.Results = accounts?.Count > 0 ?
-                new { accounts } :
-                null;
-
-            return context.Response;
+            context.Response.Results = accounts?.Count > 0 ? new { accounts } : null;
         }
         catch (Exception ex)
         {
             HandleException(context.Response, ex);
-            return context.Response;
         }
+
+        return context.Response;
     }
 }

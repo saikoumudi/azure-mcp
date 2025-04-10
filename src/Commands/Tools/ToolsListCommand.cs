@@ -3,67 +3,64 @@ using AzureMCP.Models;
 using AzureMCP.Models.Argument;
 using AzureMCP.Models.Command;
 using ModelContextProtocol.Server;
-using System.CommandLine;
 using System.CommandLine.Parsing;
 
 namespace AzureMCP.Commands.Tools;
 
 [HiddenCommand]
-public class ToolsListCommand : BaseCommandWithoutArgs
+public sealed class ToolsListCommand : BaseCommand
 {
-    [McpServerTool(Destructive = false, ReadOnly = true)]
-    public override Command GetCommand()
-    {
-        return new Command("list", "List all available commands and their tools in a hierarchical structure. This command returns detailed information about each command, including its name, description, full command path, available subcommands, and all supported arguments. Use this to explore the CLI's functionality or to build interactive command interfaces.");
-    }
+    protected override string GetCommandName() => "list";
 
-    public override Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
+    protected override string GetCommandDescription() =>
+        """
+        List all available commands and their tools in a hierarchical structure. This command returns detailed information
+        about each command, including its name, description, full command path, available subcommands, and all supported 
+        arguments. Use this to explore the CLI's functionality or to build interactive command interfaces.
+        """;
+
+    [McpServerTool(Destructive = false, ReadOnly = true)]
+    public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
         try
         {
             var factory = context.GetService<CommandFactory>();
-            var tools = factory.AllCommands
+            var tools = await Task.Run(() => factory.AllCommands
                 .Where(kvp =>
                 {
                     var parts = kvp.Key.Split(CommandFactory.Separator, StringSplitOptions.RemoveEmptyEntries);
                     return !parts.Any(x => x == "tools" || x == "server");
                 })
                 .Select(kvp => CreateCommand(kvp.Key, kvp.Value))
-                .ToList();
+                .ToList());
 
             context.Response.Results = tools;
-            return Task.FromResult(context.Response);
+            return context.Response;
         }
         catch (Exception ex)
         {
             HandleException(context.Response, ex);
-            return Task.FromResult(context.Response);
+            return context.Response;
         }
     }
 
-    private static CommandInfo CreateCommand(string hyphenatedName, ICommand command)
+    private static CommandInfo CreateCommand(string hyphenatedName, IBaseCommand command)
     {
-        var fullPath = hyphenatedName.Replace(CommandFactory.Separator, ' ');
-        var argumentInfos = command.GetArgumentChain()
-            ?.Select(arg =>
-            {
-                return new ArgumentInfo(
-                    name: arg.Name,
-                    description: arg.Description,
-                    command: fullPath,
-                    value: string.Empty,
-                    defaultValue: arg is ArgumentChain<BaseArguments> chain ? chain.DefaultValue : null,
-                    values: arg is ArgumentChain<BaseArguments> chainWithValues ? chainWithValues.Values : null,
-                    required: arg.Required
-                    );
-            })
+        var argumentInfos = command.GetArguments()
+            ?.Select(arg => new ArgumentInfo(
+                name: arg.Name,
+                description: arg.Description,
+                value: string.Empty,
+                defaultValue: arg is ArgumentBuilder<GlobalArguments> args ? args.DefaultValue : null,
+                suggestedValues: arg is ArgumentBuilder<GlobalArguments> argsWithValues ? argsWithValues.SuggestedValues : null,
+                required: arg.Required))
             .ToList();
 
         return new CommandInfo
         {
             Name = command.GetCommand().Name,
             Description = command.GetCommand().Description ?? string.Empty,
-            FullPath = hyphenatedName.Replace('-', ' '),
+            Command = hyphenatedName.Replace('-', ' '),
             Arguments = argumentInfos,
         };
     }

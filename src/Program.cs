@@ -11,6 +11,7 @@ using AzureMCP.Services.Caching;
 using AzureMCP.Services.Interfaces;
 using AzureMCP.Services.ProcessExecution;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using System.CommandLine;
 using System.Text.Json;
 
@@ -48,6 +49,11 @@ class Program
     private static void ConfigureServices(IServiceCollection services)
     {
         services.AddMemoryCache();
+        services.AddLogging(builder => 
+        {
+            builder.AddConsole();
+            builder.SetMinimumLevel(LogLevel.Information);
+        });
         services.AddSingleton<ICacheService, CacheService>();
         services.AddSingleton<IExternalProcessService, ExternalProcessService>();
         services.AddSingleton<ISubscriptionService, SubscriptionService>();

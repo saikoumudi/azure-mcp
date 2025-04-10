@@ -1,19 +1,54 @@
-using AzureMCP.Commands.Storage;
 using AzureMCP.Models.Argument;
+using AzureMCP.Services.Interfaces;
+using System.CommandLine;
+using System.CommandLine.Parsing;
+
+namespace AzureMCP.Commands.Storage.Blob.Container;
 
 public abstract class BaseContainerCommand<TArgs> : BaseStorageCommand<TArgs> where TArgs : BaseContainerArguments, new()
 {
+    protected readonly Option<string> _containerOption = ArgumentDefinitions.Storage.Container.ToOption();
+
     protected BaseContainerCommand()
     {
     }
 
-    protected ArgumentChain<TArgs> CreateContainerArgument()
+    protected override void RegisterOptions(Command command)
     {
-        return ArgumentChain<TArgs>
+        base.RegisterOptions(command);
+        command.AddOption(_containerOption);
+    }
+
+    protected override void RegisterArguments()
+    {
+        base.RegisterArguments();
+        AddArgument(CreateContainerArgument());
+    }
+
+    protected override TArgs BindArguments(ParseResult parseResult)
+    {
+        var args = base.BindArguments(parseResult);
+        args.Container = parseResult.GetValueForOption(_containerOption);
+        return args;
+    }
+
+    protected ArgumentBuilder<TArgs> CreateContainerArgument()
+    {
+        return ArgumentBuilder<TArgs>
             .Create(ArgumentDefinitions.Storage.Container.Name, ArgumentDefinitions.Storage.Container.Description)
-            .WithCommandExample(ArgumentDefinitions.GetCommandExample(GetCommandPath(), ArgumentDefinitions.Storage.Container))
             .WithValueAccessor(args => args.Container ?? string.Empty)
-            .WithValueLoader(GetContainerOptions)
+            .WithSuggestedValuesLoader(async (context, args) =>
+            {
+                if (string.IsNullOrEmpty(args.Account) || string.IsNullOrEmpty(args.Subscription))
+                {
+                    return [];
+                }
+
+                var storageService = context.GetService<IStorageService>();
+                var containers = await storageService.ListContainers(args.Account, args.Subscription);
+
+                return containers?.Select(c => new ArgumentOption { Name = c, Id = c }).ToList() ?? [];
+            })
             .WithIsRequired(ArgumentDefinitions.Storage.Container.Required);
     }
 }

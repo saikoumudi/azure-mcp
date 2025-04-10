@@ -5,9 +5,10 @@ using AzureMCP.Services.Interfaces;
 
 namespace AzureMCP.Services.Azure.ResourceGroup;
 
-public class ResourceGroupService(ICacheService cacheService, ISubscriptionService subscriptionService) : BaseAzureService, IResourceGroupService
+public class ResourceGroupService(ICacheService cacheService, ISubscriptionService subscriptionService)
+    : BaseAzureService, IResourceGroupService
 {
-    private readonly ICacheService _cacheService = cacheService;
+    private readonly ICacheService _cacheService = cacheService ?? throw new ArgumentNullException(nameof(cacheService));
     private readonly ISubscriptionService _subscriptionService = subscriptionService ?? throw new ArgumentNullException(nameof(subscriptionService));
     private const string CACHE_KEY = "resourcegroups";
     private static readonly TimeSpan CACHE_DURATION = TimeSpan.FromHours(1);

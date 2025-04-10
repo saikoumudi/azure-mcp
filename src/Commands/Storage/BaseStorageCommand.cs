@@ -1,67 +1,49 @@
 using AzureMCP.Arguments.Storage;
 using AzureMCP.Models.Argument;
-using AzureMCP.Models.Command;
 using AzureMCP.Services.Interfaces;
 using System.CommandLine;
 using System.CommandLine.Parsing;
 
 namespace AzureMCP.Commands.Storage;
 
-public abstract class BaseStorageCommand<TArgs> : BaseCommandWithSubscription<TArgs>
-    where TArgs : BaseStorageArguments, new()
+public abstract class BaseStorageCommand<T> : SubscriptionCommand<T>
+    where T : BaseStorageArguments, new()
 {
-    protected readonly Option<string> _accountOption;
-    protected readonly Option<string> _containerOption;
-    protected readonly Option<string> _tableOption;
+    protected readonly Option<string> _accountOption = ArgumentDefinitions.Storage.Account.ToOption();
 
-    protected BaseStorageCommand()
-        : base()
+    protected override void RegisterOptions(Command command)
     {
-        _accountOption = ArgumentDefinitions.Storage.Account.ToOption();
-        _containerOption = ArgumentDefinitions.Storage.Container.ToOption();
-        _tableOption = ArgumentDefinitions.Storage.Table.ToOption();
+        base.RegisterOptions(command);
+        command.AddOption(_accountOption);
     }
 
-    // Common method to get storage account options
-    protected async Task<List<ArgumentOption>> GetAccountOptions(CommandContext context, TArgs args)
+    protected override void RegisterArguments()
     {
-        if (string.IsNullOrEmpty(args.Subscription)) return [];
-
-        var storageService = context.GetService<IStorageService>();
-        var accounts = await storageService.GetStorageAccounts(args.Subscription);
-
-        return accounts?.Select(a => new ArgumentOption { Name = a, Id = a }).ToList() ?? [];
+        base.RegisterArguments();
+        AddArgument(CreateAccountArgument());
     }
 
-    // Helper method to get container options
-    protected async Task<List<ArgumentOption>> GetContainerOptions(CommandContext context, TArgs args)
-    {
-        if (string.IsNullOrEmpty(args.Account) || string.IsNullOrEmpty(args.Subscription))
-        {
-            return [];
-        }
-
-        var storageService = context.GetService<IStorageService>();
-        var containers = await storageService.ListContainers(args.Account, args.Subscription);
-
-        return containers?.Select(c => new ArgumentOption { Name = c, Id = c }).ToList() ?? [];
-    }
-
-    // Helper methods for creating Storage-specific arguments
-    protected ArgumentChain<TArgs> CreateAccountArgument()
-    {
-        return ArgumentChain<TArgs>
-            .Create(ArgumentDefinitions.Storage.Account.Name, ArgumentDefinitions.Storage.Account.Description)
-            .WithCommandExample(ArgumentDefinitions.GetCommandExample(GetCommandPath(), ArgumentDefinitions.Storage.Account))
-            .WithValueAccessor(args => ((BaseStorageArguments)args).Account ?? string.Empty)
-            .WithValueLoader(GetAccountOptions)
-            .WithIsRequired(ArgumentDefinitions.Storage.Account.Required);
-    }
-
-    protected override TArgs BindArguments(ParseResult parseResult)
+    protected override T BindArguments(ParseResult parseResult)
     {
         var args = base.BindArguments(parseResult);
-        ((BaseStorageArguments)args).Account = parseResult.GetValueForOption(_accountOption);
+        args.Account = parseResult.GetValueForOption(_accountOption);
         return args;
+    }
+
+    protected ArgumentBuilder<T> CreateAccountArgument()
+    {
+        return ArgumentBuilder<T>
+            .Create(ArgumentDefinitions.Storage.Account.Name, ArgumentDefinitions.Storage.Account.Description)
+            .WithValueAccessor(args => args.Account ?? string.Empty)
+            .WithSuggestedValuesLoader(async (context, args) =>
+            {
+                if (string.IsNullOrEmpty(args.Subscription)) return [];
+
+                var storageService = context.GetService<IStorageService>();
+                var accounts = await storageService.GetStorageAccounts(args.Subscription);
+
+                return accounts?.Select(a => new ArgumentOption { Name = a, Id = a }).ToList() ?? [];
+            })
+            .WithIsRequired(ArgumentDefinitions.Storage.Account.Required);
     }
 }

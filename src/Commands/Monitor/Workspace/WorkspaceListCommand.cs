@@ -7,32 +7,25 @@ using System.CommandLine.Parsing;
 
 namespace AzureMCP.Commands.Monitor.Workspace;
 
-public class WorkspaceListCommand : BaseCommandWithSubscription<WorkspaceListArguments>
+public sealed class WorkspaceListCommand() : SubscriptionCommand<WorkspaceListArguments>
 {
-    public WorkspaceListCommand() : base()
-    {
-        RegisterArgumentChain();
-    }
+    protected override string GetCommandName() => "list";
+
+    protected override string GetCommandDescription() =>
+        """
+        List Log Analytics workspaces in a subscription. This command retrieves all Log Analytics workspaces 
+        available in the specified Azure subscription, displaying their names, IDs, and other key properties. 
+        Use this command to identify workspaces before querying their logs or tables.
+        """;
 
     [McpServerTool(Destructive = false, ReadOnly = true)]
-    public override Command GetCommand()
-    {
-        var command = new Command(
-            "list",
-            "List Log Analytics workspaces in a subscription. This command retrieves all Log Analytics workspaces available in the specified Azure subscription, displaying their names, IDs, and other key properties. Use this command to identify workspaces before querying their logs or tables.");
-
-
-        AddBaseOptionsToCommand(command);
-        return command;
-    }
-
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
         var args = BindArguments(parseResult);
 
         try
         {
-            if (!await ProcessArgumentChain(context, args))
+            if (!await ProcessArguments(context, args))
             {
                 return context.Response;
             }

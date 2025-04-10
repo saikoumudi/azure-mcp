@@ -23,7 +23,7 @@ public class UserAgentPolicyTests
     [Fact]
     public void Constructor_ThrowsEmptyUserAgent()
     {
-        Assert.Throws<ArgumentException>(() => new UserAgentPolicy("emptyUserAgent"));
+        Assert.Throws<ArgumentException>(() => new UserAgentPolicy(""));
     }
 
     [Fact]
@@ -128,4 +128,3 @@ public class UserAgentPolicyTests
         }
     }
 }
-

@@ -18,35 +18,36 @@ using System.Reflection;
 namespace AzureMCP.Commands.Server;
 
 [HiddenCommand]
-public class ServiceStartCommand : ICommand
+public sealed class ServiceStartCommand(IServiceProvider serviceProvider) : BaseCommand
 {
-    private readonly Command _command;
-    private readonly IServiceProvider _rootServiceProvider;
-    private readonly List<ArgumentDefinition<string>> _arguments = [];
-    private readonly Option<string> _transportOption;
-    private readonly Option<int> _portOption;
+    private readonly IServiceProvider _serviceProvider = serviceProvider;
+    private readonly Option<string> _transportOption = ArgumentDefinitions.Service.Transport.ToOption();
+    private readonly Option<int> _portOption = ArgumentDefinitions.Service.Port.ToOption();
 
-    public ServiceStartCommand(IServiceProvider serviceProvider)
+    protected override string GetCommandName() => "start";
+
+    protected override string GetCommandDescription() => "Starts Azure MCP Server.";
+
+    protected override void RegisterOptions(Command command)
     {
-        _arguments.Add(ArgumentDefinitions.Service.Transport);
-        _arguments.Add(GetPortArgument());
-
-        _transportOption = ArgumentDefinitions.Service.Transport.ToOption();
-        _portOption = ArgumentDefinitions.Service.Port.ToOption();
-
-        _rootServiceProvider = serviceProvider;
-
-        _command = new Command("start", "Starts Azure MCP Server.");
-        _command.AddOption(_transportOption);
-        _command.AddOption(_portOption);
-        _command.SetHandler(parsingContext => ExecuteAsync(new CommandContext(_rootServiceProvider), parsingContext.ParseResult));
+        base.RegisterOptions(command);
+        command.AddOption(_transportOption);
+        command.AddOption(_portOption);
     }
 
-    public async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult commandOptions)
+    protected override void RegisterArguments()
+    {
+        base.RegisterArguments();
+        AddArgument(GetTransportArgument());
+        AddArgument(GetPortArgument());
+    }
+
+    public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult commandOptions)
     {
         var port = commandOptions.GetValueForOption(_portOption) == default
             ? ArgumentDefinitions.Service.Port.DefaultValue
             : commandOptions.GetValueForOption(_portOption);
+
         var serverOptions = new ServiceStartArguments
         {
             Transport = commandOptions.GetValueForOption(_transportOption) ?? TransportTypes.StdIo,
@@ -54,23 +55,18 @@ public class ServiceStartCommand : ICommand
         };
 
         using var host = CreateHost(serverOptions);
-
         await host.StartAsync(CancellationToken.None);
-
-        // Wait for the host to be terminated
         await host.WaitForShutdownAsync(CancellationToken.None);
 
         return context.Response;
     }
-
-    public Command GetCommand() => _command;
 
     private IHost CreateHost(ServiceStartArguments serverArguments)
     {
         if (serverArguments.Transport == TransportTypes.Sse)
         {
             var builder = WebApplication.CreateBuilder([]);
-            ConfigureServices(builder.Services, _rootServiceProvider);
+            ConfigureServices(builder.Services, _serviceProvider);
             ConfigureMcpServer(builder.Services, serverArguments.Transport);
 
             builder.WebHost.ConfigureKestrel(server =>
@@ -90,36 +86,36 @@ public class ServiceStartCommand : ICommand
                 .ConfigureLogging(logging => logging.ClearProviders())
                 .ConfigureServices(services =>
                 {
-                    ConfigureServices(services, _rootServiceProvider);
+                    ConfigureServices(services, _serviceProvider);
                     ConfigureMcpServer(services, serverArguments.Transport);
                 })
                 .Build();
         }
     }
 
-    public IEnumerable<ArgumentDefinition<string>>? GetArgumentChain() => _arguments;
-
-    public void ClearArgumentChain()
+    private static ArgumentDefinition<string> GetTransportArgument()
     {
-        _arguments.Clear();
-    }
-
-    public void AddArgumentToChain(ArgumentDefinition<string> argument)
-    {
-        _arguments.Add(argument);
+        var definition = ArgumentDefinitions.Service.Transport;
+        return new ArgumentDefinition<string>(
+            definition.Name,
+            definition.Description,
+            definition.DefaultValue?.ToString() ?? TransportTypes.StdIo);
     }
 
     private static ArgumentDefinition<string> GetPortArgument()
     {
         var definition = ArgumentDefinitions.Service.Port;
-        return new ArgumentDefinition<string>(definition.Name, definition.Description, definition.DefaultValue.ToString());
+        return new ArgumentDefinition<string>(
+            definition.Name,
+            definition.Description,
+            definition.DefaultValue.ToString());
     }
 
-    private static void ConfigureMcpServer(IServiceCollection services, String transport)
+    private static void ConfigureMcpServer(IServiceCollection services, string transport)
     {
         services.AddSingleton<ToolOperations>();
 
-        services.AddSingleton<McpServerOptions>(provider =>
+        services.AddSingleton(provider =>
         {
             var toolOperations = provider.GetRequiredService<ToolOperations>();
 

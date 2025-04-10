@@ -5,7 +5,8 @@ using AzureMCP.Services.Interfaces;
 
 namespace AzureMCP.Services.Azure.Subscription;
 
-public class SubscriptionService(ICacheService cacheService, ITenantService tenantService) : BaseAzureService(tenantService), ISubscriptionService
+public class SubscriptionService(ICacheService cacheService, ITenantService tenantService)
+    : BaseAzureService(tenantService), ISubscriptionService
 {
     private readonly ICacheService _cacheService = cacheService ?? throw new ArgumentNullException(nameof(cacheService));
     private const string CACHE_KEY = "subscriptions";

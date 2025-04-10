@@ -8,54 +8,25 @@ using System.CommandLine.Parsing;
 
 namespace AzureMCP.Commands.AppConfig.KeyValue;
 
-public class KeyValueLockCommand : BaseKeyValueCommand<KeyValueLockArguments>
+public sealed class KeyValueLockCommand : BaseKeyValueCommand<KeyValueLockArguments>
 {
-    private readonly Option<string> _keyOption;
-    private readonly Option<string> _labelOption;
+    protected override string GetCommandName() => "lock";
 
-    public KeyValueLockCommand() : base()
-    {
-        _keyOption = ArgumentDefinitions.AppConfig.Key.ToOption();
-        _labelOption = ArgumentDefinitions.AppConfig.Label.ToOption();
-
-        RegisterArgumentChain(
-            CreateAccountArgument(),
-            CreateKeyArgument(),
-            CreateLabelArgument()
-        );
-    }
+    protected override string GetCommandDescription() =>
+        """
+        Lock a key-value in an App Configuration store. This command sets a key-value to read-only mode, 
+        preventing any modifications to its value. You must specify an account name and key. Optionally, 
+        you can specify a label to lock a specific labeled version of the key-value.
+        """;
 
     [McpServerTool(Destructive = false, ReadOnly = false)]
-    public override Command GetCommand()
-    {
-        var command = new Command(
-            "lock",
-            "Lock a key-value in an App Configuration store. This command sets a key-value to read-only mode, preventing any modifications to its value. You must specify an account name and key. Optionally, you can specify a label to lock a specific labeled version of the key-value.");
-
-        AddBaseOptionsToCommand(command);
-        command.AddOption(_accountOption);
-        command.AddOption(_keyOption);
-        command.AddOption(_labelOption);
-
-        return command;
-    }
-
-    protected override KeyValueLockArguments BindArguments(ParseResult parseResult)
-    {
-        var args = base.BindArguments(parseResult);
-        args.Account = parseResult.GetValueForOption(_accountOption);
-        args.Key = parseResult.GetValueForOption(_keyOption);
-        args.Label = parseResult.GetValueForOption(_labelOption);
-        return args;
-    }
-
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
         var args = BindArguments(parseResult);
 
         try
         {
-            if (!await ProcessArgumentChain(context, args))
+            if (!await ProcessArguments(context, args))
             {
                 return context.Response;
             }

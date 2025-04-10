@@ -5,7 +5,8 @@ using AzureMCP.Services.Interfaces;
 
 namespace AzureMCP.Services.Azure.Tenant;
 
-public class TenantService(ICacheService cacheService) : BaseAzureService, ITenantService
+public class TenantService(ICacheService cacheService)
+    : BaseAzureService, ITenantService
 {
     private readonly ICacheService _cacheService = cacheService ?? throw new ArgumentNullException(nameof(cacheService));
     private const string CACHE_KEY = "tenants";

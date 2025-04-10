@@ -3,54 +3,28 @@ using AzureMCP.Models.Argument;
 using AzureMCP.Models.Command;
 using AzureMCP.Services.Interfaces;
 using ModelContextProtocol.Server;
-using System.CommandLine;
 using System.CommandLine.Parsing;
 
 namespace AzureMCP.Commands.Storage.Blob.Container;
 
-public class ContainerDetailsCommand : BaseContainerCommand<ContainerDetailsArguments>
+public sealed class ContainerDetailsCommand : BaseContainerCommand<ContainerDetailsArguments>
 {
-    public ContainerDetailsCommand() : base()
-    {
-        // Create the argument chain with account and container arguments
-        RegisterArgumentChain(
-            CreateAccountArgument(),
-            CreateContainerArgument()
-        );
-    }
+    protected override string GetCommandName() => "details";
+
+    protected override string GetCommandDescription() =>
+        $"""
+        Get detailed properties of a storage container including metadata, lease status, and access level.
+        Requires {ArgumentDefinitions.Storage.AccountName} and {ArgumentDefinitions.Storage.ContainerName}.
+        """;
 
     [McpServerTool(Destructive = false, ReadOnly = true)]
-    public override Command GetCommand()
-    {
-        var command = new Command(
-            "details",
-            "Get detailed properties of a storage container including metadata, lease status, and access level. " +
-            $"Requires {ArgumentDefinitions.Storage.AccountName} and {ArgumentDefinitions.Storage.ContainerName}.");
-
-        AddBaseOptionsToCommand(command);
-        command.AddOption(_accountOption);
-        command.AddOption(_containerOption);
-        return command;
-    }
-
-    protected override ContainerDetailsArguments BindArguments(ParseResult parseResult)
-    {
-        var args = base.BindArguments(parseResult);
-
-        // Explicitly bind the options we care about
-        args.Account = parseResult.GetValueForOption(_accountOption);
-        args.Container = parseResult.GetValueForOption(_containerOption);
-
-        return args;
-    }
-
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
         try
         {
             var args = BindArguments(parseResult);
 
-            if (!await ProcessArgumentChain(context, args))
+            if (!await ProcessArguments(context, args))
             {
                 return context.Response;
             }

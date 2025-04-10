@@ -1,5 +1,5 @@
 namespace AzureMCP.Arguments.Monitor;
 
-public class WorkspaceListArguments : BaseArgumentsWithSubscription
+public class WorkspaceListArguments : SubscriptionArguments
 {
 }

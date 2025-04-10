@@ -9,10 +9,9 @@ using System.Runtime.InteropServices;
 
 namespace AzureMCP.Commands.Extension;
 
-public class AzCommand : BaseCommand<AzArguments>
+public sealed class AzCommand(int processTimeoutSeconds = 300) : GlobalCommand<AzArguments>
 {
     private readonly Option<string> _commandOption = ArgumentDefinitions.Extension.Az.Command.ToOption();
-    private readonly int _processTimeoutSeconds;
     private static string? _cachedAzPath;
 
     private static readonly string[] AzureCliPaths =
@@ -24,39 +23,40 @@ public class AzCommand : BaseCommand<AzArguments>
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Programs", "Python", "Python311", "Scripts")
     ];
 
-    public AzCommand(int processTimeoutSeconds = 300) : base()
-    {
-        _processTimeoutSeconds = processTimeoutSeconds;
+    protected override string GetCommandName() => "az";
 
-        // Register the command argument in the chain
-        AddArgumentToChain(CreateCommandArgument());
+    protected override string GetCommandDescription() =>
+        """
+        Your job is to answer questions about an Azure environment by executing Azure CLI commands. You have the following rules:
+
+        - You should use the Azure CLI to manage Azure resources and services. Do not use any other tool.
+        - You should provide a valid Azure CLI command. For example: 'group list'.
+        - When deleting or modifying resources, ALWAYS request user confirmation.
+        - Whenever a command fails, retry it 3 times before giving up with an improved version of the code based on the returned feedback.
+        - When listing resources, ensure pagination is handled correctly so that all resources are returned.
+        - This tool can ONLY write code that interacts with Azure. It CANNOT generate charts, tables, graphs, etc.
+        - This tool can delete or modify resources in your Azure environment. Always be cautious and include appropriate warnings when providing commands to users.
+
+        Be concise, professional and to the point. Do not give generic advice, always reply with detailed & contextual data sourced from the current Azure environment.
+        """;
+
+    protected override void RegisterOptions(Command command)
+    {
+        base.RegisterOptions(command);
+        command.AddOption(_commandOption);
     }
 
-    protected ArgumentChain<AzArguments> CreateCommandArgument() =>
-        ArgumentChain<AzArguments>
+    protected override void RegisterArguments()
+    {
+        base.RegisterArguments();
+        AddArgument(CreateCommandArgument());
+    }
+
+    private static ArgumentBuilder<AzArguments> CreateCommandArgument() =>
+        ArgumentBuilder<AzArguments>
             .Create(ArgumentDefinitions.Extension.Az.Command.Name, ArgumentDefinitions.Extension.Az.Command.Description)
-            .WithCommandExample(ArgumentDefinitions.GetCommandExample(GetCommandPath(), ArgumentDefinitions.Extension.Az.Command))
             .WithValueAccessor(args => args.Command ?? string.Empty)
             .WithIsRequired(ArgumentDefinitions.Extension.Az.Command.Required);
-
-    [McpServerTool(Destructive = true, ReadOnly = false)]
-    public override Command GetCommand()
-    {
-        var command = new Command(
-            "az",
-            "Your job is to answer questions about an Azure environment by executing Azure CLI commands. You have the following rules:\n\n" +
-            "- You should use the Azure CLI to manage Azure resources and services. Do not use any other tool.\n" +
-            "- You should provide a valid Azure CLI command. For example: 'group list'.\n" +
-            "- When deleting or modifying resources, ALWAYS request user confirmation.\n" +
-            "- Whenever a command fails, retry it 3 times before giving up with an improved version of the code based on the returned feedback.\n" +
-            "- When listing resources, ensure pagination is handled correctly so that all resources are returned.\n" +
-            "- This tool can ONLY write code that interacts with Azure. It CANNOT generate charts, tables, graphs, etc.\n\n" +
-            "- This tool can delete or modify resources in your Azure environment. Always be cautious and include appropriate warnings when providing commands to users.\n\n" +
-            "Be concise, professional and to the point. Do not give generic advice, always reply with detailed & contextual data sourced from the current Azure environment.");
-
-        command.AddOption(_commandOption);
-        return command;
-    }
 
     protected override AzArguments BindArguments(ParseResult parseResult)
     {
@@ -108,13 +108,14 @@ public class AzCommand : BaseCommand<AzArguments>
         return null;
     }
 
+    [McpServerTool(Destructive = true, ReadOnly = false)]
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
         var args = BindArguments(parseResult);
 
         try
         {
-            if (!await ProcessArgumentChain(context, args))
+            if (!await ProcessArguments(context, args))
             {
                 return context.Response;
             }
@@ -123,7 +124,7 @@ public class AzCommand : BaseCommand<AzArguments>
             var processService = context.GetService<IExternalProcessService>();
 
             var azPath = FindAzCliPath() ?? throw new FileNotFoundException("Azure CLI executable not found in PATH or common installation locations. Please ensure Azure CLI is installed.");
-            var result = await processService.ExecuteAsync(azPath, command, _processTimeoutSeconds);
+            var result = await processService.ExecuteAsync(azPath, command, processTimeoutSeconds);
             context.Response.Results = processService.ParseJsonOutput(result);
         }
         catch (Exception ex)

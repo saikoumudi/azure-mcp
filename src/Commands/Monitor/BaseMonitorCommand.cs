@@ -4,17 +4,25 @@ using AzureMCP.Models.Argument;
 using AzureMCP.Models.Command;
 using AzureMCP.Services.Interfaces;
 using System.CommandLine;
+using System.CommandLine.Parsing;
 
 namespace AzureMCP.Commands.Monitor;
 
-public abstract class BaseMonitorCommand<TArgs> : BaseCommandWithSubscription<TArgs> where TArgs : BaseArgumentsWithSubscription, IWorkspaceArguments, new()
+public abstract class BaseMonitorCommand<TArgs>() : SubscriptionCommand<TArgs>
+    where TArgs : SubscriptionArguments, IWorkspaceArguments, new()
 {
-    protected readonly Option<string> _workspaceOption;
+    protected readonly Option<string> _workspaceOption = ArgumentDefinitions.Monitor.Workspace.ToOption();
 
-    protected BaseMonitorCommand()
-        : base()
+    protected override void RegisterOptions(Command command)
     {
-        _workspaceOption = ArgumentDefinitions.Monitor.Workspace.ToOption();
+        base.RegisterOptions(command);
+        command.AddOption(_workspaceOption);
+    }
+
+    protected override void RegisterArguments()
+    {
+        base.RegisterArguments();
+        AddArgument(CreateWorkspaceArgument());
     }
 
     protected async Task<List<ArgumentOption>> GetWorkspaceOptions(CommandContext context, string subscriptionId)
@@ -23,7 +31,6 @@ public abstract class BaseMonitorCommand<TArgs> : BaseCommandWithSubscription<TA
 
         var monitorService = context.GetService<IMonitorService>();
         var workspaces = await monitorService.ListWorkspaces(subscriptionId, null);
-
         return [.. workspaces.Select(w => new ArgumentOption
         {
             Name = w.Name,
@@ -31,13 +38,19 @@ public abstract class BaseMonitorCommand<TArgs> : BaseCommandWithSubscription<TA
         })];
     }
 
-    protected virtual ArgumentChain<TArgs> CreateWorkspaceArgument()
+    protected virtual ArgumentBuilder<TArgs> CreateWorkspaceArgument()
     {
-        return ArgumentChain<TArgs>
+        return ArgumentBuilder<TArgs>
             .Create(ArgumentDefinitions.Monitor.Workspace.Name, ArgumentDefinitions.Monitor.Workspace.Description)
-            .WithCommandExample(ArgumentDefinitions.GetCommandExample(GetCommandPath(), ArgumentDefinitions.Monitor.Workspace))
             .WithValueAccessor(args => args.Workspace ?? string.Empty)
-            .WithValueLoader(async (context, args) => await GetWorkspaceOptions(context, args.Subscription ?? string.Empty))
+            .WithSuggestedValuesLoader(async (context, args) => await GetWorkspaceOptions(context, args.Subscription ?? string.Empty))
             .WithIsRequired(ArgumentDefinitions.Monitor.Workspace.Required);
+    }
+
+    protected override TArgs BindArguments(ParseResult parseResult)
+    {
+        var args = base.BindArguments(parseResult);
+        args.Workspace = parseResult.GetValueForOption(_workspaceOption);
+        return args;
     }
 }

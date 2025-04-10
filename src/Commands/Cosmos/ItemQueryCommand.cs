@@ -8,25 +8,46 @@ using System.CommandLine.Parsing;
 
 namespace AzureMCP.Commands.Cosmos;
 
-public class ItemQueryCommand : BaseDatabaseCommand<ItemQueryArguments>
+public sealed class ItemQueryCommand : BaseDatabaseCommand<ItemQueryArguments>
 {
+    private readonly Option<string> _queryOption = ArgumentDefinitions.Cosmos.Query.ToOption();
+    private readonly Option<string> _containerOption = ArgumentDefinitions.Cosmos.Container.ToOption();
+
     public ItemQueryCommand() : base()
     {
-        RegisterArgumentChain(
-            CreateAccountArgument(),
-            CreateDatabaseArgument(),
-            CreateContainerArgument(),
-            CreateQueryArgument()
-        );
+        RegisterArguments();
     }
 
-    private ArgumentChain<ItemQueryArguments> CreateContainerArgument()
+    protected override string GetCommandName() => "query";
+
+    protected override string GetCommandDescription() =>
+        $"""
+        Execute a SQL query against items in a Cosmos DB container. Requires {ArgumentDefinitions.Cosmos.AccountName}, 
+        {ArgumentDefinitions.Cosmos.DatabaseName}, and {ArgumentDefinitions.Cosmos.ContainerName}. 
+        The {ArgumentDefinitions.Cosmos.QueryText} parameter accepts SQL query syntax. Results are returned as a 
+        JSON array of documents.
+        """;
+
+    protected override void RegisterOptions(Command command)
     {
-        return ArgumentChain<ItemQueryArguments>
+        base.RegisterOptions(command);
+        command.AddOption(_containerOption);
+        command.AddOption(_queryOption);
+    }
+
+    protected override void RegisterArguments()
+    {
+        base.RegisterArguments();
+        AddArgument(CreateContainerArgument());
+        AddArgument(CreateQueryArgument());
+    }
+
+    private ArgumentBuilder<ItemQueryArguments> CreateContainerArgument()
+    {
+        return ArgumentBuilder<ItemQueryArguments>
             .Create(ArgumentDefinitions.Cosmos.Container.Name, ArgumentDefinitions.Cosmos.Container.Description)
-            .WithCommandExample(ArgumentDefinitions.GetCommandExample(GetCommandPath(), ArgumentDefinitions.Cosmos.Container))
             .WithValueAccessor(args => args.Container ?? string.Empty)
-            .WithValueLoader(async (context, args) =>
+            .WithSuggestedValuesLoader(async (context, args) =>
                 await GetContainerOptions(
                     context,
                     args.Account ?? string.Empty,
@@ -35,51 +56,31 @@ public class ItemQueryCommand : BaseDatabaseCommand<ItemQueryArguments>
             .WithIsRequired(ArgumentDefinitions.Cosmos.Container.Required);
     }
 
-    protected ArgumentChain<ItemQueryArguments> CreateQueryArgument()
+    private static ArgumentBuilder<ItemQueryArguments> CreateQueryArgument()
     {
         var defaultValue = ArgumentDefinitions.Cosmos.Query.DefaultValue ?? "SELECT * FROM c";
-        return ArgumentChain<ItemQueryArguments>
+        return ArgumentBuilder<ItemQueryArguments>
             .Create(ArgumentDefinitions.Cosmos.Query.Name, ArgumentDefinitions.Cosmos.Query.Description)
-            .WithCommandExample(ArgumentDefinitions.GetCommandExample(GetCommandPath(), ArgumentDefinitions.Cosmos.Query))
             .WithValueAccessor(args => args.Query ?? string.Empty)
             .WithDefaultValue(defaultValue)
             .WithIsRequired(ArgumentDefinitions.Cosmos.Query.Required);
     }
 
-    [McpServerTool(Destructive = false, ReadOnly = true)]
-    public override Command GetCommand()
-    {
-        var command = new Command(
-            "query",
-            $"Execute a SQL query against items in a Cosmos DB container. Requires {ArgumentDefinitions.Cosmos.AccountName}, " +
-            $"{ArgumentDefinitions.Cosmos.DatabaseName}, and {ArgumentDefinitions.Cosmos.ContainerName}. " +
-            $"The {ArgumentDefinitions.Cosmos.QueryText} parameter accepts SQL query syntax. Results are returned as a JSON array of documents.");
-
-        AddBaseOptionsToCommand(command);
-        command.AddOption(_accountOption);
-        command.AddOption(_databaseOption);
-        command.AddOption(_containerOption);
-        command.AddOption(ArgumentDefinitions.Cosmos.Query.ToOption());
-        return command;
-    }
-
     protected override ItemQueryArguments BindArguments(ParseResult parseResult)
     {
         var args = base.BindArguments(parseResult);
-        args.Account = parseResult.GetValueForOption(_accountOption);
-        args.Database = parseResult.GetValueForOption(_databaseOption);
-        args.Container = parseResult.GetValueForOption(_containerOption);
-        args.Query = parseResult.GetValueForOption(ArgumentDefinitions.Cosmos.Query.ToOption());
+        args.Query = parseResult.GetValueForOption(_queryOption);
         return args;
     }
 
+    [McpServerTool(Destructive = false, ReadOnly = true)]
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
         var args = BindArguments(parseResult);
 
         try
         {
-            if (!await ProcessArgumentChain(context, args))
+            if (!await ProcessArguments(context, args))
             {
                 return context.Response;
             }

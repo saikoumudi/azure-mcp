@@ -7,7 +7,7 @@ namespace AzureMCP.Arguments;
 /// <summary>
 /// Represents authentication method configuration for Azure SDK clients
 /// </summary>
-public class AuthMethodArguments
+public class AuthMethodArgument
 {
     [JsonPropertyName(ArgumentDefinitions.Common.AuthMethodName)]
     public AuthMethod AuthMethod { get; set; }

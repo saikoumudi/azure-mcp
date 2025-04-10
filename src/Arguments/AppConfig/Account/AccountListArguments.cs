@@ -1,5 +1,5 @@
 namespace AzureMCP.Arguments.AppConfig.Account;
 
-public class AccountListArguments : BaseArgumentsWithSubscription
+public class AccountListArguments : SubscriptionArguments
 {
 }

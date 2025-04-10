@@ -65,7 +65,7 @@ public abstract class BaseAzureService(ITenantService? tenantService = null)
         }
     }
 
-    protected T AddDefaultPolicies<T>(T clientOptions) where T : ClientOptions
+    protected static T AddDefaultPolicies<T>(T clientOptions) where T : ClientOptions
     {
         clientOptions.AddPolicy(SharedUserAgentPolicy, HttpPipelinePosition.BeforeTransport);
 

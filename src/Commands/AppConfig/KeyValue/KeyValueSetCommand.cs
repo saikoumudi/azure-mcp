@@ -8,69 +8,54 @@ using System.CommandLine.Parsing;
 
 namespace AzureMCP.Commands.AppConfig.KeyValue;
 
-public class KeyValueSetCommand : BaseKeyValueCommand<KeyValueSetArguments>
+public sealed class KeyValueSetCommand : BaseKeyValueCommand<KeyValueSetArguments>
 {
-    private readonly Option<string> _keyOption;
-    private readonly Option<string> _valueOption;
-    private readonly Option<string> _labelOption;
+    private readonly Option<string> _valueOption = ArgumentDefinitions.AppConfig.Value.ToOption();
 
-    public KeyValueSetCommand() : base()
+    protected override string GetCommandName() => "set";
+
+    protected override string GetCommandDescription() =>
+        """
+        Set a key-value setting in an App Configuration store. This command creates or updates a key-value setting 
+        with the specified value. You must specify an account name, key, and value. Optionally, you can specify a 
+        label otherwise the default label will be used.
+        """;
+
+    protected override void RegisterOptions(Command command)
     {
-        _keyOption = ArgumentDefinitions.AppConfig.Key.ToOption();
-        _valueOption = ArgumentDefinitions.AppConfig.Value.ToOption();
-        _labelOption = ArgumentDefinitions.AppConfig.Label.ToOption();
-
-        RegisterArgumentChain(
-            CreateAccountArgument(),
-            CreateKeyArgument(),
-            CreateValueArgument(),
-            CreateLabelArgument()
-        );
-    }
-
-    // Helper method for creating value arguments
-    protected ArgumentChain<KeyValueSetArguments> CreateValueArgument()
-    {
-        return ArgumentChain<KeyValueSetArguments>
-            .Create(ArgumentDefinitions.AppConfig.Value.Name, ArgumentDefinitions.AppConfig.Value.Description)
-            .WithCommandExample(ArgumentDefinitions.GetCommandExample(GetCommandPath(), ArgumentDefinitions.AppConfig.Value))
-            .WithValueAccessor(args => args.Value ?? string.Empty)
-            .WithIsRequired(ArgumentDefinitions.AppConfig.Value.Required);
-    }
-
-    [McpServerTool(Destructive = false, ReadOnly = false)]
-    public override Command GetCommand()
-    {
-        var command = new Command(
-            "set",
-            "Set a key-value setting in an App Configuration store. This command creates or updates a key-value setting with the specified value. You must specify an account name, key, and value. Optionally, you can specify a label otherwise the default label will be used.");
-
-        AddBaseOptionsToCommand(command);
-        command.AddOption(_accountOption);
-        command.AddOption(_keyOption);
+        base.RegisterOptions(command);
         command.AddOption(_valueOption);
-        command.AddOption(_labelOption);
+    }
 
-        return command;
+    protected override void RegisterArguments()
+    {
+        base.RegisterArguments();
+        AddArgument(CreateValueArgument());
     }
 
     protected override KeyValueSetArguments BindArguments(ParseResult parseResult)
     {
         var args = base.BindArguments(parseResult);
-        args.Account = parseResult.GetValueForOption(_accountOption);
-        args.Key = parseResult.GetValueForOption(_keyOption);
         args.Value = parseResult.GetValueForOption(_valueOption);
-        args.Label = parseResult.GetValueForOption(_labelOption);
         return args;
     }
 
+    private static ArgumentBuilder<KeyValueSetArguments> CreateValueArgument()
+    {
+        return ArgumentBuilder<KeyValueSetArguments>
+            .Create(ArgumentDefinitions.AppConfig.Value.Name, ArgumentDefinitions.AppConfig.Value.Description)
+            .WithValueAccessor(args => args.Value ?? string.Empty)
+            .WithIsRequired(ArgumentDefinitions.AppConfig.Value.Required);
+    }
+
+    [McpServerTool(Destructive = false, ReadOnly = false)]
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
         var args = BindArguments(parseResult);
 
         try
         {
-            if (!await ProcessArgumentChain(context, args))
+            if (!await ProcessArguments(context, args))
             {
                 return context.Response;
             }

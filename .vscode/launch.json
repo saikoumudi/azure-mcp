@@ -51,7 +51,30 @@
                 "table",
                 "list",
                 "--subscription",
-                "25fd0362-aa79-488b-b37b-d6e892009fdf"
+                "${input:subscription}",
+            ],
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "stopAtEntry": false,
+            "env": {
+                "DOTNET_ENVIRONMENT": "Development"
+            }
+        },
+        
+        {
+            "name": "Debug Storage Table List",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/src/bin/Debug/net9.0/azmcp.exe",
+            "args": [
+                "storage",
+                "table",
+                "list",
+                "--subscription",
+                "${input:subscription}",
+                "--account-name",
+                "${input:storageAccountName}",
             ],
             "cwd": "${workspaceFolder}",
             "console": "integratedTerminal",
@@ -71,9 +94,9 @@
                 "log",
                 "query",
                 "--subscription",
-                "25fd0362-aa79-488b-b37b-d6e892009fdf",
-                "--workspace-id",
-                "5a9c0f6e-cb75-481b-b018-1a6c6b67e089",
+                "${input:subscription}",
+                "--workspace",
+                "${input:workspace}",
                 "--query",
                 "recent"
             ],
@@ -114,15 +137,22 @@
     ],
     "inputs": [
         {
-            "id": "subscriptionId",
+            "id": "subscription",
             "type": "promptString",
-            "description": "Azure Subscription ID",
+            "description": "Azure Subscription",
             "default": ""
         },
         {
-            "id": "accountName",
+            "id": "cosmosAccountName",
             "type": "promptString",
             "description": "Cosmos DB Account Name",
+            "default": ""
+        }
+        ,
+        {
+            "id": "storageAccountName",
+            "type": "promptString",
+            "description": "Storage Account Name",
             "default": ""
         },
         {

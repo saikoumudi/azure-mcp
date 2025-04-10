@@ -8,72 +8,67 @@ using System.CommandLine.Parsing;
 
 namespace AzureMCP.Commands.AppConfig.KeyValue;
 
-public class KeyValueListCommand : BaseAppConfigCommand<KeyValueListArguments>
+public sealed class KeyValueListCommand : BaseAppConfigCommand<KeyValueListArguments>
 {
-    private readonly Option<string> _keyOption;
-    private readonly Option<string> _labelOption;
+    // KeyValueList has different key and label descriptions, which is why we are defining here instead of using BaseKeyValueCommand
+    private readonly Option<string> _keyOption = ArgumentDefinitions.AppConfig.KeyValueList.Key.ToOption();
+    private readonly Option<string> _labelOption = ArgumentDefinitions.AppConfig.KeyValueList.Label.ToOption();
 
-    public KeyValueListCommand() : base()
+    protected override string GetCommandName() => "list";
+
+    protected override string GetCommandDescription() =>
+        """
+        List all key-values in an App Configuration store. This command retrieves and displays all key-value pairs 
+        from the specified store. Each key-value includes its key, value, label, content type, ETag, last modified 
+        time, and lock status.
+        """;
+
+    protected override void RegisterOptions(Command command)
     {
-        _keyOption = ArgumentDefinitions.AppConfig.KeyValueList.Key.ToOption();
-        _labelOption = ArgumentDefinitions.AppConfig.KeyValueList.Label.ToOption();
-
-        RegisterArgumentChain(
-            CreateAccountArgument(),
-            CreateListKeyArgument(),
-            CreateListLabelArgument()
-        );
-    }
-
-    [McpServerTool(Destructive = false, ReadOnly = true)]
-    public override Command GetCommand()
-    {
-        var command = new Command(
-            "list",
-            "List all key-values in an App Configuration store. This command retrieves and displays all key-value pairs from the specified store. Each key-value includes its key, value, label, content type, ETag, last modified time, and lock status.");
-
-        AddBaseOptionsToCommand(command);
-        command.AddOption(_accountOption);
+        base.RegisterOptions(command);
         command.AddOption(_keyOption);
         command.AddOption(_labelOption);
+    }
 
-        return command;
+    protected override void RegisterArguments()
+    {
+        base.RegisterArguments();
+        AddArgument(CreateListKeyArgument());
+        AddArgument(CreateListLabelArgument());
+    }
+
+    private static ArgumentBuilder<KeyValueListArguments> CreateListKeyArgument()
+    {
+        return ArgumentBuilder<KeyValueListArguments>
+            .Create(ArgumentDefinitions.AppConfig.KeyValueList.Key.Name, ArgumentDefinitions.AppConfig.KeyValueList.Key.Description)
+            .WithValueAccessor(args => args.Key ?? string.Empty)
+            .WithIsRequired(ArgumentDefinitions.AppConfig.KeyValueList.Key.Required);
+    }
+
+    private static ArgumentBuilder<KeyValueListArguments> CreateListLabelArgument()
+    {
+        return ArgumentBuilder<KeyValueListArguments>
+            .Create(ArgumentDefinitions.AppConfig.KeyValueList.Label.Name, ArgumentDefinitions.AppConfig.KeyValueList.Label.Description)
+            .WithValueAccessor(args => args.Label ?? string.Empty)
+            .WithIsRequired(ArgumentDefinitions.AppConfig.KeyValueList.Label.Required);
     }
 
     protected override KeyValueListArguments BindArguments(ParseResult parseResult)
     {
         var args = base.BindArguments(parseResult);
-        args.Account = parseResult.GetValueForOption(_accountOption);
         args.Key = parseResult.GetValueForOption(_keyOption);
         args.Label = parseResult.GetValueForOption(_labelOption);
         return args;
     }
 
-    private ArgumentChain<KeyValueListArguments> CreateListKeyArgument()
-    {
-        return ArgumentChain<KeyValueListArguments>
-            .Create(ArgumentDefinitions.AppConfig.KeyValueList.Key.Name, ArgumentDefinitions.AppConfig.KeyValueList.Key.Description)
-            .WithCommandExample(ArgumentDefinitions.GetCommandExample(GetCommandPath(), ArgumentDefinitions.AppConfig.KeyValueList.Key))
-            .WithValueAccessor(args => args.Key ?? string.Empty)
-            .WithIsRequired(ArgumentDefinitions.AppConfig.KeyValueList.Key.Required);
-    }
-
-    private ArgumentChain<KeyValueListArguments> CreateListLabelArgument()
-    {
-        return ArgumentChain<KeyValueListArguments>
-            .Create(ArgumentDefinitions.AppConfig.KeyValueList.Label.Name, ArgumentDefinitions.AppConfig.KeyValueList.Label.Description)
-            .WithCommandExample(ArgumentDefinitions.GetCommandExample(GetCommandPath(), ArgumentDefinitions.AppConfig.KeyValueList.Label))
-            .WithValueAccessor(args => args.Label ?? string.Empty)
-            .WithIsRequired(ArgumentDefinitions.AppConfig.KeyValueList.Label.Required);
-    }
-
+    [McpServerTool(Destructive = false, ReadOnly = true)]
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
         var args = BindArguments(parseResult);
 
         try
         {
-            if (!await ProcessArgumentChain(context, args))
+            if (!await ProcessArguments(context, args))
             {
                 return context.Response;
             }

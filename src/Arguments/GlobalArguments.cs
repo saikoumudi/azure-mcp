@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 
 namespace AzureMCP.Arguments;
 
-public class BaseArguments
+public class GlobalArguments
 {
     [JsonPropertyName(ArgumentDefinitions.Common.ResourceGroupName)]
     public string? ResourceGroup { get; set; }

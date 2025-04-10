@@ -11,37 +11,34 @@ namespace AzureMCP.Tests.Services.Azure;
 
 public class BaseAzureServiceTests
 {
+    private readonly ITenantService _tenantService = Substitute.For<ITenantService>();
+    private readonly ClientOptions _options = Substitute.For<ClientOptions>();
+    private readonly TestAzureService _azureService;
+
+    public BaseAzureServiceTests()
+    {
+        _tenantService.GetTenantId("test-tenant-name").Returns("test-tenant-id");
+        _azureService = new TestAzureService();
+    }
+
     [Fact]
     public void AddsCorrectPolicies()
     {
-        // Arrange
-        var tenantName = "test-tenant-name";
-        var tenantId = "test-tenant-id";
-
-        var tenantService = Substitute.For<ITenantService>();
-        tenantService.GetTenantId(tenantName).Returns(tenantId);
-
-        var options = Substitute.For<ClientOptions>();
-        var azureService = new TestAzureService();
-
         // Act
-        azureService.TestAddDefaultPolicies(options);
+        _azureService.TestAddDefaultPolicies(_options);
 
         // Assert
-        options.Received().AddPolicy(
+        _options.Received().AddPolicy(
             Arg.Is<HttpPipelinePolicy>(x => x is UserAgentPolicy),
             Arg.Is(HttpPipelinePosition.BeforeTransport));
     }
 
-    private class TestAzureService : BaseAzureService
+    private sealed class TestAzureService(ITenantService? tenantService = null) : BaseAzureService(tenantService)
     {
-        public TestAzureService(ITenantService? tenantService = null)
-            : base(tenantService)
-        {
-        }
+        public Task<ArmClient> GetArmClientAsync(string? tenant = null, RetryPolicyArguments? retryPolicy = null) =>
+            CreateArmClientAsync(tenant, retryPolicy);
 
-        public Task<ArmClient> GetArmClientAsync(string? tenant = null, RetryPolicyArguments? retryPolicy = null) => CreateArmClientAsync(tenant, retryPolicy);
-
-        public T TestAddDefaultPolicies<T>(T options) where T : ClientOptions => AddDefaultPolicies(options);
+        public T TestAddDefaultPolicies<T>(T options) where T : ClientOptions =>
+            AddDefaultPolicies(options);
     }
 }

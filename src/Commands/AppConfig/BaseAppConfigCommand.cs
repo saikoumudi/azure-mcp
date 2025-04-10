@@ -1,40 +1,48 @@
 using AzureMCP.Arguments.AppConfig;
 using AzureMCP.Models.Argument;
-using AzureMCP.Models.Command;
 using AzureMCP.Services.Interfaces;
 using System.CommandLine;
+using System.CommandLine.Parsing;
 
 namespace AzureMCP.Commands.AppConfig;
 
-public abstract class BaseAppConfigCommand<TArgs> : BaseCommandWithSubscription<TArgs> where TArgs : BaseAppConfigArguments, new()
+public abstract class BaseAppConfigCommand<T> : SubscriptionCommand<T> where T : BaseAppConfigArguments, new()
 {
-    protected readonly Option<string> _accountOption;
+    protected readonly Option<string> _accountOption = ArgumentDefinitions.AppConfig.Account.ToOption();
 
-    protected BaseAppConfigCommand() : base()
+    protected override void RegisterOptions(Command command)
     {
-        _accountOption = ArgumentDefinitions.AppConfig.Account.ToOption();
+        base.RegisterOptions(command);
+        command.AddOption(_accountOption);
     }
 
-    // Common method to get account options
-    protected async Task<List<ArgumentOption>> GetAccountOptions(CommandContext context, string subscriptionId)
+    protected override void RegisterArguments()
     {
-        if (string.IsNullOrEmpty(subscriptionId)) return [];
-
-        var appConfigService = context.GetService<IAppConfigService>();
-        var accounts = await appConfigService.GetAppConfigAccounts(subscriptionId);
-
-        return accounts?.Select(a => new ArgumentOption { Name = a.Name, Id = a.Name }).ToList() ?? [];
+        base.RegisterArguments();
+        AddArgument(CreateAccountArgument());
     }
 
-    // Helper method for creating App Config-specific arguments
-    protected ArgumentChain<TArgs> CreateAccountArgument()
+    protected override T BindArguments(ParseResult parseResult)
     {
-        return ArgumentChain<TArgs>
+        var args = base.BindArguments(parseResult);
+        args.Account = parseResult.GetValueForOption(_accountOption);
+        return args;
+    }
+
+    protected ArgumentBuilder<T> CreateAccountArgument()
+    {
+        return ArgumentBuilder<T>
             .Create(ArgumentDefinitions.AppConfig.Account.Name, ArgumentDefinitions.AppConfig.Account.Description)
-            .WithCommandExample(ArgumentDefinitions.GetCommandExample(GetCommandPath(), ArgumentDefinitions.AppConfig.Account))
             .WithValueAccessor(args => args.Account ?? string.Empty)
-            .WithValueLoader(async (context, args) =>
-                await GetAccountOptions(context, args.Subscription ?? string.Empty))
+            .WithSuggestedValuesLoader(async (context, args) =>
+            {
+                if (string.IsNullOrEmpty(args.Subscription)) return [];
+
+                var appConfigService = context.GetService<IAppConfigService>();
+                var accounts = await appConfigService.GetAppConfigAccounts(args.Subscription);
+
+                return accounts?.Select(a => new ArgumentOption { Name = a.Name, Id = a.Name }).ToList() ?? [];
+            })
             .WithIsRequired(ArgumentDefinitions.AppConfig.Account.Required);
     }
 }

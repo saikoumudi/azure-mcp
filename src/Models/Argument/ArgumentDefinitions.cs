@@ -1,16 +1,12 @@
 using Azure.Core;
+using AzureMCP.Arguments.AppConfig;
 using AzureMCP.Arguments.Server;
+using AzureMCP.Services.Interfaces;
 
 namespace AzureMCP.Models.Argument;
 
 public static class ArgumentDefinitions
 {
-    // Helper method to generate consistent command examples
-    public static string GetCommandExample<T>(string commandPath, ArgumentDefinition<T> argument)
-    {
-        return $"{commandPath} --{argument.Name} <{argument.Name}>";
-    }
-
     public static class Common
     {
         public const string TenantName = "tenant";
@@ -250,6 +246,8 @@ public static class ArgumentDefinitions
             "The label to apply to the configuration key. Labels are used to group and organize settings.",
             required: false
         );
+
+
 
         public static class KeyValueList
         {

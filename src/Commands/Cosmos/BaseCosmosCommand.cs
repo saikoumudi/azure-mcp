@@ -4,18 +4,24 @@ using AzureMCP.Models.Command;
 using AzureMCP.Services.Interfaces;
 using Microsoft.Azure.Cosmos;
 using System.CommandLine;
+using System.CommandLine.Parsing;
 
 namespace AzureMCP.Commands.Cosmos;
 
-public abstract class BaseCosmosCommand<TArgs> : BaseCommandWithSubscription<TArgs> where TArgs : BaseCosmosArguments, new()
+public abstract class BaseCosmosCommand<TArgs> : SubscriptionCommand<TArgs> where TArgs : BaseCosmosArguments, new()
 {
-    protected readonly Option<string> _accountOption;
-    protected readonly Option<string> _containerOption;
+    protected readonly Option<string> _accountOption = ArgumentDefinitions.Cosmos.Account.ToOption();
 
-    protected BaseCosmosCommand() : base()
+    protected override void RegisterOptions(Command command)
     {
-        _accountOption = ArgumentDefinitions.Cosmos.Account.ToOption();
-        _containerOption = ArgumentDefinitions.Cosmos.Container.ToOption();
+        base.RegisterOptions(command);
+        command.AddOption(_accountOption);
+    }
+
+    protected override void RegisterArguments()
+    {
+        base.RegisterArguments();
+        AddArgument(CreateAccountArgument());
     }
 
     // Common method to get account options
@@ -65,14 +71,20 @@ public abstract class BaseCosmosCommand<TArgs> : BaseCommandWithSubscription<TAr
         _ => base.GetStatusCode(ex)
     };
 
-    // Helper methods for creating Cosmos-specific arguments
-    protected ArgumentChain<TArgs> CreateAccountArgument()
+    protected override TArgs BindArguments(ParseResult parseResult)
     {
-        return ArgumentChain<TArgs>
+        var args = base.BindArguments(parseResult);
+        args.Account = parseResult.GetValueForOption(_accountOption);
+        return args;
+    }
+
+    // Helper methods for creating Cosmos-specific arguments
+    protected ArgumentBuilder<TArgs> CreateAccountArgument()
+    {
+        return ArgumentBuilder<TArgs>
             .Create(ArgumentDefinitions.Cosmos.Account.Name, ArgumentDefinitions.Cosmos.Account.Description)
-            .WithCommandExample(ArgumentDefinitions.GetCommandExample(GetCommandPath(), ArgumentDefinitions.Cosmos.Account))
             .WithValueAccessor(args => args.Account ?? string.Empty)
-            .WithValueLoader(async (context, args) => await GetAccountOptions(context, args.Subscription ?? string.Empty))
+            .WithSuggestedValuesLoader(async (context, args) => await GetAccountOptions(context, args.Subscription ?? string.Empty))
             .WithIsRequired(ArgumentDefinitions.Cosmos.Account.Required);
     }
 }

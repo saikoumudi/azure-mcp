@@ -2,41 +2,28 @@ using AzureMCP.Arguments.AppConfig.Account;
 using AzureMCP.Models.Command;
 using AzureMCP.Services.Interfaces;
 using ModelContextProtocol.Server;
-using System.CommandLine;
 using System.CommandLine.Parsing;
 
 namespace AzureMCP.Commands.AppConfig.Account;
 
-public class AccountListCommand : BaseCommandWithSubscription<AccountListArguments>
+public sealed class AccountListCommand : SubscriptionCommand<AccountListArguments>
 {
-    public AccountListCommand() : base()
-    {
-        RegisterArgumentChain();
-    }
+    protected override string GetCommandName() => "list";
+
+    protected override string GetCommandDescription() =>
+        """
+        List all App Configuration stores in a subscription. This command retrieves and displays all App Configuration
+        stores available in the specified subscription. Results include store names returned as a JSON array.
+        """;
 
     [McpServerTool(Destructive = false, ReadOnly = true)]
-    public override Command GetCommand()
-    {
-        var command = new Command(
-            "list",
-            "List all App Configuration stores in a subscription. This command retrieves and displays all App Configuration stores available in the specified subscription. Results include store names returned as a JSON array.");
-
-        AddBaseOptionsToCommand(command);
-        return command;
-    }
-
-    protected override AccountListArguments BindArguments(ParseResult parseResult)
-    {
-        return base.BindArguments(parseResult);
-    }
-
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
         var args = BindArguments(parseResult);
 
         try
         {
-            if (!await ProcessArgumentChain(context, args))
+            if (!await ProcessArguments(context, args))
             {
                 return context.Response;
             }

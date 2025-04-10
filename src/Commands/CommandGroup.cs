@@ -7,10 +7,10 @@ public class CommandGroup(string name, string description)
     public string Name { get; } = name;
     public string Description { get; } = description;
     public List<CommandGroup> SubGroup { get; } = [];
-    public Dictionary<string, ICommand> Commands { get; } = [];
+    public Dictionary<string, IBaseCommand> Commands { get; } = [];
     public Command Command { get; } = new Command(name, description);
 
-    public void AddCommand(string path, ICommand command)
+    public void AddCommand(string path, IBaseCommand command)
     {
         // Split on first dot to get group and remaining path
         var parts = path.Split(['.'], 2);
@@ -40,7 +40,7 @@ public class CommandGroup(string name, string description)
         Command.Add(subGroup.Command);
     }
 
-    public ICommand GetCommand(string path)
+    public IBaseCommand GetCommand(string path)
     {
         // Split on first dot to get group and remaining path
         var parts = path.Split(['.'], 2);

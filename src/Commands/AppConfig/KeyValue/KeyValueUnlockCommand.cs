@@ -8,54 +8,26 @@ using System.CommandLine.Parsing;
 
 namespace AzureMCP.Commands.AppConfig.KeyValue;
 
-public class KeyValueUnlockCommand : BaseKeyValueCommand<KeyValueUnlockArguments>
+public sealed class KeyValueUnlockCommand : BaseKeyValueCommand<KeyValueUnlockArguments>
 {
-    private readonly Option<string> _keyOption;
-    private readonly Option<string> _labelOption;
+    protected override string GetCommandName() => "unlock";
 
-    public KeyValueUnlockCommand() : base()
-    {
-        _keyOption = ArgumentDefinitions.AppConfig.Key.ToOption();
-        _labelOption = ArgumentDefinitions.AppConfig.Label.ToOption();
-
-        RegisterArgumentChain(
-            CreateAccountArgument(),
-            CreateKeyArgument(),
-            CreateLabelArgument()
-        );
-    }
+    protected override string GetCommandDescription() =>
+        """
+        Unlock a key-value setting in an App Configuration store. This command removes the read-only mode from a 
+        key-value setting, allowing modifications to its value. You must specify an account name and key. Optionally, 
+        you can specify a label to unlock a specific labeled version of the setting, otherwise the setting with the 
+        default label will be unlocked.
+        """;
 
     [McpServerTool(Destructive = false, ReadOnly = false)]
-    public override Command GetCommand()
-    {
-        var command = new Command(
-            "unlock",
-            "Unlock a key-value setting in an App Configuration store. This command removes the read-only mode from a key-value setting, allowing modifications to its value. You must specify an account name and key. Optionally, you can specify a label to unlock a specific labeled version of the setting, otherwise the setting with the default label will be unlocked.");
-
-        AddBaseOptionsToCommand(command);
-        command.AddOption(_accountOption);
-        command.AddOption(_keyOption);
-        command.AddOption(_labelOption);
-
-        return command;
-    }
-
-    protected override KeyValueUnlockArguments BindArguments(ParseResult parseResult)
-    {
-        var args = base.BindArguments(parseResult);
-        args.Account = parseResult.GetValueForOption(_accountOption);
-        args.Key = parseResult.GetValueForOption(_keyOption);
-        args.Label = parseResult.GetValueForOption(_labelOption);
-        return args;
-    }
-
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
         var args = BindArguments(parseResult);
 
         try
         {
-            if (!await ProcessArgumentChain(context, args))
+            if (!await ProcessArguments(context, args))
             {
                 return context.Response;
             }
