@@ -152,6 +152,31 @@ If you don't have a Windows machine, follow the manual steps listed in the "Othe
 3. Try a prompt that tells the agent to use the Azure MCP Server, such as "List my Azure Storage containers"
 4. The agent should be able to use the Azure MCP Server tools to complete your query
 
+
+## 🔑 Authentication
+
+Azure MCP Server seamlessly integrates with your host operating system's authentication mechanisms, making it super easy to get started! We use Azure Identity under the hood, which means you get all the goodness of DefaultAzureCredential. 
+
+### 🎭 How Authentication Works
+
+The server automatically tries these authentication methods in order:
+
+1. 🔐 **Environment Variables** (`EnvironmentCredential`) - Perfect for CI/CD pipelines
+2. 👷 **Workload Identity** (`WorkloadIdentityCredential`) - Ideal for Kubernetes environments
+3. 👤 **Managed Identity** (`ManagedIdentityCredential`) - Great for cloud-hosted scenarios
+4. 🔄 **Shared Token Cache** (`SharedTokenCacheCredential`) - Uses cached tokens from other tools
+5. 💫 **Visual Studio** (`VisualStudioCredential`) - Uses your Visual Studio credentials
+6. 🌐 **Azure CLI** (`AzureCliCredential`) - Uses your existing Azure CLI login
+7. 🔧 **Azure PowerShell** (`AzurePowerShellCredential`) - Uses your Az PowerShell login
+8. 🚀 **Azure Developer CLI** (`AzureDeveloperCliCredential`) - Uses your azd login
+9. 🎯 **Interactive Browser** (`InteractiveBrowserCredential`) - Falls back to browser-based login if needed
+
+No special configuration needed - it just works! If you're already logged in through any of these methods, Azure MCP Server will automatically use those credentials. If not, it'll smoothly fall back to an interactive browser login.
+
+### 🛡️ Security Note
+
+Your credentials are always handled securely through the official Azure Identity SDK - we never store or manage tokens directly!
+
 ## 👥 Contributing
 
 We welcome contributions to Azure MCP! Whether you're fixing bugs, adding new features, or improving documentation, your contributions are welcome.

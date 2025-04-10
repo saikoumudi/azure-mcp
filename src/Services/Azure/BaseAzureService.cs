@@ -2,9 +2,9 @@
 // Licensed under the MIT License.
 
 using Azure.Core;
-using Azure.Identity;
 using Azure.ResourceManager;
 using AzureMCP.Arguments;
+using AzureMCP.Services.Azure.Authentication;
 using AzureMCP.Services.Interfaces;
 using System.Reflection;
 using System.Runtime.Versioning;
@@ -16,7 +16,7 @@ public abstract class BaseAzureService(ITenantService? tenantService = null)
     private static readonly UserAgentPolicy SharedUserAgentPolicy;
     internal static readonly string DefaultUserAgent;
 
-    private DefaultAzureCredential? _credential;
+    private CustomChainedCredential? _credential;
     private string? _lastTenantId;
     private ArmClient? _armClient;
     private string? _lastArmClientTenantId;
@@ -42,9 +42,9 @@ public abstract class BaseAzureService(ITenantService? tenantService = null)
         return await _tenantService.GetTenantId(tenant);
     }
 
-    protected DefaultAzureCredential GetCredential(string? tenant = null)
+    protected TokenCredential GetCredential(string? tenant = null)
     {
-        var tenantId = tenant != null ? Task.Run(() => ResolveTenantId(tenant)).GetAwaiter().GetResult() : null;
+        var tenantId = string.IsNullOrEmpty(tenant) ? null : Task.Run(() => ResolveTenantId(tenant)).GetAwaiter().GetResult();
 
         // Return cached credential if it exists and tenant ID hasn't changed
         if (_credential != null && _lastTenantId == tenantId)
@@ -54,10 +54,7 @@ public abstract class BaseAzureService(ITenantService? tenantService = null)
 
         try
         {
-            // Create new credential and cache it
-            _credential = string.IsNullOrEmpty(tenantId)
-                ? new DefaultAzureCredential()
-                : new DefaultAzureCredential(new DefaultAzureCredentialOptions { TenantId = tenantId });
+            _credential = new CustomChainedCredential(tenantId);
             _lastTenantId = tenantId;
 
             return _credential;

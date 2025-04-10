@@ -1,4 +1,8 @@
 # Script to add copyright headers to all files
+param(
+    [switch]$Force
+)
+
 $copyrightText = "Copyright (c) Microsoft Corporation."
 $licenseText = "Licensed under the MIT License."
 
@@ -185,32 +189,76 @@ Get-ChildItem -Path $PSScriptRoot\..\..\src, $PSScriptRoot\..\..\tests -Recurse 
     
     # Check if file already has a copyright header
     $hasHeader = $false
-    if ($style.multi) {
-        $hasHeader = $content.TrimStart().StartsWith($style.prefix)
-    }
-    else {
-        $hasHeader = $content.TrimStart().StartsWith("$($style.prefix) $copyrightText")
-    }
-
-    if ($hasHeader) {
-        Write-Host "Copyright header already exists in $($_.FullName)"
-        
-        # Remove existing header and add new one to ensure consistency
-        $lines = $content -split "`n"
-        $nonHeaderStart = $lines | Where-Object { 
-            $line = $_.TrimStart()
-            -not [string]::IsNullOrWhiteSpace($line) -and
-            -not $line.StartsWith($style.prefix) -and
-            (-not $style.suffix -or -not $line.EndsWith($style.suffix))
-        } | Select-Object -First 1
-        
-        if ($nonHeaderStart) {
-            $startIndex = $content.IndexOf($nonHeaderStart)
-            $content = $content.Substring($startIndex)
+    $lines = $content -split "`n"
+    foreach ($line in $lines) {
+        $trimmedLine = $line.TrimStart()
+        if ($trimmedLine.Contains($copyrightText)) {
+            $hasHeader = $true
+            break
         }
     }
 
-    $newContent = $header + $content
+    if ($hasHeader -and -not $Force) {
+        Write-Host "Copyright header already exists in $($_.FullName)"
+        # Skip files that already have the header unless Force is specified
+        return
+    }
+
+    if ($hasHeader -and $Force) {
+        Write-Host "Forcing update of copyright header in $($_.FullName)"
+        # Remove existing header while preserving shebang lines
+        $newLines = @()
+        $foundCopyright = $false
+        $preserveShebang = $false
+        $blankLineRemoved = $false
+        
+        for ($i = 0; $i -lt $lines.Count; $i++) {
+            $line = $lines[$i]
+            $trimmedLine = $line.TrimStart()
+            
+            # Always preserve shebang lines
+            if ($trimmedLine -match '^#!' -and -not $preserveShebang) {
+                $newLines += $line
+                $preserveShebang = $true
+                continue
+            }
+            
+            # Look for copyright
+            if ($trimmedLine.Contains($copyrightText)) {
+                $foundCopyright = $true
+                # Skip this line and next license line
+                $i++ # Skip license line
+                # Skip any blank lines after the header
+                while (($i + 1) -lt $lines.Count -and [string]::IsNullOrWhiteSpace($lines[$i + 1].TrimStart())) {
+                    $i++
+                    $blankLineRemoved = $true
+                }
+                continue
+            }
+            
+            if (-not $foundCopyright) {
+                $newLines += $line
+            }
+            else {
+                # Only add the line if we've found the copyright and processed any trailing blanks
+                $newLines += $line
+            }
+        }
+        
+        $content = $newLines -join "`n"
+    }
+
+    # Add the new header (which includes its own blank line)
+    if ($lines[0] -match '^#!' -and -not $hasHeader) {
+        $shebangLine = $lines[0] + "`n"
+        $content = $content.Substring($lines[0].Length).TrimStart()
+        $newContent = $shebangLine + $header + $content
+    }
+    else {
+        $content = $content.TrimStart()
+        $newContent = $header + $content
+    }
+
     Set-Content -Path $_.FullName -Value $newContent -NoNewline
     Write-Host "Updated copyright header in $($_.FullName)"
 }
