@@ -30,4 +30,10 @@ public interface IExternalProcessService
     /// <param name="result">Process execution result</param>
     /// <returns>Parsed JSON element or formatted error object if parsing fails</returns>
     JsonElement ParseJsonOutput(ProcessResult result);
+
+    /// <summary>
+    /// Sets environment variables for the process execution
+    /// /// </summary>
+    /// <param name="variables">Dictionary of environment variables to set</param>
+    void SetEnvironmentVariables(IDictionary<string, string> variables);
 }

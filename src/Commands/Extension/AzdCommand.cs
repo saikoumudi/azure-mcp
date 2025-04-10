@@ -1,6 +1,7 @@
 using AzureMCP.Arguments.Extension;
 using AzureMCP.Models.Argument;
 using AzureMCP.Models.Command;
+using AzureMCP.Services.Azure;
 using AzureMCP.Services.Interfaces;
 using ModelContextProtocol.Server;
 using System.CommandLine;
@@ -81,6 +82,11 @@ public sealed class AzdCommand(int processTimeoutSeconds = 300) : GlobalCommand<
             command += " --no-prompt";
 
             var processService = context.GetService<IExternalProcessService>();
+            processService.SetEnvironmentVariables(new Dictionary<string, string>
+            {
+                { "AZURE_DEV_USER_AGENT", BaseAzureService.DefaultUserAgent },
+            });
+
             var azdPath = FindAzdCliPath() ?? throw new FileNotFoundException("Azure Developer CLI executable not found in PATH or common installation locations. Please ensure Azure Developer CLI is installed.");
             var result = await processService.ExecuteAsync(azdPath, command, processTimeoutSeconds);
 

@@ -7,6 +7,8 @@ namespace AzureMCP.Services.ProcessExecution;
 
 public class ExternalProcessService : IExternalProcessService
 {
+    private IDictionary<string, string> environmentVariables = new Dictionary<string, string>();
+
     public async Task<ProcessResult> ExecuteAsync(
         string executablePath,
         string arguments,
@@ -35,6 +37,11 @@ public class ExternalProcessService : IExternalProcessService
             StandardOutputEncoding = Encoding.UTF8,
             StandardErrorEncoding = Encoding.UTF8
         };
+
+        foreach (var keyValuePair in environmentVariables)
+        {
+            processStartInfo.EnvironmentVariables[keyValuePair.Key] = keyValuePair.Value;
+        }
 
         using var process = new Process { StartInfo = processStartInfo };
         using var outputWaitHandle = new AutoResetEvent(false);
@@ -107,6 +114,18 @@ public class ExternalProcessService : IExternalProcessService
         catch
         {
             return JsonSerializer.SerializeToElement(new { output = result.Output });
+        }
+    }
+
+    public void SetEnvironmentVariables(IDictionary<string, string> variables)
+    {
+        if (variables == null) {
+            return;
+        }
+
+        foreach (var pair in variables)
+        {
+            environmentVariables[pair.Key] = pair.Value;
         }
     }
 }
