@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using AzureMCP.Models.Argument;
+using AzureMcp.Models.Argument;
 using System.Text.Json.Serialization;
 
-namespace AzureMCP.Arguments.Cosmos;
+namespace AzureMcp.Arguments.Cosmos;
 
 public class ItemQueryArguments : BaseContainerArguments
 {

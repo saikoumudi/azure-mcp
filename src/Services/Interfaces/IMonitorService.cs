@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using AzureMCP.Arguments;
-using AzureMCP.Models.Monitor;
+using AzureMcp.Arguments;
+using AzureMcp.Models.Monitor;
 using System.Text.Json;
 
-namespace AzureMCP.Services.Interfaces;
+namespace AzureMcp.Services.Interfaces;
 
 public interface IMonitorService
 {

@@ -1,12 +1,12 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using AzureMCP.Arguments.Cosmos;
-using AzureMCP.Models.Argument;
+using AzureMcp.Arguments.Cosmos;
+using AzureMcp.Models.Argument;
 using System.CommandLine;
 using System.CommandLine.Parsing;
 
-namespace AzureMCP.Commands.Cosmos;
+namespace AzureMcp.Commands.Cosmos;
 
 public abstract class BaseDatabaseCommand<TArgs> : BaseCosmosCommand<TArgs> where TArgs : BaseDatabaseArguments, new()
 {

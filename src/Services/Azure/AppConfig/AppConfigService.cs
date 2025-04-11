@@ -5,13 +5,13 @@ using Azure.Core;
 using Azure.Data.AppConfiguration;
 using Azure.ResourceManager.AppConfiguration;
 using Azure.ResourceManager.Resources;
-using AzureMCP.Arguments;
-using AzureMCP.Models;
-using AzureMCP.Models.AppConfig;
-using AzureMCP.Models.Identity;
-using AzureMCP.Services.Interfaces;
+using AzureMcp.Arguments;
+using AzureMcp.Models;
+using AzureMcp.Models.AppConfig;
+using AzureMcp.Models.Identity;
+using AzureMcp.Services.Interfaces;
 
-namespace AzureMCP.Services.Azure.AppConfig;
+namespace AzureMcp.Services.Azure.AppConfig;
 
 public class AppConfigService(ISubscriptionService subscriptionService, ITenantService tenantService)
     : BaseAzureService(tenantService), IAppConfigService

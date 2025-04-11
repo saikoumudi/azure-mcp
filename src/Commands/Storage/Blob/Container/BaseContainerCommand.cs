@@ -1,12 +1,12 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using AzureMCP.Models.Argument;
-using AzureMCP.Services.Interfaces;
+using AzureMcp.Models.Argument;
+using AzureMcp.Services.Interfaces;
 using System.CommandLine;
 using System.CommandLine.Parsing;
 
-namespace AzureMCP.Commands.Storage.Blob.Container;
+namespace AzureMcp.Commands.Storage.Blob.Container;
 
 public abstract class BaseContainerCommand<TArgs> : BaseStorageCommand<TArgs> where TArgs : BaseContainerArguments, new()
 {

@@ -1,12 +1,12 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using AzureMCP.Arguments;
-using AzureMCP.Models.Argument;
+using AzureMcp.Arguments;
+using AzureMcp.Models.Argument;
 using System.CommandLine;
 using System.CommandLine.Parsing;
 
-namespace AzureMCP.Commands;
+namespace AzureMcp.Commands;
 
 public abstract class SubscriptionCommand<TArgs> : GlobalCommand<TArgs>
     where TArgs : SubscriptionArguments, new()

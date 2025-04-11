@@ -1,13 +1,13 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using AzureMCP.Models.Argument;
-using AzureMCP.Services.Interfaces;
+using AzureMcp.Models.Argument;
+using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
 using Xunit;
 
-namespace AzureMCP.Commands.Server.Tests;
+namespace AzureMcp.Commands.Server.Tests;
 
 public class ServiceStartCommandTests
 {

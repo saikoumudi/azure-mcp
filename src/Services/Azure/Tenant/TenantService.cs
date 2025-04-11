@@ -3,10 +3,10 @@
 
 using Azure.Identity;
 using Azure.ResourceManager;
-using AzureMCP.Models.Argument;
-using AzureMCP.Services.Interfaces;
+using AzureMcp.Models.Argument;
+using AzureMcp.Services.Interfaces;
 
-namespace AzureMCP.Services.Azure.Tenant;
+namespace AzureMcp.Services.Azure.Tenant;
 
 public class TenantService(ICacheService cacheService)
     : BaseAzureService, ITenantService

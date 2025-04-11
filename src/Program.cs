@@ -1,24 +1,24 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using AzureMCP.Commands;
-using AzureMCP.Models.Command;
-using AzureMCP.Services.Azure.AppConfig;
-using AzureMCP.Services.Azure.Cosmos;
-using AzureMCP.Services.Azure.Monitor;
-using AzureMCP.Services.Azure.ResourceGroup;
-using AzureMCP.Services.Azure.Storage;
-using AzureMCP.Services.Azure.Subscription;
-using AzureMCP.Services.Azure.Tenant;
-using AzureMCP.Services.Caching;
-using AzureMCP.Services.Interfaces;
-using AzureMCP.Services.ProcessExecution;
+using AzureMcp.Commands;
+using AzureMcp.Models.Command;
+using AzureMcp.Services.Azure.AppConfig;
+using AzureMcp.Services.Azure.Cosmos;
+using AzureMcp.Services.Azure.Monitor;
+using AzureMcp.Services.Azure.ResourceGroup;
+using AzureMcp.Services.Azure.Storage;
+using AzureMcp.Services.Azure.Subscription;
+using AzureMcp.Services.Azure.Tenant;
+using AzureMcp.Services.Caching;
+using AzureMcp.Services.Interfaces;
+using AzureMcp.Services.ProcessExecution;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.CommandLine;
 using System.Text.Json;
 
-namespace AzureMCP;
+namespace AzureMcp;
 
 class Program
 {

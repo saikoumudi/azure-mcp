@@ -3,7 +3,7 @@
 
 using Xunit;
 
-namespace AzureMCP.Tests;
+namespace AzureMcp.Tests;
 
 public class SkipIfDotnetTestFactAttribute : FactAttribute
 {

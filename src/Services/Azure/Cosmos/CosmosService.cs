@@ -2,12 +2,12 @@
 // Licensed under the MIT License.
 
 using Azure.ResourceManager.CosmosDB;
-using AzureMCP.Arguments;
-using AzureMCP.Services.Interfaces;
+using AzureMcp.Arguments;
+using AzureMcp.Services.Interfaces;
 using Microsoft.Azure.Cosmos;
 using System.Text.Json;
 
-namespace AzureMCP.Services.Azure.Cosmos;
+namespace AzureMcp.Services.Azure.Cosmos;
 
 public class CosmosService(ISubscriptionService subscriptionService, ITenantService tenantService)
     : BaseAzureService(tenantService), ICosmosService, IDisposable

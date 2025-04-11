@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-namespace AzureMCP.Arguments.Subscription;
+namespace AzureMcp.Arguments.Subscription;
 
 public class SubscriptionListArguments : BaseSubscriptionArguments
 {

@@ -1,16 +1,16 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using AzureMCP.Arguments.Extension;
-using AzureMCP.Models.Argument;
-using AzureMCP.Models.Command;
-using AzureMCP.Services.Interfaces;
+using AzureMcp.Arguments.Extension;
+using AzureMcp.Models.Argument;
+using AzureMcp.Models.Command;
+using AzureMcp.Services.Interfaces;
 using ModelContextProtocol.Server;
 using System.CommandLine;
 using System.CommandLine.Parsing;
 using System.Runtime.InteropServices;
 
-namespace AzureMCP.Commands.Extension;
+namespace AzureMcp.Commands.Extension;
 
 public sealed class AzCommand(int processTimeoutSeconds = 300) : GlobalCommand<AzArguments>
 {

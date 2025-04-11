@@ -1,14 +1,14 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using AzureMCP.Arguments;
-using AzureMCP.Models;
-using AzureMCP.Models.Argument;
-using AzureMCP.Models.Command;
+using AzureMcp.Arguments;
+using AzureMcp.Models;
+using AzureMcp.Models.Argument;
+using AzureMcp.Models.Command;
 using ModelContextProtocol.Server;
 using System.CommandLine.Parsing;
 
-namespace AzureMCP.Commands.Tools;
+namespace AzureMcp.Commands.Tools;
 
 [HiddenCommand]
 public sealed class ToolsListCommand : BaseCommand

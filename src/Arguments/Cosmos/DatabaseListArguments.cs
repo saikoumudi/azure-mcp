@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-namespace AzureMCP.Arguments.Cosmos;
+namespace AzureMcp.Arguments.Cosmos;
 
 public class DatabaseListArguments : BaseCosmosArguments
 {

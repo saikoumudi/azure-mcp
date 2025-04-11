@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using AzureMCP.Arguments;
+using AzureMcp.Arguments;
 using System.Text.Json;
 
-namespace AzureMCP.Services.Interfaces;
+namespace AzureMcp.Services.Interfaces;
 
 public interface ICosmosService
 {

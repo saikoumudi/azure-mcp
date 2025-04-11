@@ -2,11 +2,11 @@
 // Licensed under the MIT License.
 
 using Azure.ResourceManager.Resources;
-using AzureMCP.Arguments;
-using AzureMCP.Models.ResourceGroup;
-using AzureMCP.Services.Interfaces;
+using AzureMcp.Arguments;
+using AzureMcp.Models.ResourceGroup;
+using AzureMcp.Services.Interfaces;
 
-namespace AzureMCP.Services.Azure.ResourceGroup;
+namespace AzureMcp.Services.Azure.ResourceGroup;
 
 public class ResourceGroupService(ICacheService cacheService, ISubscriptionService subscriptionService)
     : BaseAzureService, IResourceGroupService

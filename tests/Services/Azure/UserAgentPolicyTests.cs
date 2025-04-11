@@ -2,11 +2,11 @@
 // Licensed under the MIT License.
 
 using Azure.Core;
-using AzureMCP.Services.Azure;
+using AzureMcp.Services.Azure;
 using System.Diagnostics.CodeAnalysis;
 using Xunit;
 
-namespace AzureMCP.Tests.Services.Azure;
+namespace AzureMcp.Tests.Services.Azure;
 
 public class UserAgentPolicyTests
 {

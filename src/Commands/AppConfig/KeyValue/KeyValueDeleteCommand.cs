@@ -1,13 +1,13 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using AzureMCP.Arguments.AppConfig.KeyValue;
-using AzureMCP.Models.Command;
-using AzureMCP.Services.Interfaces;
+using AzureMcp.Arguments.AppConfig.KeyValue;
+using AzureMcp.Models.Command;
+using AzureMcp.Services.Interfaces;
 using ModelContextProtocol.Server;
 using System.CommandLine.Parsing;
 
-namespace AzureMCP.Commands.AppConfig.KeyValue;
+namespace AzureMcp.Commands.AppConfig.KeyValue;
 
 public sealed class KeyValueDeleteCommand : BaseKeyValueCommand<KeyValueDeleteArguments>
 {

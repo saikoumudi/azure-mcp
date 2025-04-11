@@ -5,7 +5,7 @@ using Azure.Core;
 using Azure.Identity;
 using Azure.Identity.Broker;
 
-namespace AzureMCP.Services.Azure.Authentication;
+namespace AzureMcp.Services.Azure.Authentication;
 
 /// <summary>
 /// A custom token credential that chains the Identity Broker-enabled InteractiveBrowserCredential 

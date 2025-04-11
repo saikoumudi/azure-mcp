@@ -1,13 +1,13 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using AzureMCP.Arguments.Storage;
-using AzureMCP.Models.Argument;
-using AzureMCP.Services.Interfaces;
+using AzureMcp.Arguments.Storage;
+using AzureMcp.Models.Argument;
+using AzureMcp.Services.Interfaces;
 using System.CommandLine;
 using System.CommandLine.Parsing;
 
-namespace AzureMCP.Commands.Storage;
+namespace AzureMcp.Commands.Storage;
 
 public abstract class BaseStorageCommand<T> : SubscriptionCommand<T>
     where T : BaseStorageArguments, new()

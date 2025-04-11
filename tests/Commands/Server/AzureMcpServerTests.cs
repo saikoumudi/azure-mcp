@@ -8,7 +8,7 @@ using ModelContextProtocol.Server;
 using NSubstitute;
 using Xunit;
 
-namespace AzureMCP.Commands.Server.Tests;
+namespace AzureMcp.Commands.Server.Tests;
 
 public class AzureMcpServerTests
 {

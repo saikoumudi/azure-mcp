@@ -4,16 +4,16 @@
 using Azure.Core;
 using Azure.Identity;
 using Azure.Identity.Broker;
-using AzureMCP.Models.Argument;
-using AzureMCP.Services.Azure.Subscription;
-using AzureMCP.Services.Interfaces;
+using AzureMcp.Models.Argument;
+using AzureMcp.Services.Azure.Subscription;
+using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
 using System.Text.Json;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace AzureMCP.Tests.Services.Azure.Authentication;
+namespace AzureMcp.Tests.Services.Azure.Authentication;
 
 public class AuthenticationIntegrationTests : IAsyncLifetime
 {

@@ -1,17 +1,17 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using AzureMCP.Commands.Cosmos;
-using AzureMCP.Commands.Server;
-using AzureMCP.Commands.Storage.Blob;
-using AzureMCP.Commands.Subscription;
-using AzureMCP.Models.Command;
+using AzureMcp.Commands.Cosmos;
+using AzureMcp.Commands.Server;
+using AzureMcp.Commands.Storage.Blob;
+using AzureMcp.Commands.Subscription;
+using AzureMcp.Models.Command;
 using System.CommandLine;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace AzureMCP.Commands;
+namespace AzureMcp.Commands;
 
 public class CommandFactory
 {

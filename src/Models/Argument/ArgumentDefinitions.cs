@@ -2,9 +2,9 @@
 // Licensed under the MIT License.
 
 using Azure.Core;
-using AzureMCP.Arguments.Server;
+using AzureMcp.Arguments.Server;
 
-namespace AzureMCP.Models.Argument;
+namespace AzureMcp.Models.Argument;
 
 public static class ArgumentDefinitions
 {

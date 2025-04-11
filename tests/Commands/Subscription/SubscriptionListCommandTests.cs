@@ -1,12 +1,12 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using AzureMCP.Arguments;
-using AzureMCP.Commands.Subscription;
-using AzureMCP.Models;
-using AzureMCP.Models.Argument;
-using AzureMCP.Models.Command;
-using AzureMCP.Services.Interfaces;
+using AzureMcp.Arguments;
+using AzureMcp.Commands.Subscription;
+using AzureMcp.Models;
+using AzureMcp.Models.Argument;
+using AzureMcp.Models.Command;
+using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using ModelContextProtocol.Server;
 using NSubstitute;
@@ -15,7 +15,7 @@ using System.CommandLine.Parsing;
 using System.Text.Json;
 using Xunit;
 
-namespace AzureMCP.Tests.Commands.Subscription
+namespace AzureMcp.Tests.Commands.Subscription
 {
     public class SubscriptionListCommandTests
     {

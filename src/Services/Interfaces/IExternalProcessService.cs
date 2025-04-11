@@ -3,7 +3,7 @@
 
 using System.Text.Json;
 
-namespace AzureMCP.Services.Interfaces;
+namespace AzureMcp.Services.Interfaces;
 
 public record ProcessResult(
     int ExitCode,

@@ -8,7 +8,7 @@ using ModelContextProtocol.Protocol.Types;
 using ModelContextProtocol.Server;
 using System.Diagnostics;
 
-namespace AzureMCP.Commands.Server;
+namespace AzureMcp.Commands.Server;
 
 /// <summary>
 /// Wraps the implementation of an McpServer.  Used when the transport is not immediately available or active. 

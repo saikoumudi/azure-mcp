@@ -8,11 +8,11 @@ using Azure.ResourceManager.Storage;
 using Azure.ResourceManager.Storage.Models;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
-using AzureMCP.Arguments;
-using AzureMCP.Models;
-using AzureMCP.Services.Interfaces;
+using AzureMcp.Arguments;
+using AzureMcp.Models;
+using AzureMcp.Services.Interfaces;
 
-namespace AzureMCP.Services.Azure.Storage;
+namespace AzureMcp.Services.Azure.Storage;
 
 public class StorageService(ISubscriptionService subscriptionService, ICacheService cacheService) : BaseAzureService, IStorageService
 {

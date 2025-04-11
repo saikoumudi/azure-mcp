@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-namespace AzureMCP.Services.Interfaces;
+namespace AzureMcp.Services.Interfaces;
 
 public interface ICacheService
 {

@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using AzureMCP.Models;
-using AzureMCP.Models.Command;
+using AzureMcp.Models;
+using AzureMcp.Models.Command;
 using ModelContextProtocol.Protocol.Types;
 using ModelContextProtocol.Server;
 using ModelContextProtocol.Utils.Json;
@@ -10,7 +10,7 @@ using System.CommandLine;
 using System.Reflection;
 using System.Text.Json;
 
-namespace AzureMCP.Commands.Server;
+namespace AzureMcp.Commands.Server;
 
 public class ToolOperations
 {

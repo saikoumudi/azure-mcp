@@ -3,7 +3,7 @@
 
 using System.Text.Json.Serialization;
 
-namespace AzureMCP.Arguments.Server;
+namespace AzureMcp.Arguments.Server;
 
 public class ServiceStartArguments
 {

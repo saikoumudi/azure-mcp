@@ -9,7 +9,7 @@
     <CliName>azmcp</CliName>
     <AssemblyName>$(CliName)</AssemblyName>
     <AssemblyTitle>Azure MCP Server</AssemblyTitle>
-    <RootNamespace>AzureMCP</RootNamespace>
+    <RootNamespace>AzureMcp</RootNamespace>
 
     <!-- Publishing settings -->
     <PublishSingleFile>true</PublishSingleFile>

@@ -1,14 +1,14 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using AzureMCP.Arguments.Storage.Blob.Container;
-using AzureMCP.Models.Argument;
-using AzureMCP.Models.Command;
-using AzureMCP.Services.Interfaces;
+using AzureMcp.Arguments.Storage.Blob.Container;
+using AzureMcp.Models.Argument;
+using AzureMcp.Models.Command;
+using AzureMcp.Services.Interfaces;
 using ModelContextProtocol.Server;
 using System.CommandLine.Parsing;
 
-namespace AzureMCP.Commands.Storage.Blob.Container;
+namespace AzureMcp.Commands.Storage.Blob.Container;
 
 public sealed class ContainerDetailsCommand : BaseContainerCommand<ContainerDetailsArguments>
 {

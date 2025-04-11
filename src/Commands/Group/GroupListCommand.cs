@@ -1,14 +1,14 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using AzureMCP.Arguments.Group;
-using AzureMCP.Models.Argument;
-using AzureMCP.Models.Command;
-using AzureMCP.Services.Interfaces;
+using AzureMcp.Arguments.Group;
+using AzureMcp.Models.Argument;
+using AzureMcp.Models.Command;
+using AzureMcp.Services.Interfaces;
 using ModelContextProtocol.Server;
 using System.CommandLine.Parsing;
 
-namespace AzureMCP.Commands.Group;
+namespace AzureMcp.Commands.Group;
 
 public sealed class GroupListCommand : SubscriptionCommand<BaseGroupArguments>
 {

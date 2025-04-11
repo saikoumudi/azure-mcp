@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-namespace AzureMCP.Models.Identity;
+namespace AzureMcp.Models.Identity;
 
 public class UserAssignedIdentityInfo
 {

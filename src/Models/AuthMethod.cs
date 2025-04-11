@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-namespace AzureMCP.Models;
+namespace AzureMcp.Models;
 
 public enum AuthMethod
 {

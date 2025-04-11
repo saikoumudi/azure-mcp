@@ -1,14 +1,14 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using AzureMCP.Arguments.Subscription;
-using AzureMCP.Models.Argument;
-using AzureMCP.Models.Command;
-using AzureMCP.Services.Interfaces;
+using AzureMcp.Arguments.Subscription;
+using AzureMcp.Models.Argument;
+using AzureMcp.Models.Command;
+using AzureMcp.Services.Interfaces;
 using ModelContextProtocol.Server;
 using System.CommandLine.Parsing;
 
-namespace AzureMCP.Commands.Subscription;
+namespace AzureMcp.Commands.Subscription;
 
 public sealed class SubscriptionListCommand : GlobalCommand<SubscriptionListArguments>
 {

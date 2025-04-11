@@ -1,13 +1,13 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using AzureMCP.Arguments.AppConfig.Account;
-using AzureMCP.Models.Command;
-using AzureMCP.Services.Interfaces;
+using AzureMcp.Arguments.AppConfig.Account;
+using AzureMcp.Models.Command;
+using AzureMcp.Services.Interfaces;
 using ModelContextProtocol.Server;
 using System.CommandLine.Parsing;
 
-namespace AzureMCP.Commands.AppConfig.Account;
+namespace AzureMcp.Commands.AppConfig.Account;
 
 public sealed class AccountListCommand : SubscriptionCommand<AccountListArguments>
 {

@@ -3,7 +3,7 @@
 
 using System.Text.Json.Serialization;
 
-namespace AzureMCP.Models.Argument;
+namespace AzureMcp.Models.Argument;
 
 public class ArgumentOption
 {

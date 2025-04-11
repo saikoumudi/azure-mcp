@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using AzureMCP.Arguments;
-using AzureMCP.Models.Command;
+using AzureMcp.Arguments;
+using AzureMcp.Models.Command;
 
-namespace AzureMCP.Models.Argument;
+namespace AzureMcp.Models.Argument;
 
 /// <summary>
 /// Typed argument definition for a specific argument class

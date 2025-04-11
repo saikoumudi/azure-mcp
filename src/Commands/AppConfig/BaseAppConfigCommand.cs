@@ -1,13 +1,13 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using AzureMCP.Arguments.AppConfig;
-using AzureMCP.Models.Argument;
-using AzureMCP.Services.Interfaces;
+using AzureMcp.Arguments.AppConfig;
+using AzureMcp.Models.Argument;
+using AzureMcp.Services.Interfaces;
 using System.CommandLine;
 using System.CommandLine.Parsing;
 
-namespace AzureMCP.Commands.AppConfig;
+namespace AzureMcp.Commands.AppConfig;
 
 public abstract class BaseAppConfigCommand<T> : SubscriptionCommand<T> where T : BaseAppConfigArguments, new()
 {

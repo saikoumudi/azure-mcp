@@ -53,8 +53,8 @@ A complete command implementation requires the following files in this exact str
 
 3. Namespaces must exactly match the folder structure:
    ```csharp
-   namespace AzureMCP.Commands.Storage.Blob.Containers;
-   namespace AzureMCP.Arguments.Storage.Blob.Containers;
+   namespace AzureMcp.Commands.Storage.Blob.Containers;
+   namespace AzureMcp.Arguments.Storage.Blob.Containers;
    ```
 
 ## Step 1: Create Arguments Class
@@ -63,7 +63,7 @@ Location: `src/Arguments/{Service}/{SubService}/{Resource}/{Resource}{Operation}
 
 Template:
 ```csharp
-namespace AzureMCP.Arguments.{Service}.{SubService}.{Resource};
+namespace AzureMcp.Arguments.{Service}.{SubService}.{Resource};
 
 public class {Resource}{Operation}Arguments : BaseArgumentsWithSubscription
 {
@@ -155,11 +155,11 @@ Template:
 ```csharp
 using System.CommandLine;
 using System.CommandLine.Parsing;
-using AzureMCP.Models.Command;
-using AzureMCP.Services.Interfaces;
+using AzureMcp.Models.Command;
+using AzureMcp.Services.Interfaces;
 using ModelContextProtocol.Server;
 
-namespace AzureMCP.Commands.{Service}.{SubService}.{Resource};
+namespace AzureMcp.Commands.{Service}.{SubService}.{Resource};
 
 public sealed class {Resource}{Operation}Command : Base{Service}Command<{Resource}{Operation}Arguments>
 {
@@ -329,7 +329,7 @@ private static void ConfigureServices(IServiceCollection services)
 
 2. Add the required using statements in Program.cs:
 ```csharp
-using AzureMCP.Services.Azure.YourService;  // For YourService implementation
+using AzureMcp.Services.Azure.YourService;  // For YourService implementation
 ```
 
 3. After registering the command, update the MCP Server service registration:
@@ -657,7 +657,7 @@ Here's a complete implementation example for reference:
 
 ### Arguments Class
 ```csharp
-namespace AzureMCP.Arguments.Storage;
+namespace AzureMcp.Arguments.Storage;
 
 public class ContainersListArguments : BaseStorageArguments
 {
@@ -679,7 +679,7 @@ public interface IStorageService
 
 ### Command Class
 ```csharp
-namespace AzureMCP.Commands.Storage;
+namespace AzureMcp.Commands.Storage;
 
 public class ContainersListCommand : BaseStorageCommand
 {
@@ -755,9 +755,9 @@ When creating a new base command class for a service:
 1. Required using directives:
 ```csharp
 using System.CommandLine;
-using AzureMCP.Models;
-using AzureMCP.Services.Interfaces;
-using AzureMCP.Arguments;
+using AzureMcp.Models;
+using AzureMcp.Services.Interfaces;
+using AzureMcp.Arguments;
 ```
 
 2. Always add proper type constraints:

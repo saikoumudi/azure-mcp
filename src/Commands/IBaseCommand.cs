@@ -1,12 +1,12 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using AzureMCP.Models.Argument;
-using AzureMCP.Models.Command;
+using AzureMcp.Models.Argument;
+using AzureMcp.Models.Command;
 using System.CommandLine;
 using System.CommandLine.Parsing;
 
-namespace AzureMCP.Commands;
+namespace AzureMcp.Commands;
 
 /// <summary>
 /// Interface for all commands

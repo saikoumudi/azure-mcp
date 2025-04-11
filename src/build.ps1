@@ -3,7 +3,7 @@
 
 #!/bin/env pwsh
 $currentDirectory = $PSScriptRoot
-$projectFile = Join-Path $currentDirectory "AzureMCP.csproj"
+$projectFile = Join-Path $currentDirectory "AzureMcp.csproj"
 
 # Create .dist directory if it doesn't exist
 New-Item -ItemType Directory -Force -Path .dist | Out-Null

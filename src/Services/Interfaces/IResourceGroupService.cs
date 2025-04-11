@@ -2,10 +2,10 @@
 // Licensed under the MIT License.
 
 using Azure.ResourceManager.Resources;
-using AzureMCP.Arguments;
-using AzureMCP.Models.ResourceGroup;
+using AzureMcp.Arguments;
+using AzureMcp.Models.ResourceGroup;
 
-namespace AzureMCP.Services.Interfaces;
+namespace AzureMcp.Services.Interfaces;
 
 public interface IResourceGroupService
 {

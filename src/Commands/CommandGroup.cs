@@ -3,7 +3,7 @@
 
 using System.CommandLine;
 
-namespace AzureMCP.Commands;
+namespace AzureMcp.Commands;
 
 public class CommandGroup(string name, string description)
 {

@@ -3,7 +3,7 @@
 
 using Microsoft.Extensions.DependencyInjection;
 
-namespace AzureMCP.Models.Command;
+namespace AzureMcp.Models.Command;
 
 /// <summary>
 /// Provides context for command execution including service access and response management

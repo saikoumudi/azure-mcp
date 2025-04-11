@@ -3,13 +3,13 @@
 
 using Azure.Core;
 using Azure.ResourceManager;
-using AzureMCP.Arguments;
-using AzureMCP.Services.Azure.Authentication;
-using AzureMCP.Services.Interfaces;
+using AzureMcp.Arguments;
+using AzureMcp.Services.Azure.Authentication;
+using AzureMcp.Services.Interfaces;
 using System.Reflection;
 using System.Runtime.Versioning;
 
-namespace AzureMCP.Services.Azure;
+namespace AzureMcp.Services.Azure;
 
 public abstract class BaseAzureService(ITenantService? tenantService = null)
 {

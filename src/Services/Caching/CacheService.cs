@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using AzureMCP.Services.Interfaces;
+using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.Caching.Memory;
 
-namespace AzureMCP.Services.Caching;
+namespace AzureMcp.Services.Caching;
 
 public class CacheService(IMemoryCache memoryCache) : ICacheService
 {

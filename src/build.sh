@@ -5,7 +5,7 @@
 
 # Get the directory where the script is located
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-PROJECT_FILE="$SCRIPT_DIR/AzureMCP.csproj"
+PROJECT_FILE="$SCRIPT_DIR/AzureMcp.csproj"
 
 # Create .dist directory if it doesn't exist
 mkdir -p "$SCRIPT_DIR/.dist"

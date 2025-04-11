@@ -1,14 +1,14 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using AzureMCP.Arguments.Storage.Table;
-using AzureMCP.Models;
-using AzureMCP.Models.Command;
-using AzureMCP.Services.Interfaces;
+using AzureMcp.Arguments.Storage.Table;
+using AzureMcp.Models;
+using AzureMcp.Models.Command;
+using AzureMcp.Services.Interfaces;
 using ModelContextProtocol.Server;
 using System.CommandLine.Parsing;
 
-namespace AzureMCP.Commands.Storage.Table;
+namespace AzureMcp.Commands.Storage.Table;
 
 public sealed class TableListCommand : BaseStorageCommand<TableListArguments>
 {

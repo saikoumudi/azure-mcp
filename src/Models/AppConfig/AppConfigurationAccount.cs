@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using AzureMCP.Models.Identity;
+using AzureMcp.Models.Identity;
 
-namespace AzureMCP.Models.AppConfig;
+namespace AzureMcp.Models.AppConfig;
 
 public class AppConfigurationAccount
 {

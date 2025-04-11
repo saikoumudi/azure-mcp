@@ -1,12 +1,12 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using AzureMCP.Services.Interfaces;
+using AzureMcp.Services.Interfaces;
 using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
 
-namespace AzureMCP.Services.ProcessExecution;
+namespace AzureMcp.Services.ProcessExecution;
 
 public class ExternalProcessService : IExternalProcessService
 {

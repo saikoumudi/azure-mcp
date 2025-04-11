@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-namespace AzureMCP.Arguments.Storage.Account;
+namespace AzureMcp.Arguments.Storage.Account;
 
 public class AccountListArguments : SubscriptionArguments
 {

@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using AzureMCP.Arguments;
-using AzureMCP.Commands.Cosmos;
-using AzureMCP.Models.Command;
-using AzureMCP.Services.Interfaces;
+using AzureMcp.Arguments;
+using AzureMcp.Commands.Cosmos;
+using AzureMcp.Models.Command;
+using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
@@ -14,7 +14,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Xunit;
 
-namespace AzureMCP.Tests.Commands.Cosmos
+namespace AzureMcp.Tests.Commands.Cosmos
 {
     public class AccountListCommandTests
     {

@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using AzureMCP.Arguments.Subscription;
+using AzureMcp.Arguments.Subscription;
 
-namespace AzureMCP.Commands.Subscription;
+namespace AzureMcp.Commands.Subscription;
 
 public abstract class BaseSubscriptionCommand<TArgs> : GlobalCommand<TArgs>
     where TArgs : BaseSubscriptionArguments, new()

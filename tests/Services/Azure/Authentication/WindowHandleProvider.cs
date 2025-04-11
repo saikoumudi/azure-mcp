@@ -3,7 +3,7 @@
 
 using System.Runtime.InteropServices;
 
-namespace AzureMCP.Tests.Services.Azure.Authentication;
+namespace AzureMcp.Tests.Services.Azure.Authentication;
 
 /// <summary>
 /// Provides window handle information for native authentication dialogs.

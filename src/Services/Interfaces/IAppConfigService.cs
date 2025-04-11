@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using AzureMCP.Arguments;
-using AzureMCP.Models.AppConfig;
+using AzureMcp.Arguments;
+using AzureMcp.Models.AppConfig;
 
-namespace AzureMCP.Services.Interfaces;
+namespace AzureMcp.Services.Interfaces;
 
 public interface IAppConfigService
 {

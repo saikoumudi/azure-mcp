@@ -10,7 +10,7 @@ using ModelContextProtocol.Protocol.Transport;
 using ModelContextProtocol.Server;
 using ModelContextProtocol.Utils.Json;
 
-namespace AzureMCP.Commands.Server;
+namespace AzureMcp.Commands.Server;
 
 /// <summary>
 /// From: https://github.com/modelcontextprotocol/csharp-sdk/blob/main/samples/AspNetCoreSseServer/McpEndpointRouteBuilderExtensions.cs

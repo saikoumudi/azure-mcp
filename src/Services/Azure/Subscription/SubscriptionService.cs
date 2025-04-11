@@ -2,11 +2,11 @@
 // Licensed under the MIT License.
 
 using Azure.ResourceManager.Resources;
-using AzureMCP.Arguments;
-using AzureMCP.Models.Argument;
-using AzureMCP.Services.Interfaces;
+using AzureMcp.Arguments;
+using AzureMcp.Models.Argument;
+using AzureMcp.Services.Interfaces;
 
-namespace AzureMCP.Services.Azure.Subscription;
+namespace AzureMcp.Services.Azure.Subscription;
 
 public class SubscriptionService(ICacheService cacheService, ITenantService tenantService)
     : BaseAzureService(tenantService), ISubscriptionService

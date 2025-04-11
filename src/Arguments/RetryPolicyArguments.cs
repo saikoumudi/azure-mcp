@@ -2,10 +2,10 @@
 // Licensed under the MIT License.
 
 using Azure.Core;
-using AzureMCP.Models.Argument;
+using AzureMcp.Models.Argument;
 using System.Text.Json.Serialization;
 
-namespace AzureMCP.Arguments;
+namespace AzureMcp.Arguments;
 
 /// <summary>
 /// Represents retry policy configuration for Azure SDK clients

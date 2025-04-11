@@ -1,15 +1,15 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using AzureMCP.Arguments;
-using AzureMCP.Arguments.Monitor;
-using AzureMCP.Models.Argument;
-using AzureMCP.Models.Command;
-using AzureMCP.Services.Interfaces;
+using AzureMcp.Arguments;
+using AzureMcp.Arguments.Monitor;
+using AzureMcp.Models.Argument;
+using AzureMcp.Models.Command;
+using AzureMcp.Services.Interfaces;
 using System.CommandLine;
 using System.CommandLine.Parsing;
 
-namespace AzureMCP.Commands.Monitor;
+namespace AzureMcp.Commands.Monitor;
 
 public abstract class BaseMonitorCommand<TArgs>() : SubscriptionCommand<TArgs>
     where TArgs : SubscriptionArguments, IWorkspaceArguments, new()

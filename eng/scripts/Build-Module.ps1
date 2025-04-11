@@ -18,7 +18,7 @@ param(
 $RepoRoot = $RepoRoot.Path.Replace('\', '/')
 
 $npmPackagePath = "$RepoRoot/eng/npm/platform"
-$projectFile = "$RepoRoot/src/AzureMCP.csproj"
+$projectFile = "$RepoRoot/src/AzureMcp.csproj"
 
 if(!$Version) {
     $Version = & "$PSScriptRoot/Get-Version.ps1"

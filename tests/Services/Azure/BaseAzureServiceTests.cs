@@ -4,13 +4,13 @@
 using Azure.Core;
 using Azure.Core.Pipeline;
 using Azure.ResourceManager;
-using AzureMCP.Arguments;
-using AzureMCP.Services.Azure;
-using AzureMCP.Services.Interfaces;
+using AzureMcp.Arguments;
+using AzureMcp.Services.Azure;
+using AzureMcp.Services.Interfaces;
 using NSubstitute;
 using Xunit;
 
-namespace AzureMCP.Tests.Services.Azure;
+namespace AzureMcp.Tests.Services.Azure;
 
 public class BaseAzureServiceTests
 {

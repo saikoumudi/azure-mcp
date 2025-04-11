@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-namespace AzureMCP.Models.AppConfig;
+namespace AzureMcp.Models.AppConfig;
 
 public class KeyValueSetting
 {

@@ -7,7 +7,7 @@ param(
 . "$PSScriptRoot/../common/scripts/common.ps1"
 $RepoRoot = $RepoRoot.Path.Replace('\', '/')
 
-$projectFile = "$RepoRoot/src/AzureMCP.csproj"
+$projectFile = "$RepoRoot/src/AzureMcp.csproj"
 $project = [xml](Get-Content $projectFile)
 $currentVersion = $project.Project.PropertyGroup.Version[0]
 

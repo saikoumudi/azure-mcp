@@ -4,7 +4,7 @@
 using Azure.Core;
 using Azure.Core.Pipeline;
 
-namespace AzureMCP.Services.Azure;
+namespace AzureMcp.Services.Azure;
 
 public class UserAgentPolicy : HttpPipelineSynchronousPolicy
 {

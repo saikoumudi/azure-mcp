@@ -18,7 +18,7 @@ if (Test-Path TestResults) {
 
 # Run tests with coverage
 Write-Host "Running tests with coverage..."
-dotnet test AzureMCP.Tests.csproj `
+dotnet test AzureMcp.Tests.csproj `
     --collect:"XPlat Code Coverage" `
     --results-directory TestResults `
     --settings coverage.runsettings

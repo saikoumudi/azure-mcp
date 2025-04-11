@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using AzureMCP.Arguments.Server;
-using AzureMCP.Models;
-using AzureMCP.Models.Argument;
-using AzureMCP.Models.Command;
-using AzureMCP.Services.Interfaces;
+using AzureMcp.Arguments.Server;
+using AzureMcp.Models;
+using AzureMcp.Models.Argument;
+using AzureMcp.Models.Command;
+using AzureMcp.Services.Interfaces;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
@@ -18,7 +18,7 @@ using System.CommandLine;
 using System.CommandLine.Parsing;
 using System.Reflection;
 
-namespace AzureMCP.Commands.Server;
+namespace AzureMcp.Commands.Server;
 
 [HiddenCommand]
 public sealed class ServiceStartCommand(IServiceProvider serviceProvider) : BaseCommand

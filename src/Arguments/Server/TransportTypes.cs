@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-namespace AzureMCP.Arguments.Server;
+namespace AzureMcp.Arguments.Server;
 
 internal static class TransportTypes
 {

@@ -1,14 +1,14 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using AzureMCP.Commands;
-using AzureMCP.Commands.Server;
+using AzureMcp.Commands;
+using AzureMcp.Commands.Server;
 using ModelContextProtocol.Protocol.Types;
 using ModelContextProtocol.Server;
 using NSubstitute;
 using Xunit;
 
-namespace AzureMCP.Tests.Commands.Server;
+namespace AzureMcp.Tests.Commands.Server;
 public class ToolOperationsTest
 {
     private readonly CommandFactory _commandFactory;

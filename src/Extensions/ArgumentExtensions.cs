@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-namespace AzureMCP.Extensions;
+namespace AzureMcp.Extensions;
 
-using AzureMCP.Models.Argument;
+using AzureMcp.Models.Argument;
 using System;
 using System.Collections.Generic;
 

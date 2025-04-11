@@ -4,16 +4,16 @@
 using Azure;
 using Azure.Core;
 using Azure.Identity;
-using AzureMCP.Arguments;
-using AzureMCP.Extensions;
-using AzureMCP.Models;
-using AzureMCP.Models.Argument;
-using AzureMCP.Models.Command;
-using AzureMCP.Services.Interfaces;
+using AzureMcp.Arguments;
+using AzureMcp.Extensions;
+using AzureMcp.Models;
+using AzureMcp.Models.Argument;
+using AzureMcp.Models.Command;
+using AzureMcp.Services.Interfaces;
 using System.CommandLine;
 using System.CommandLine.Parsing;
 
-namespace AzureMCP.Commands;
+namespace AzureMcp.Commands;
 
 public abstract class GlobalCommand<TArgs> : BaseCommand
     where TArgs : GlobalArguments, new()
@@ -162,7 +162,7 @@ public abstract class GlobalCommand<TArgs> : BaseCommand
         string namespaceName = GetType().Namespace ?? "";
         string serviceName = "";
 
-        // Extract service name from namespace (e.g., AzureMCP.Commands.Cosmos -> cosmos)
+        // Extract service name from namespace (e.g., AzureMcp.Commands.Cosmos -> cosmos)
         if (!string.IsNullOrEmpty(namespaceName) && namespaceName.Contains(".Commands."))
         {
             string[] parts = namespaceName.Split(".Commands.");
