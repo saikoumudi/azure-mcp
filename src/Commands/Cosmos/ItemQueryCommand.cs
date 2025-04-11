@@ -11,15 +11,9 @@ using System.CommandLine.Parsing;
 
 namespace AzureMCP.Commands.Cosmos;
 
-public sealed class ItemQueryCommand : BaseDatabaseCommand<ItemQueryArguments>
+public sealed class ItemQueryCommand : BaseContainerCommand<ItemQueryArguments>
 {
     private readonly Option<string> _queryOption = ArgumentDefinitions.Cosmos.Query.ToOption();
-    private readonly Option<string> _containerOption = ArgumentDefinitions.Cosmos.Container.ToOption();
-
-    public ItemQueryCommand() : base()
-    {
-        RegisterArguments();
-    }
 
     protected override string GetCommandName() => "query";
 
@@ -34,29 +28,13 @@ public sealed class ItemQueryCommand : BaseDatabaseCommand<ItemQueryArguments>
     protected override void RegisterOptions(Command command)
     {
         base.RegisterOptions(command);
-        command.AddOption(_containerOption);
         command.AddOption(_queryOption);
     }
 
     protected override void RegisterArguments()
     {
         base.RegisterArguments();
-        AddArgument(CreateContainerArgument());
         AddArgument(CreateQueryArgument());
-    }
-
-    private ArgumentBuilder<ItemQueryArguments> CreateContainerArgument()
-    {
-        return ArgumentBuilder<ItemQueryArguments>
-            .Create(ArgumentDefinitions.Cosmos.Container.Name, ArgumentDefinitions.Cosmos.Container.Description)
-            .WithValueAccessor(args => args.Container ?? string.Empty)
-            .WithSuggestedValuesLoader(async (context, args) =>
-                await GetContainerOptions(
-                    context,
-                    args.Account ?? string.Empty,
-                    args.Database ?? string.Empty,
-                    args.Subscription ?? string.Empty))
-            .WithIsRequired(ArgumentDefinitions.Cosmos.Container.Required);
     }
 
     private static ArgumentBuilder<ItemQueryArguments> CreateQueryArgument()

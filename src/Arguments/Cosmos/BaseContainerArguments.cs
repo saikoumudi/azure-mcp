@@ -6,8 +6,8 @@ using System.Text.Json.Serialization;
 
 namespace AzureMCP.Arguments.Cosmos;
 
-public class ItemQueryArguments : BaseContainerArguments
+public class BaseContainerArguments : BaseDatabaseArguments
 {
-    [JsonPropertyName(ArgumentDefinitions.Cosmos.QueryText)]
-    public string? Query { get; set; }
+    [JsonPropertyName(ArgumentDefinitions.Cosmos.ContainerName)]
+    public string? Container { get; set; }
 }

@@ -20,9 +20,6 @@ public sealed class ContainerListCommand : BaseDatabaseCommand<ContainerListArgu
         JSON array. You must specify both an account name and a database name.
         """;
 
-
-
-
     [McpServerTool(Destructive = false, ReadOnly = true)]
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
