@@ -63,25 +63,17 @@ public class TenantService(ICacheService cacheService)
     public async Task<string> GetTenantIdByName(string tenantName)
     {
         var tenants = await GetTenants();
-        var tenant = tenants.FirstOrDefault(t => t.Name.Equals(tenantName, StringComparison.OrdinalIgnoreCase));
-
-        if (tenant == null)
-        {
+        var tenant = tenants.FirstOrDefault(t => t.Name.Equals(tenantName, StringComparison.OrdinalIgnoreCase)) ??
             throw new Exception($"Could not find tenant with name {tenantName}");
-        }
-
+        
         return tenant.Id;
     }
 
     public async Task<string> GetTenantNameById(string tenantId)
     {
         var tenants = await GetTenants();
-        var tenant = tenants.FirstOrDefault(t => t.Id.Equals(tenantId, StringComparison.OrdinalIgnoreCase));
-
-        if (tenant == null)
-        {
+        var tenant = tenants.FirstOrDefault(t => t.Id.Equals(tenantId, StringComparison.OrdinalIgnoreCase)) ??
             throw new Exception($"Could not find tenant with ID {tenantId}");
-        }
 
         return tenant.Name;
     }

@@ -3,6 +3,4 @@
 
 namespace AzureMcp.Arguments.AppConfig.Account;
 
-public class AccountListArguments : SubscriptionArguments
-{
-}
+public class AccountListArguments : SubscriptionArguments;

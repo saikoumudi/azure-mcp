@@ -3,6 +3,4 @@
 
 namespace AzureMcp.Arguments.Monitor;
 
-public class BaseMonitorArguments : SubscriptionArguments
-{
-}
+public class BaseMonitorArguments : SubscriptionArguments;

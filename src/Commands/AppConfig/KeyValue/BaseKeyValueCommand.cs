@@ -35,19 +35,15 @@ public abstract class BaseKeyValueCommand<T> : BaseAppConfigCommand<T> where T :
         return args;
     }
 
-    protected virtual ArgumentBuilder<T> CreateKeyArgument()
-    {
-        return ArgumentBuilder<T>
+    protected virtual ArgumentBuilder<T> CreateKeyArgument() =>
+        ArgumentBuilder<T>
             .Create(ArgumentDefinitions.AppConfig.Key.Name, ArgumentDefinitions.AppConfig.Key.Description)
             .WithValueAccessor(args => args.Key ?? string.Empty)
             .WithIsRequired(ArgumentDefinitions.AppConfig.Key.Required);
-    }
 
-    protected virtual ArgumentBuilder<T> CreateLabelArgument()
-    {
-        return ArgumentBuilder<T>
+    protected virtual ArgumentBuilder<T> CreateLabelArgument() =>
+        ArgumentBuilder<T>
             .Create(ArgumentDefinitions.AppConfig.Label.Name, ArgumentDefinitions.AppConfig.Label.Description)
             .WithValueAccessor(args => args.Label ?? string.Empty)
             .WithIsRequired(ArgumentDefinitions.AppConfig.Label.Required);
-    }
 }

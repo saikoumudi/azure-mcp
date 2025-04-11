@@ -31,9 +31,8 @@ public abstract class BaseContainerCommand<TArgs> : BaseDatabaseCommand<TArgs> w
         return args;
     }
 
-    private ArgumentBuilder<Arguments.Cosmos.BaseContainerArguments> CreateContainerArgument()
-    {
-        return ArgumentBuilder<Arguments.Cosmos.BaseContainerArguments>
+    private ArgumentBuilder<Arguments.Cosmos.BaseContainerArguments> CreateContainerArgument() =>
+        ArgumentBuilder<Arguments.Cosmos.BaseContainerArguments>
             .Create(ArgumentDefinitions.Cosmos.Container.Name, ArgumentDefinitions.Cosmos.Container.Description)
             .WithValueAccessor(args => args.Container ?? string.Empty)
             .WithSuggestedValuesLoader(async (context, args) =>
@@ -43,5 +42,4 @@ public abstract class BaseContainerCommand<TArgs> : BaseDatabaseCommand<TArgs> w
                     args.Database ?? string.Empty,
                     args.Subscription ?? string.Empty))
             .WithIsRequired(ArgumentDefinitions.Cosmos.Container.Required);
-    }
 }

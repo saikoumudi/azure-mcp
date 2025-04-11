@@ -3,5 +3,4 @@
 
 namespace AzureMcp.Arguments.AppConfig.KeyValue;
 
-public class KeyValueDeleteArguments : BaseKeyValueArguments
-{ }
+public class KeyValueDeleteArguments : BaseKeyValueArguments;

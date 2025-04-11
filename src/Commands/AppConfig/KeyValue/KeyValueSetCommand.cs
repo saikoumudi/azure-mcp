@@ -43,13 +43,11 @@ public sealed class KeyValueSetCommand : BaseKeyValueCommand<KeyValueSetArgument
         return args;
     }
 
-    private static ArgumentBuilder<KeyValueSetArguments> CreateValueArgument()
-    {
-        return ArgumentBuilder<KeyValueSetArguments>
+    private static ArgumentBuilder<KeyValueSetArguments> CreateValueArgument() =>
+        ArgumentBuilder<KeyValueSetArguments>
             .Create(ArgumentDefinitions.AppConfig.Value.Name, ArgumentDefinitions.AppConfig.Value.Description)
             .WithValueAccessor(args => args.Value ?? string.Empty)
             .WithIsRequired(ArgumentDefinitions.AppConfig.Value.Required);
-    }
 
     [McpServerTool(Destructive = false, ReadOnly = false)]
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)

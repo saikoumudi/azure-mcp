@@ -34,8 +34,15 @@ public class RetryPolicyArguments : IComparable<RetryPolicyArguments>, IEquatabl
     /// <returns>True if both policies have identical settings or are both null, false otherwise</returns>
     public static bool AreEqual(RetryPolicyArguments? policy1, RetryPolicyArguments? policy2)
     {
-        if (policy1 == null && policy2 == null) return true;
-        if (policy1 == null || policy2 == null) return false;
+        if (ReferenceEquals(policy1, policy2))
+        {
+            return true;
+        }
+
+        if (policy1 == null || policy2 == null)
+        {
+            return false;
+        }
 
         return policy1.MaxRetries == policy2.MaxRetries &&
                policy1.Mode == policy2.Mode &&
@@ -67,54 +74,23 @@ public class RetryPolicyArguments : IComparable<RetryPolicyArguments>, IEquatabl
         return NetworkTimeoutSeconds.CompareTo(other.NetworkTimeoutSeconds);
     }
 
-    public bool Equals(RetryPolicyArguments? other)
-    {
-        return AreEqual(this, other);
-    }
+    public bool Equals(RetryPolicyArguments? other) => AreEqual(this, other);
 
-    public override bool Equals(object? obj)
-    {
-        if (obj is RetryPolicyArguments other)
-            return Equals(other);
-        return false;
-    }
+    public override bool Equals(object? obj) => obj is RetryPolicyArguments other && Equals(other);
 
-    public override int GetHashCode()
-    {
-        return HashCode.Combine(MaxRetries, Mode, DelaySeconds, MaxDelaySeconds, NetworkTimeoutSeconds);
-    }
+    public override int GetHashCode() => HashCode.Combine(MaxRetries, Mode, DelaySeconds, MaxDelaySeconds, NetworkTimeoutSeconds);
 
-    public static bool operator ==(RetryPolicyArguments? left, RetryPolicyArguments? right)
-    {
-        if (ReferenceEquals(left, right)) return true;
-        if (left is null || right is null) return false;
-        return left.Equals(right);
-    }
+    public static bool operator ==(RetryPolicyArguments? left, RetryPolicyArguments? right) => AreEqual(left, right);
 
-    public static bool operator !=(RetryPolicyArguments? left, RetryPolicyArguments? right)
-    {
-        return !(left == right);
-    }
+    public static bool operator !=(RetryPolicyArguments? left, RetryPolicyArguments? right) => !(left == right);
 
-    public static bool operator <(RetryPolicyArguments? left, RetryPolicyArguments? right)
-    {
-        if (left is null) return right is not null;
-        return left.CompareTo(right) < 0;
-    }
+    public static bool operator <(RetryPolicyArguments? left, RetryPolicyArguments? right) =>
+        left is null ? right is not null : left.CompareTo(right) < 0;
 
-    public static bool operator <=(RetryPolicyArguments? left, RetryPolicyArguments? right)
-    {
-        if (left is null) return true;
-        return left.CompareTo(right) <= 0;
-    }
+    public static bool operator <=(RetryPolicyArguments? left, RetryPolicyArguments? right) =>
+        left is null || left.CompareTo(right) <= 0;
 
-    public static bool operator >(RetryPolicyArguments? left, RetryPolicyArguments? right)
-    {
-        return !(left <= right);
-    }
+    public static bool operator >(RetryPolicyArguments? left, RetryPolicyArguments? right) => !(left <= right);
 
-    public static bool operator >=(RetryPolicyArguments? left, RetryPolicyArguments? right)
-    {
-        return !(left < right);
-    }
+    public static bool operator >=(RetryPolicyArguments? left, RetryPolicyArguments? right) => !(left < right);
 }

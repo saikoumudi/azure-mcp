@@ -69,13 +69,9 @@ public class UserAgentPolicyTests
     }
 
     // Helper class for testing the base method call
-    private class TestableUserAgentPolicy : UserAgentPolicy
+    private class TestableUserAgentPolicy(string userAgent) : UserAgentPolicy(userAgent)
     {
         public bool BaseOnSendingRequestCalled { get; private set; }
-
-        public TestableUserAgentPolicy(string userAgent) : base(userAgent)
-        {
-        }
 
         public override void OnSendingRequest(HttpMessage message)
         {

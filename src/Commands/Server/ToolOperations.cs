@@ -56,11 +56,8 @@ public class ToolOperations
         {
             return new CallToolResponse
             {
-                Content = [new Content {
-                            Text = "Could not parse parameters from tool request.",
-                            Type = "text",
-                            MimeType = "text/plain"
-                        }],
+                Content = [new Content { Text = "Could not parse parameters from tool request." }],
+                IsError = true,
             };
         }
 
@@ -69,11 +66,8 @@ public class ToolOperations
         {
             return new CallToolResponse
             {
-                Content = [new Content
-                        {
-                            Text = $"Could not find command: {parameters.Params.Name}",
-                        Type = "text", MimeType = "text/plain"
-                        }],
+                Content = [new Content { Text = $"Could not find command: {parameters.Params.Name}" }],
+                IsError = true,
             };
 
         }
@@ -90,9 +84,8 @@ public class ToolOperations
 
         return new CallToolResponse
         {
-            Content = [new Content { Text = jsonResponse, Type = "text", MimeType = "application/json" }],
+            Content = [new Content { Text = jsonResponse, MimeType = "application/json" }],
         };
-
     }
 
     private static Tool GetTool(string fullName, IBaseCommand command)
@@ -106,25 +99,16 @@ public class ToolOperations
 
         // Get the GetCommand method info to check for McpServerToolAttribute
         var getCommandMethod = command.GetType().GetMethod(nameof(IBaseCommand.GetCommand));
-        if (getCommandMethod != null)
+        if (getCommandMethod?.GetCustomAttribute<McpServerToolAttribute>() is { } mcpServerToolAttr)
         {
-            var mcpServerToolAttr = getCommandMethod.GetCustomAttribute<McpServerToolAttribute>();
-            if (mcpServerToolAttr != null)
+            tool.Annotations = new ToolAnnotations()
             {
-
-                var annotations = new ToolAnnotations();
-
-                if (mcpServerToolAttr.Destructive)
-                    annotations.DestructiveHint = mcpServerToolAttr.Destructive;
-                if (mcpServerToolAttr.ReadOnly)
-                    annotations.ReadOnlyHint = mcpServerToolAttr.ReadOnly;
-                if (mcpServerToolAttr.Idempotent)
-                    annotations.IdempotentHint = mcpServerToolAttr.Idempotent;
-                if (mcpServerToolAttr.OpenWorld)
-                    annotations.OpenWorldHint = mcpServerToolAttr.OpenWorld;
-
-                tool.Annotations = annotations;
-            }
+                DestructiveHint = mcpServerToolAttr.Destructive,
+                IdempotentHint = mcpServerToolAttr.Idempotent,
+                OpenWorldHint = mcpServerToolAttr.OpenWorld,
+                ReadOnlyHint = mcpServerToolAttr.ReadOnly,
+                Title = mcpServerToolAttr.Title,
+            };
         }
 
         var args = command.GetArguments()?.ToList();

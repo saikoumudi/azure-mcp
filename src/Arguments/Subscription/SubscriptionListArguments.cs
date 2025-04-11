@@ -3,7 +3,4 @@
 
 namespace AzureMcp.Arguments.Subscription;
 
-public class SubscriptionListArguments : BaseSubscriptionArguments
-{
-
-}
+public class SubscriptionListArguments : BaseSubscriptionArguments;

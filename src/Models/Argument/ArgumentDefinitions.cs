@@ -95,7 +95,6 @@ public static class ArgumentDefinitions
             AccountName,
             "The name of the Azure Storage account. This is the unique name you chose for your storage account (e.g., 'mystorageaccount').",
             required: true
-
         );
 
         public static readonly ArgumentDefinition<string> Container = new(
@@ -159,7 +158,6 @@ public static class ArgumentDefinitions
             required: true
         );
 
-
         public static readonly ArgumentDefinition<string> TableType = new(
             TableTypeName,
             "The type of table to query. Options: 'CustomLog', 'AzureMetrics', etc.",
@@ -168,10 +166,10 @@ public static class ArgumentDefinitions
         );
 
         public static readonly ArgumentDefinition<string> TableName = new(
-          TableNameName,
-          "The name of the table to query. This is the specific table within the workspace.",
-          required: true
-      );
+            TableNameName,
+            "The name of the table to query. This is the specific table within the workspace.",
+            required: true
+        );
 
         public static readonly ArgumentDefinition<string> Query = new(
             QueryTextName,
@@ -247,8 +245,6 @@ public static class ArgumentDefinitions
             "The label to apply to the configuration key. Labels are used to group and organize settings.",
             required: false
         );
-
-
 
         public static class KeyValueList
         {

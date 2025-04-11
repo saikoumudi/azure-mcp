@@ -32,7 +32,7 @@ public sealed class ToolsListCommand : BaseCommand
                 .Where(kvp =>
                 {
                     var parts = kvp.Key.Split(CommandFactory.Separator, StringSplitOptions.RemoveEmptyEntries);
-                    return !parts.Any(x => x == "tools" || x == "server");
+                    return !parts.Any(x => x is "tools" or "server");
                 })
                 .Select(kvp => CreateCommand(kvp.Key, kvp.Value))
                 .ToList());

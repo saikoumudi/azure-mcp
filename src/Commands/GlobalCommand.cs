@@ -13,6 +13,8 @@ using AzureMcp.Services.Interfaces;
 using System.CommandLine;
 using System.CommandLine.Parsing;
 
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
+
 namespace AzureMcp.Commands;
 
 public abstract class GlobalCommand<TArgs> : BaseCommand
@@ -117,13 +119,11 @@ public abstract class GlobalCommand<TArgs> : BaseCommand
         return await tenantService.GetTenants();
     }
 
-
-
     // Helper method to get auth method options
     protected virtual async Task<List<ArgumentOption>> GetAuthMethodOptions(CommandContext context)
     {
         // Use the helper method from AuthMethodArgument
-        return await Task.FromResult(AuthMethodArgument.GetAuthMethodOptions());
+        return AuthMethodArgument.GetAuthMethodOptions();
     }
 
     // Helper method to get subscription options

@@ -82,12 +82,10 @@ public abstract class BaseCosmosCommand<TArgs> : SubscriptionCommand<TArgs> wher
     }
 
     // Helper methods for creating Cosmos-specific arguments
-    protected ArgumentBuilder<TArgs> CreateAccountArgument()
-    {
-        return ArgumentBuilder<TArgs>
+    protected ArgumentBuilder<TArgs> CreateAccountArgument() =>
+        ArgumentBuilder<TArgs>
             .Create(ArgumentDefinitions.Cosmos.Account.Name, ArgumentDefinitions.Cosmos.Account.Description)
             .WithValueAccessor(args => args.Account ?? string.Empty)
             .WithSuggestedValuesLoader(async (context, args) => await GetAccountOptions(context, args.Subscription ?? string.Empty))
             .WithIsRequired(ArgumentDefinitions.Cosmos.Account.Required);
-    }
 }

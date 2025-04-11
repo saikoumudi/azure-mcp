@@ -32,29 +32,12 @@ public class AuthMethodArgument
     public static AuthMethod GetDefaultAuthMethod() => AuthMethod.Credential;
 
     /// <summary>
-    /// Gets all available auth methods
-    /// </summary>
-    public static IEnumerable<AuthMethod> GetAllAuthMethods()
-    {
-        return Enum.GetValues<AuthMethod>();
-    }
-
-    /// <summary>
     /// Gets all available auth methods as ArgumentOptions
     /// </summary>
-    public static List<ArgumentOption> GetAuthMethodOptions()
-    {
-        var options = new List<ArgumentOption>();
-
-        foreach (AuthMethod authMethod in GetAllAuthMethods())
+    public static List<ArgumentOption> GetAuthMethodOptions() =>
+        [.. Enum.GetValues<AuthMethod>().Select(authMethod => new ArgumentOption
         {
-            options.Add(new ArgumentOption
-            {
-                Name = GetDisplayName(authMethod),
-                Id = authMethod.ToString()
-            });
-        }
-
-        return options;
-    }
+            Name = GetDisplayName(authMethod),
+            Id = authMethod.ToString()
+        })];
 }

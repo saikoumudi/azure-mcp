@@ -3,6 +3,4 @@
 
 namespace AzureMcp.Arguments.AppConfig.KeyValue;
 
-public class KeyValueUnlockArguments : BaseKeyValueArguments
-{
-}
+public class KeyValueUnlockArguments : BaseKeyValueArguments;

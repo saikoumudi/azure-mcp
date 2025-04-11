@@ -80,8 +80,7 @@ public sealed class AzCommand(int processTimeoutSeconds = 300) : GlobalCommand<A
         var searchPaths = new List<string>(AzureCliPaths);
 
         // Add PATH environment directories
-        var pathDirs = Environment.GetEnvironmentVariable("PATH")?.Split(Path.PathSeparator);
-        if (pathDirs != null)
+        if (Environment.GetEnvironmentVariable("PATH")?.Split(Path.PathSeparator) is { } pathDirs)
         {
             searchPaths.AddRange(pathDirs);
         }
@@ -123,7 +122,8 @@ public sealed class AzCommand(int processTimeoutSeconds = 300) : GlobalCommand<A
                 return context.Response;
             }
 
-            var command = args.Command ?? throw new ArgumentNullException(nameof(args.Command), "Command cannot be null");
+            ArgumentNullException.ThrowIfNull(args.Command);
+            var command = args.Command;
             var processService = context.GetService<IExternalProcessService>();
 
             var azPath = FindAzCliPath() ?? throw new FileNotFoundException("Azure CLI executable not found in PATH or common installation locations. Please ensure Azure CLI is installed.");

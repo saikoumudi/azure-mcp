@@ -40,10 +40,8 @@ public abstract class SubscriptionCommand<TArgs> : GlobalCommand<TArgs>
         return args;
     }
 
-    protected ArgumentBuilder<TArgs> CreateResourceGroupArgument()
-    {
-
-        return ArgumentBuilder<TArgs>
+    protected ArgumentBuilder<TArgs> CreateResourceGroupArgument() =>
+        ArgumentBuilder<TArgs>
             .Create(ArgumentDefinitions.Common.ResourceGroup.Name, ArgumentDefinitions.Common.ResourceGroup.Description)
             .WithValueAccessor(args => (args as SubscriptionArguments)?.ResourceGroup ?? string.Empty)
             .WithSuggestedValuesLoader(async (context, args) =>
@@ -56,5 +54,4 @@ public abstract class SubscriptionCommand<TArgs> : GlobalCommand<TArgs>
                 return await GetResourceGroupOptions(context, subArgs.Subscription);
             })
             .WithIsRequired(true);
-    }
 }

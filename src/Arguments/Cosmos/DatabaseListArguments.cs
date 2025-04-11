@@ -3,6 +3,4 @@
 
 namespace AzureMcp.Arguments.Cosmos;
 
-public class DatabaseListArguments : BaseCosmosArguments
-{
-}
+public class DatabaseListArguments : BaseCosmosArguments;

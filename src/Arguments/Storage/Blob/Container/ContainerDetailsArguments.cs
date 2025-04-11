@@ -3,6 +3,4 @@
 
 namespace AzureMcp.Arguments.Storage.Blob.Container;
 
-public class ContainerDetailsArguments : BaseContainerArguments
-{
-}
+public class ContainerDetailsArguments : BaseContainerArguments;

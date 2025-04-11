@@ -13,6 +13,8 @@ namespace AzureMcp.Commands.Cosmos;
 
 public sealed class ItemQueryCommand : BaseContainerCommand<ItemQueryArguments>
 {
+    private const string DefaultQuery = "SELECT * FROM c";
+
     private readonly Option<string> _queryOption = ArgumentDefinitions.Cosmos.Query.ToOption();
 
     protected override string GetCommandName() => "query";
@@ -37,15 +39,12 @@ public sealed class ItemQueryCommand : BaseContainerCommand<ItemQueryArguments>
         AddArgument(CreateQueryArgument());
     }
 
-    private static ArgumentBuilder<ItemQueryArguments> CreateQueryArgument()
-    {
-        var defaultValue = ArgumentDefinitions.Cosmos.Query.DefaultValue ?? "SELECT * FROM c";
-        return ArgumentBuilder<ItemQueryArguments>
+    private static ArgumentBuilder<ItemQueryArguments> CreateQueryArgument() =>
+        ArgumentBuilder<ItemQueryArguments>
             .Create(ArgumentDefinitions.Cosmos.Query.Name, ArgumentDefinitions.Cosmos.Query.Description)
             .WithValueAccessor(args => args.Query ?? string.Empty)
-            .WithDefaultValue(defaultValue)
+            .WithDefaultValue(ArgumentDefinitions.Cosmos.Query.DefaultValue ?? DefaultQuery)
             .WithIsRequired(ArgumentDefinitions.Cosmos.Query.Required);
-    }
 
     protected override ItemQueryArguments BindArguments(ParseResult parseResult)
     {
@@ -71,7 +70,7 @@ public sealed class ItemQueryCommand : BaseContainerCommand<ItemQueryArguments>
                 args.Account!,
                 args.Database!,
                 args.Container!,
-                args.Query ?? "SELECT * FROM c",
+                args.Query ?? DefaultQuery,
                 args.Subscription!,
                 args.Tenant,
                 args.RetryPolicy);

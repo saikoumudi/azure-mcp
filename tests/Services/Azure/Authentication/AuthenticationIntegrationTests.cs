@@ -45,7 +45,7 @@ public class AuthenticationIntegrationTests : IAsyncLifetime
         // Test implementation remains unchanged since we handle skipping in the attribute
         _output.WriteLine("Testing InteractiveBrowserCredential with identity broker...");
 
-        var browserCredential = await AuthenticateWithBrokerAsync();
+        await AuthenticateWithBrokerAsync();
         _output.WriteLine("Successfully authenticated with identity broker");
 
         // Step 2: Now test the subscription service which will use our CustomChainedCredential internally
@@ -88,8 +88,10 @@ public class AuthenticationIntegrationTests : IAsyncLifetime
         }
 
         // Output subscriptions for manual verification
-        var jsonString = JsonSerializer.Serialize(subscriptions, new JsonSerializerOptions { WriteIndented = true });
+        var jsonString = JsonSerializer.Serialize(subscriptions, _writeIndentedOptions);
         _output.WriteLine($"Retrieved {subscriptions.Count} subscriptions:");
         _output.WriteLine(jsonString);
     }
+
+    private static readonly JsonSerializerOptions _writeIndentedOptions = new() { WriteIndented = true };
 }

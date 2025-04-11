@@ -40,21 +40,17 @@ public sealed class KeyValueListCommand : BaseAppConfigCommand<KeyValueListArgum
         AddArgument(CreateListLabelArgument());
     }
 
-    private static ArgumentBuilder<KeyValueListArguments> CreateListKeyArgument()
-    {
-        return ArgumentBuilder<KeyValueListArguments>
+    private static ArgumentBuilder<KeyValueListArguments> CreateListKeyArgument() =>
+        ArgumentBuilder<KeyValueListArguments>
             .Create(ArgumentDefinitions.AppConfig.KeyValueList.Key.Name, ArgumentDefinitions.AppConfig.KeyValueList.Key.Description)
             .WithValueAccessor(args => args.Key ?? string.Empty)
             .WithIsRequired(ArgumentDefinitions.AppConfig.KeyValueList.Key.Required);
-    }
 
-    private static ArgumentBuilder<KeyValueListArguments> CreateListLabelArgument()
-    {
-        return ArgumentBuilder<KeyValueListArguments>
+    private static ArgumentBuilder<KeyValueListArguments> CreateListLabelArgument() =>
+        ArgumentBuilder<KeyValueListArguments>
             .Create(ArgumentDefinitions.AppConfig.KeyValueList.Label.Name, ArgumentDefinitions.AppConfig.KeyValueList.Label.Description)
             .WithValueAccessor(args => args.Label ?? string.Empty)
             .WithIsRequired(ArgumentDefinitions.AppConfig.KeyValueList.Label.Required);
-    }
 
     protected override KeyValueListArguments BindArguments(ParseResult parseResult)
     {

@@ -125,8 +125,7 @@ public abstract class BaseAzureService(ITenantService? tenantService = null)
     {
         foreach (var param in parameters)
         {
-            if (string.IsNullOrEmpty(param))
-                throw new ArgumentException($"Parameter cannot be null or empty", nameof(param));
+            ArgumentException.ThrowIfNullOrEmpty(param);
         }
     }
 }

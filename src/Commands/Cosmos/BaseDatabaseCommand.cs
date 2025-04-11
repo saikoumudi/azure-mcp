@@ -32,13 +32,11 @@ public abstract class BaseDatabaseCommand<TArgs> : BaseCosmosCommand<TArgs> wher
         return args;
     }
 
-    protected ArgumentBuilder<TArgs> CreateDatabaseArgument()
-    {
-        return ArgumentBuilder<TArgs>
+    protected ArgumentBuilder<TArgs> CreateDatabaseArgument() =>
+        ArgumentBuilder<TArgs>
             .Create(ArgumentDefinitions.Cosmos.Database.Name, ArgumentDefinitions.Cosmos.Database.Description)
             .WithValueAccessor(args => args.Database ?? string.Empty)
             .WithSuggestedValuesLoader(async (context, args) =>
                 await GetDatabaseOptions(context, args.Account ?? string.Empty, args.Subscription ?? string.Empty))
             .WithIsRequired(ArgumentDefinitions.Cosmos.Database.Required);
-    }
 }

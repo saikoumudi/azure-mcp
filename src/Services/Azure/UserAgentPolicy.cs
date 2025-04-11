@@ -14,10 +14,8 @@ public class UserAgentPolicy : HttpPipelineSynchronousPolicy
 
     public UserAgentPolicy(string userAgent)
     {
-        if (string.IsNullOrWhiteSpace(userAgent))
-        {
-            throw new ArgumentException("User agent cannot be empty", nameof(userAgent));
-        }
+        ArgumentException.ThrowIfNullOrWhiteSpace(userAgent);
+
         _userAgent = userAgent;
     }
 

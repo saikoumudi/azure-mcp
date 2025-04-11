@@ -84,12 +84,8 @@ public class SubscriptionService(ICacheService cacheService, ITenantService tena
     public async Task<string> GetSubscriptionIdByName(string subscriptionName, string? tenant = null, RetryPolicyArguments? retryPolicy = null)
     {
         var subscriptions = await GetSubscriptions(tenant, retryPolicy);
-        var subscription = subscriptions.FirstOrDefault(s => s.Name.Equals(subscriptionName, StringComparison.OrdinalIgnoreCase));
-
-        if (subscription == null)
-        {
+        var subscription = subscriptions.FirstOrDefault(s => s.Name.Equals(subscriptionName, StringComparison.OrdinalIgnoreCase)) ??
             throw new Exception($"Could not find subscription with name {subscriptionName}");
-        }
 
         return subscription.Id;
     }
@@ -97,12 +93,8 @@ public class SubscriptionService(ICacheService cacheService, ITenantService tena
     public async Task<string> GetSubscriptionNameById(string subscriptionId, string? tenant = null, RetryPolicyArguments? retryPolicy = null)
     {
         var subscriptions = await GetSubscriptions(tenant, retryPolicy);
-        var subscription = subscriptions.FirstOrDefault(s => s.Id.Equals(subscriptionId, StringComparison.OrdinalIgnoreCase));
-
-        if (subscription == null)
-        {
+        var subscription = subscriptions.FirstOrDefault(s => s.Id.Equals(subscriptionId, StringComparison.OrdinalIgnoreCase)) ??
             throw new Exception($"Could not find subscription with ID {subscriptionId}");
-        }
 
         return subscription.Name;
     }

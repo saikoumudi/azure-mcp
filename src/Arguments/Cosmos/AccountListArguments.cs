@@ -3,6 +3,4 @@
 
 namespace AzureMcp.Arguments.Cosmos;
 
-public class AccountListArguments : SubscriptionArguments
-{
-}
+public class AccountListArguments : SubscriptionArguments;

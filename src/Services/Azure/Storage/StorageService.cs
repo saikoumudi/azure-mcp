@@ -224,46 +224,32 @@ public class StorageService(ISubscriptionService subscriptionService, ICacheServ
     private async Task<string> GetStorageAccountKey(string accountName, string subscriptionId, string? tenant = null)
     {
         var subscription = await _subscriptionService.GetSubscription(subscriptionId, tenant);
-        var storageAccount = await GetStorageAccount(subscription, accountName);
-        if (storageAccount == null)
-        {
+        var storageAccount = await GetStorageAccount(subscription, accountName) ?? 
             throw new Exception($"Storage account '{accountName}' not found in subscription '{subscriptionId}'");
-        }
-
+        
         var keys = new List<StorageAccountKey>();
         await foreach (var key in storageAccount.GetKeysAsync())
         {
             keys.Add(key);
         }
 
-        var firstKey = keys.FirstOrDefault();
-        if (firstKey == null)
-        {
-            throw new Exception($"No keys found for storage account '{accountName}'");
-        }
+        var firstKey = keys.FirstOrDefault() ?? throw new Exception($"No keys found for storage account '{accountName}'");
         return firstKey.Value;
     }
 
     private async Task<string> GetStorageAccountConnectionString(string accountName, string subscriptionId, string? tenant = null)
     {
         var subscription = await _subscriptionService.GetSubscription(subscriptionId, tenant);
-        var storageAccount = await GetStorageAccount(subscription, accountName);
-        if (storageAccount == null)
-        {
+        var storageAccount = await GetStorageAccount(subscription, accountName) ??
             throw new Exception($"Storage account '{accountName}' not found in subscription '{subscriptionId}'");
-        }
-
+        
         var keys = new List<StorageAccountKey>();
         await foreach (var key in storageAccount.GetKeysAsync())
         {
             keys.Add(key);
         }
 
-        var firstKey = keys.FirstOrDefault();
-        if (firstKey == null)
-        {
-            throw new Exception($"No keys found for storage account '{accountName}'");
-        }
+        var firstKey = keys.FirstOrDefault() ?? throw new Exception($"No keys found for storage account '{accountName}'");
         return $"DefaultEndpointsProtocol=https;AccountName={accountName};AccountKey={firstKey.Value};EndpointSuffix=core.windows.net";
     }
 

@@ -79,7 +79,7 @@ public sealed class ServiceStartCommand(IServiceProvider serviceProvider) : Base
 
             var application = builder.Build();
 
-            application.MapMcpSse();
+            application.MapMcp();
 
             return application;
         }

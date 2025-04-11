@@ -32,9 +32,8 @@ public abstract class BaseAppConfigCommand<T> : SubscriptionCommand<T> where T :
         return args;
     }
 
-    protected ArgumentBuilder<T> CreateAccountArgument()
-    {
-        return ArgumentBuilder<T>
+    protected ArgumentBuilder<T> CreateAccountArgument() =>
+        ArgumentBuilder<T>
             .Create(ArgumentDefinitions.AppConfig.Account.Name, ArgumentDefinitions.AppConfig.Account.Description)
             .WithValueAccessor(args => args.Account ?? string.Empty)
             .WithSuggestedValuesLoader(async (context, args) =>
@@ -47,5 +46,4 @@ public abstract class BaseAppConfigCommand<T> : SubscriptionCommand<T> where T :
                 return accounts?.Select(a => new ArgumentOption { Name = a.Name, Id = a.Name }).ToList() ?? [];
             })
             .WithIsRequired(ArgumentDefinitions.AppConfig.Account.Required);
-    }
 }

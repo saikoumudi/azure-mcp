@@ -80,14 +80,15 @@ public sealed class AzdCommand(int processTimeoutSeconds = 300) : GlobalCommand<
                 return context.Response;
             }
 
-            var command = args.Command ?? throw new ArgumentNullException(nameof(args.Command), "Command cannot be null");
+            ArgumentNullException.ThrowIfNull(args.Command);
+            var command = args.Command;
             // We need to always pass the --no-prompt flag to avoid prompting for user input and getting the process stuck
             command += " --no-prompt";
 
             var processService = context.GetService<IExternalProcessService>();
             processService.SetEnvironmentVariables(new Dictionary<string, string>
             {
-                { "AZURE_DEV_USER_AGENT", BaseAzureService.DefaultUserAgent },
+                ["AZURE_DEV_USER_AGENT"] = BaseAzureService.DefaultUserAgent,
             });
 
             var azdPath = FindAzdCliPath() ?? throw new FileNotFoundException("Azure Developer CLI executable not found in PATH or common installation locations. Please ensure Azure Developer CLI is installed.");
@@ -99,7 +100,7 @@ public sealed class AzdCommand(int processTimeoutSeconds = 300) : GlobalCommand<
             }
             else
             {
-                return HandleError(result, command, context.Response);
+                return HandleError(result, context.Response);
             }
         }
         catch (Exception ex)
@@ -123,8 +124,7 @@ public sealed class AzdCommand(int processTimeoutSeconds = 300) : GlobalCommand<
         // Add PATH environment directories followed by the common installation locations
         // This will capture any custom AZD installations as well as standard installations.
         var searchPaths = new List<string>();
-        var pathDirs = Environment.GetEnvironmentVariable("PATH")?.Split(Path.PathSeparator);
-        if (pathDirs != null)
+        if (Environment.GetEnvironmentVariable("PATH")?.Split(Path.PathSeparator) is { } pathDirs)
         {
             searchPaths.AddRange(pathDirs);
         }
@@ -164,7 +164,7 @@ public sealed class AzdCommand(int processTimeoutSeconds = 300) : GlobalCommand<
             contentResults.Add(result.Output);
         }
 
-        var commandArgs = command.Split(" ");
+        var commandArgs = command.Split(' ');
 
         // Help the user decide what the next steps might be based on the command they just executed
         switch (commandArgs[0])
@@ -177,12 +177,14 @@ public sealed class AzdCommand(int processTimeoutSeconds = 300) : GlobalCommand<
                     "- 'azd deploy': Deploy the application code to the Azure infrastructure.\n"
                 );
                 break;
+
             case "provision":
                 contentResults.Add(
                     "Most common commands after provisioning the application are the following:\n" +
                     "- 'azd deploy': Deploy the application code to the Azure infrastructure.\n"
                 );
                 break;
+
             case "deploy":
                 contentResults.Add(
                     "Most common commands after deploying the application are the following:\n" +
@@ -191,6 +193,7 @@ public sealed class AzdCommand(int processTimeoutSeconds = 300) : GlobalCommand<
                     "- 'azd pipeline config': Allows the user to configure a CI/CD pipeline for the application.\n"
                 );
                 break;
+
             case "up":
                 contentResults.Add(
                     "Most common commands after provisioning the application are the following:\n" +
@@ -205,7 +208,7 @@ public sealed class AzdCommand(int processTimeoutSeconds = 300) : GlobalCommand<
         return response;
     }
 
-    private static CommandResponse HandleError(ProcessResult result, string command, CommandResponse response)
+    private static CommandResponse HandleError(ProcessResult result, CommandResponse response)
     {
         response.Status = 500;
         response.Message = result.Error;

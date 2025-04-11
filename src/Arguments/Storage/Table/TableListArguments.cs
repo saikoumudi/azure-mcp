@@ -3,6 +3,4 @@
 
 namespace AzureMcp.Arguments.Storage.Table;
 
-public class TableListArguments : BaseStorageArguments
-{
-}
+public class TableListArguments : BaseStorageArguments;

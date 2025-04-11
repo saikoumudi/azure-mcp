@@ -10,7 +10,7 @@ namespace AzureMcp.Services.ProcessExecution;
 
 public class ExternalProcessService : IExternalProcessService
 {
-    private IDictionary<string, string> environmentVariables = new Dictionary<string, string>();
+    private readonly Dictionary<string, string> environmentVariables = [];
 
     public async Task<ProcessResult> ExecuteAsync(
         string executablePath,
@@ -18,10 +18,7 @@ public class ExternalProcessService : IExternalProcessService
         int timeoutSeconds = 300,
         IEnumerable<string>? customPaths = null)
     {
-        if (string.IsNullOrEmpty(executablePath))
-        {
-            throw new ArgumentNullException(nameof(executablePath));
-        }
+        ArgumentException.ThrowIfNullOrEmpty(executablePath);
 
         if (!File.Exists(executablePath))
         {

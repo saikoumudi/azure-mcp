@@ -3,6 +3,4 @@
 
 namespace AzureMcp.Arguments.Group;
 
-public class BaseGroupArguments : SubscriptionArguments
-{
-}
+public class BaseGroupArguments : SubscriptionArguments;

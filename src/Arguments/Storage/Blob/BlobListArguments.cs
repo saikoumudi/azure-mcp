@@ -3,5 +3,4 @@
 
 namespace AzureMcp.Arguments.Storage.Blob;
 
-public class BlobListArguments : BaseContainerArguments
-{ }
+public class BlobListArguments : BaseContainerArguments;

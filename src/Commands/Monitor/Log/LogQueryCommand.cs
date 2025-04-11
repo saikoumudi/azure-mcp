@@ -84,21 +84,6 @@ public sealed class LogQueryCommand() : BaseMonitorCommand<LogQueryArguments>
         return context.Response;
     }
 
-    private static async Task<List<ArgumentOption>> GetTableNameOptions(CommandContext context, string subscriptionId, string resourceGroup, string workspace, string? tableType = "CustomLog", string? tenant = null, RetryPolicyArguments? retryPolicy = null)
-    {
-        if (string.IsNullOrEmpty(subscriptionId) || string.IsNullOrEmpty(resourceGroup) || string.IsNullOrEmpty(workspace))
-            return [];
-
-        var monitorService = context.GetService<IMonitorService>();
-        var tables = await monitorService.ListTables(subscriptionId, resourceGroup, workspace, tableType, tenant, retryPolicy);
-
-        return [.. tables.Select(t => new ArgumentOption
-        {
-            Name = t,
-            Id = t
-        })];
-    }
-
     private static ArgumentBuilder<LogQueryArguments> CreateTableNameArgument()
     {
         return ArgumentBuilder<LogQueryArguments>
@@ -117,31 +102,25 @@ public sealed class LogQueryCommand() : BaseMonitorCommand<LogQueryArguments>
             .WithIsRequired(ArgumentDefinitions.Monitor.TableName.Required);
     }
 
-    private static ArgumentBuilder<LogQueryArguments> CreateQueryArgument()
-    {
-        return ArgumentBuilder<LogQueryArguments>
+    private static ArgumentBuilder<LogQueryArguments> CreateQueryArgument() =>
+        ArgumentBuilder<LogQueryArguments>
             .Create(ArgumentDefinitions.Monitor.Query.Name, ArgumentDefinitions.Monitor.Query.Description)
             .WithValueAccessor(args => args.Query ?? string.Empty)
             .WithIsRequired(true);
-    }
 
-    private static ArgumentBuilder<LogQueryArguments> CreateHoursArgument()
-    {
-        return ArgumentBuilder<LogQueryArguments>
+    private static ArgumentBuilder<LogQueryArguments> CreateHoursArgument() =>
+        ArgumentBuilder<LogQueryArguments>
             .Create(ArgumentDefinitions.Monitor.Hours.Name, ArgumentDefinitions.Monitor.Hours.Description)
             .WithValueAccessor(args => args.Hours?.ToString() ?? ArgumentDefinitions.Monitor.Hours.DefaultValue.ToString())
             .WithDefaultValue(ArgumentDefinitions.Monitor.Hours.DefaultValue.ToString())
             .WithIsRequired(false);
-    }
 
-    private static ArgumentBuilder<LogQueryArguments> CreateLimitArgument()
-    {
-        return ArgumentBuilder<LogQueryArguments>
+    private static ArgumentBuilder<LogQueryArguments> CreateLimitArgument() =>
+        ArgumentBuilder<LogQueryArguments>
             .Create(ArgumentDefinitions.Monitor.Limit.Name, ArgumentDefinitions.Monitor.Limit.Description)
             .WithValueAccessor(args => args.Limit?.ToString() ?? ArgumentDefinitions.Monitor.Limit.DefaultValue.ToString())
             .WithDefaultValue(ArgumentDefinitions.Monitor.Limit.DefaultValue.ToString())
             .WithIsRequired(false);
-    }
 
     protected override LogQueryArguments BindArguments(ParseResult parseResult)
     {

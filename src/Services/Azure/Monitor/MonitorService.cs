@@ -21,15 +21,15 @@ public class MonitorService(ISubscriptionService subscriptionService, IResourceG
 
     private static readonly Dictionary<string, string> PredefinedQueries = new()
     {
-        ["recent"] = @"
+        ["recent"] = """
             {tableName}
             | order by TimeGenerated desc
-        ",
-        ["errors"] = @"
+            """,
+        ["errors"] = """
             {tableName}
-            | where Level == ""ERROR""
+            | where Level == "ERROR"
             | order by TimeGenerated desc
-        "
+            """
     };
 
     public async Task<List<JsonDocument>> QueryWorkspace(
@@ -106,12 +106,8 @@ public class MonitorService(ISubscriptionService subscriptionService, IResourceG
         {
             var (_, resolvedWorkspaceName) = await GetWorkspaceInfo(workspace, subscription, tenant, retryPolicy);
 
-            var resourceGroupResource = await _resourceGroupService.GetResourceGroupResource(subscription, resourceGroup, tenant, retryPolicy);
-            if (resourceGroupResource == null)
-            {
+            var resourceGroupResource = await _resourceGroupService.GetResourceGroupResource(subscription, resourceGroup, tenant, retryPolicy) ?? 
                 throw new Exception($"Resource group {resourceGroup} not found in subscription {subscription}");
-            }
-
             var workspaceResponse = await resourceGroupResource.GetOperationalInsightsWorkspaceAsync(resolvedWorkspaceName)
                 .ConfigureAwait(false);
 
