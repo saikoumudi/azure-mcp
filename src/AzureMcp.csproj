@@ -61,7 +61,6 @@
     <PackageReference Include="System.Formats.Asn1" Version="9.0.4" />
     <PackageReference Include="System.Linq.AsyncEnumerable" Version="10.0.0-preview.3.25171.5" />
     <PackageReference Include="System.Net.ServerSentEvents" Version="10.0.0-preview.3.25171.5" />
-    <PackageReference Include="System.Private.Uri" Version="4.3.2" />
   </ItemGroup>
 </Project>
 
