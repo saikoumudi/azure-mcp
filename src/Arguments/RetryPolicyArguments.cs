@@ -39,7 +39,7 @@ public class RetryPolicyArguments : IComparable<RetryPolicyArguments>, IEquatabl
             return true;
         }
 
-        if (policy1 == null || policy2 == null)
+        if (ReferenceEquals(policy1,  null) || ReferenceEquals(policy2, null))
         {
             return false;
         }

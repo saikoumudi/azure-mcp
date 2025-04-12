@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using AzureMcp.Arguments.Storage.Blob;
 using AzureMcp.Models.Argument;
 using AzureMcp.Services.Interfaces;
 using System.CommandLine;

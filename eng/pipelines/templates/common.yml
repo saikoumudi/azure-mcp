@@ -35,14 +35,34 @@ extends:
           SparseCheckout: false
           DependsOn: Initialize
           JobTemplatePath: /eng/pipelines/templates/jobs/build.yml
+          AdditionalParameters: {}
           MatrixConfigs:
             - Name: build_matrix
               Path: eng/pipelines/build-matrix.json
               Selection: all
               GenerateVMJobs: true
-          AdditionalParameters:
-            SkipSigning: ${{ parameters.SkipSigning }}
       - template: /eng/pipelines/templates/jobs/analyze.yml
+
+    - stage: Test
+      dependsOn: []
+      pool:
+        name: $(LINUXPOOL)
+        image: $(LINUXVMIMAGE)
+        os: linux
+      variables:
+      - template: /eng/pipelines/templates/variables/image.yml
+      - template: /eng/pipelines/templates/variables/globals.yml
+      jobs:
+      - template: /eng/common/pipelines/templates/jobs/generate-job-matrix.yml
+        parameters:
+          SparseCheckout: false
+          JobTemplatePath: /eng/pipelines/templates/jobs/test.yml
+          AdditionalParameters: {}
+          MatrixConfigs:
+            - Name: test_matrix
+              Path: eng/pipelines/test-matrix.json
+              Selection: all
+              GenerateVMJobs: true
 
     # All builds in the internal project get signing
     - ${{ if eq(variables['System.TeamProject'], 'internal') }}:
@@ -67,6 +87,7 @@ extends:
           dependsOn:
           - Build
           - Sign
+          - Test
           pool:
             name: $(LINUXPOOL)
             image: $(LINUXVMIMAGE)
@@ -84,6 +105,7 @@ extends:
           dependsOn:
           - Build
           - Sign
+          - Test
           pool:
             name: $(LINUXPOOL)
             image: $(LINUXVMIMAGE)
