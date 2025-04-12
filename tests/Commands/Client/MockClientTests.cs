@@ -7,7 +7,7 @@ using ModelContextProtocol.Server;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using Xunit;
-using AzureMCP.Commands.Server;
+using AzureMcp.Commands.Server;
 
 namespace AzureMCP.Tests.Commands.Client;
 
