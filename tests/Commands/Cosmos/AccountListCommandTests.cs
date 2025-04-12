@@ -3,6 +3,7 @@
 
 using AzureMcp.Arguments;
 using AzureMcp.Commands.Cosmos;
+using AzureMcp.Models.Argument;
 using AzureMcp.Models.Command;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
@@ -81,11 +82,21 @@ namespace AzureMcp.Tests.Commands.Cosmos
         {
             // Arrange
             var expectedError = "Test error";
-            _cosmosService.GetCosmosAccounts(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<RetryPolicyArguments>())
-                .Throws(new Exception(expectedError));
+            var subscriptionId = "sub123";
+            var defaultRetryPolicy = new RetryPolicyArguments
+            {
+                DelaySeconds = ArgumentDefinitions.RetryPolicy.Delay.DefaultValue,
+                MaxDelaySeconds = ArgumentDefinitions.RetryPolicy.MaxDelay.DefaultValue,
+                MaxRetries = ArgumentDefinitions.RetryPolicy.MaxRetries.DefaultValue,
+                Mode = ArgumentDefinitions.RetryPolicy.Mode.DefaultValue,
+                NetworkTimeoutSeconds = ArgumentDefinitions.RetryPolicy.NetworkTimeout.DefaultValue
+            };
+
+            _cosmosService.GetCosmosAccounts(subscriptionId, null, defaultRetryPolicy)
+                .ThrowsAsync(new Exception(expectedError));
 
             var command = new AccountListCommand();
-            var args = command.GetCommand().Parse(["--subscription", "sub123"]);
+            var args = command.GetCommand().Parse(["--subscription", subscriptionId]);
             var context = new CommandContext(_serviceProvider);
 
             // Act

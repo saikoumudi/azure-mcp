@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using Azure.Core;
-using Azure.Core.Pipeline;
 using Azure.ResourceManager;
 using AzureMcp.Arguments;
 using AzureMcp.Services.Azure;
@@ -14,26 +12,54 @@ namespace AzureMcp.Tests.Services.Azure;
 
 public class BaseAzureServiceTests
 {
+    private const string TenantId = "test-tenant-id";
+    private const string TenantName = "test-tenant-name";
+
     private readonly ITenantService _tenantService = Substitute.For<ITenantService>();
-    private readonly ClientOptions _options = Substitute.For<ClientOptions>();
     private readonly TestAzureService _azureService;
 
     public BaseAzureServiceTests()
     {
-        _tenantService.GetTenantId("test-tenant-name").Returns("test-tenant-id");
         _azureService = new TestAzureService();
+        _tenantService.GetTenantId(TenantName).Returns(TenantId);
     }
 
     [Fact]
-    public void AddsCorrectPolicies()
+    public async Task CreateArmClientAsync_CreatesAndUsesCachedClient()
     {
         // Act
-        _azureService.TestAddDefaultPolicies(_options);
+        var tenantName2 = "Other-Tenant-Name";
+        var tenantId2 = "Other-Tenant-Id";
 
-        // Assert
-        _options.Received().AddPolicy(
-            Arg.Is<HttpPipelinePolicy>(x => x is UserAgentPolicy),
-            Arg.Is(HttpPipelinePosition.BeforeTransport));
+        _tenantService.GetTenantId(tenantName2).Returns(tenantId2);
+
+        var retryPolicyArgs = new RetryPolicyArguments
+        {
+            DelaySeconds = 5,
+            MaxDelaySeconds = 15,
+            MaxRetries = 3
+        };
+
+        var client = await _azureService.GetArmClientAsync(TenantName, retryPolicyArgs);
+        var client2 = await _azureService.GetArmClientAsync(TenantName, retryPolicyArgs);
+
+        Assert.Equal(client, client2);
+
+        var otherClient = await _azureService.GetArmClientAsync(tenantName2, retryPolicyArgs);
+
+        Assert.NotEqual(client, otherClient);
+    }
+
+    [Fact]
+    public async Task ResolveTenantIdAsync_ReturnsValueNoService()
+    {
+        var testAzureService = new TestAzureService(null);
+
+        string? actual = await testAzureService.ResolveTenantId(TenantName);
+        Assert.Equal(TenantName, actual);
+
+        string? actual2 = await testAzureService.ResolveTenantId(null);
+        Assert.Null(actual2);
     }
 
     private sealed class TestAzureService(ITenantService? tenantService = null) : BaseAzureService(tenantService)
@@ -41,7 +67,6 @@ public class BaseAzureServiceTests
         public Task<ArmClient> GetArmClientAsync(string? tenant = null, RetryPolicyArguments? retryPolicy = null) =>
             CreateArmClientAsync(tenant, retryPolicy);
 
-        public T TestAddDefaultPolicies<T>(T options) where T : ClientOptions =>
-            AddDefaultPolicies(options);
+        public Task<string?> ResolveTenantId(string? tenant) => ResolveTenantIdAsync(tenant);
     }
 }

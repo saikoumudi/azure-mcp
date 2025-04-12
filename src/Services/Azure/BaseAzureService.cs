@@ -36,7 +36,7 @@ public abstract class BaseAzureService(ITenantService? tenantService = null)
 
     protected string UserAgent { get; } = DefaultUserAgent;
 
-    protected async Task<string?> ResolveTenantId(string? tenant)
+    protected async Task<string?> ResolveTenantIdAsync(string? tenant)
     {
         if (tenant == null || _tenantService == null) return tenant;
         return await _tenantService.GetTenantId(tenant);
@@ -44,7 +44,7 @@ public abstract class BaseAzureService(ITenantService? tenantService = null)
 
     protected TokenCredential GetCredential(string? tenant = null)
     {
-        var tenantId = string.IsNullOrEmpty(tenant) ? null : Task.Run(() => ResolveTenantId(tenant)).GetAwaiter().GetResult();
+        var tenantId = string.IsNullOrEmpty(tenant) ? null : Task.Run(() => ResolveTenantIdAsync(tenant)).GetAwaiter().GetResult();
 
         // Return cached credential if it exists and tenant ID hasn't changed
         if (_credential != null && _lastTenantId == tenantId)
@@ -79,7 +79,7 @@ public abstract class BaseAzureService(ITenantService? tenantService = null)
     /// <param name="retryPolicy">Optional retry policy configuration</param>
     protected async Task<ArmClient> CreateArmClientAsync(string? tenant = null, RetryPolicyArguments? retryPolicy = null)
     {
-        var tenantId = await ResolveTenantId(tenant);
+        var tenantId = await ResolveTenantIdAsync(tenant);
 
         // Return cached client if parameters match
         if (_armClient != null &&
