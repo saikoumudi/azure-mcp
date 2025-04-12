@@ -1,11 +1,9 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-namespace AzureMcp.Extensions;
-
 using AzureMcp.Models.Argument;
-using System;
-using System.Collections.Generic;
+
+namespace AzureMcp.Extensions;
 
 public static class ArgumentExtensions
 {

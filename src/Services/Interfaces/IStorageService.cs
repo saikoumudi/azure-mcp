@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-namespace AzureMcp.Services.Interfaces;
-
 using AzureMcp.Arguments;
 using AzureMcp.Models;
-using global::Azure.Storage.Blobs.Models;
+using Azure.Storage.Blobs.Models;
+
+namespace AzureMcp.Services.Interfaces;
 
 public interface IStorageService
 {
