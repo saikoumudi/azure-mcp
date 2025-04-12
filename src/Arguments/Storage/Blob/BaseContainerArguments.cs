@@ -5,8 +5,6 @@ using AzureMcp.Arguments.Storage;
 using AzureMcp.Models.Argument;
 using System.Text.Json.Serialization;
 
-namespace AzureMcp.Arguments.Storage.Blob;
-
 public class BaseContainerArguments : BaseStorageArguments
 {
     [JsonPropertyName(ArgumentDefinitions.Storage.ContainerName)]
