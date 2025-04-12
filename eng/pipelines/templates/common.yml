@@ -1,6 +1,9 @@
 parameters:
 - name: SkipSigning
   type: boolean
+  default: true
+- name: PublishPackages
+  type: boolean
   default: false
 - name: ReleaseRun
   type: boolean
@@ -65,28 +68,28 @@ extends:
               GenerateVMJobs: true
 
     # All builds in the internal project get signing
-    - ${{ if eq(variables['System.TeamProject'], 'internal') }}:
-      - stage: Sign
-        ${{ if parameters.SkipSigning }}:
-          displayName: 'Pack'
-        ${{ else }}:
-          displayName: 'Sign and Pack'
-        dependsOn: Build
-        variables:
-        - template: /eng/pipelines/templates/variables/image.yml
-        - template: /eng/pipelines/templates/variables/globals.yml
-        - name: Version
-          value: $[ stageDependencies.Build.Initialize.outputs['Version.Version'] ]
-        jobs:
-        - template: /eng/pipelines/templates/jobs/sign-and-pack.yml
-          parameters:
-            SkipSigning: ${{ parameters.SkipSigning }}
-
+    - stage: SignAndPack
+      ${{ if parameters.SkipSigning }}:
+        displayName: 'Pack'
+      ${{ else }}:
+        displayName: 'Sign and Pack'
+      dependsOn: Build
+      variables:
+      - template: /eng/pipelines/templates/variables/image.yml
+      - template: /eng/pipelines/templates/variables/globals.yml
+      - name: Version
+        value: $[ stageDependencies.Build.Initialize.outputs['Version.Version'] ]
+      jobs:
+      - template: /eng/pipelines/templates/jobs/sign-and-pack.yml
+        parameters:
+          SkipSigning: ${{ parameters.SkipSigning }}
+            
+    - ${{ if eq(parameters.PublishPackages, 'true') }}:
       - ${{ if eq(parameters.ReleaseRun, 'true') }}:
         - stage: Release
           dependsOn:
           - Build
-          - Sign
+          - SignAndPack
           - Test
           pool:
             name: $(LINUXPOOL)
@@ -104,7 +107,7 @@ extends:
         - stage: Integration
           dependsOn:
           - Build
-          - Sign
+          - SignAndPack
           - Test
           pool:
             name: $(LINUXPOOL)
