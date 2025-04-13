@@ -1,0 +1,33 @@
+using ModelContextProtocol.Protocol.Transport;
+using ModelContextProtocol.Client;
+using Xunit;
+
+namespace AzureMCP.Tests.Commands.Client;
+
+public class McpClientFixture : IAsyncLifetime
+{
+    public IMcpClient Client { get; private set; } = default!;
+
+    public async Task InitializeAsync()
+    {
+        var azMcpPath = Environment.GetEnvironmentVariable("AZURE_MCP_PATH");
+
+        if (!string.IsNullOrWhiteSpace(azMcpPath))
+        {
+            var clientTransport = new StdioClientTransport(new StdioClientTransportOptions
+            {
+                Name = "Test Server",
+                Command = azMcpPath,
+                Arguments = new[] { "server", "start" },
+            });
+
+            Client = await McpClientFactory.CreateAsync(clientTransport);
+        }
+    }
+
+    public async Task DisposeAsync()
+    {
+        if (Client is IAsyncDisposable disposable)
+            await disposable.DisposeAsync();
+    }
+}
