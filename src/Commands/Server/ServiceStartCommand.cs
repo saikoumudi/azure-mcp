@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using ModelContextProtocol.Protocol.Transport;
 using ModelContextProtocol.Protocol.Types;
 using ModelContextProtocol.Server;
@@ -118,42 +119,41 @@ public sealed class ServiceStartCommand(IServiceProvider serviceProvider) : Base
     {
         services.AddSingleton<ToolOperations>();
 
-        services.AddSingleton(provider =>
-        {
-            var toolOperations = provider.GetRequiredService<ToolOperations>();
-
-            var entryAssembly = Assembly.GetEntryAssembly();
-            var assemblyName = entryAssembly?.GetName();
-            var serverName = entryAssembly?.GetCustomAttribute<AssemblyTitleAttribute>()?.Title ?? "Azure MCP Server";
-            var mcpServerOptions = new McpServerOptions
+        services.AddOptions<McpServerOptions>()
+            .Configure<ToolOperations>((mcpServerOptions, toolOperations) =>
             {
-                ServerInfo = new Implementation
+                var entryAssembly = Assembly.GetEntryAssembly();
+                var assemblyName = entryAssembly?.GetName();
+                var serverName = entryAssembly?.GetCustomAttribute<AssemblyTitleAttribute>()?.Title ?? "Azure MCP Server";
+                
+                mcpServerOptions.ServerInfo = new Implementation
                 {
                     Name = serverName,
                     Version = assemblyName?.Version?.ToString() ?? "1.0.0-beta"
-                },
-                Capabilities = new ServerCapabilities
+                };
+
+                mcpServerOptions.Capabilities = new ServerCapabilities
                 {
                     Tools = toolOperations.ToolsCapability
-                },
-                ProtocolVersion = "2024-11-05"
-            };
+                };
 
-            return mcpServerOptions;
-        });
+                mcpServerOptions.ProtocolVersion = "2024-11-05";
+
+            });
+
         services.AddSingleton(provider =>
         {
             var transport = provider.GetService<ITransport>();
-            var options = provider.GetRequiredService<McpServerOptions>();
+            var options = provider.GetRequiredService<IOptions<McpServerOptions>>();
             var loggerFactory = provider.GetRequiredService<ILoggerFactory>();
 
             if (transport == null)
             {
-                return new AzureMcpServer(options, loggerFactory, provider);
+                return new AzureMcpServer(options.Value, loggerFactory, provider);
             }
             else
             {
-                return McpServerFactory.Create(transport, options, loggerFactory);
+                return McpServerFactory.Create(transport, options.Value, loggerFactory);
             }
 
         });
@@ -162,7 +162,7 @@ public sealed class ServiceStartCommand(IServiceProvider serviceProvider) : Base
         {
             services.AddSingleton<ITransport>(provider =>
             {
-                var options = provider.GetRequiredService<McpServerOptions>();
+                var options = provider.GetRequiredService<IOptions<McpServerOptions>>();
 
                 return new StdioServerTransport(options,
                     provider.GetRequiredService<ILoggerFactory>());
