@@ -12,7 +12,7 @@ public class CachingTokenCredential : TokenCredential
 
     private readonly MemoryCache _cache = new(new MemoryCacheOptions
     {
-        SizeLimit = 1000 // Max number of unique tokens to cache
+        SizeLimit = 100 // Max number of unique tokens to cache
     });
 
     public CachingTokenCredential(TokenCredential innerCredential)

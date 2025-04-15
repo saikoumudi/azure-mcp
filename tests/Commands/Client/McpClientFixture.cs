@@ -15,12 +15,12 @@ public class McpClientFixture : IAsyncLifetime
     {
         var azMcpPath = Environment.GetEnvironmentVariable("AZURE_MCP_PATH");
 
-        if (true)
+        if (!string.IsNullOrWhiteSpace(azMcpPath))
         {
             var clientTransport = new StdioClientTransport(new StdioClientTransportOptions
             {
                 Name = "Test Server",
-                Command = "C:\\Users\\vigera\\Documents\\mcp\\azure-mcp\\src\\.dist\\azmcp.exe",
+                Command = azMcpPath,
                 Arguments = new[] { "server", "start" },
             });
 

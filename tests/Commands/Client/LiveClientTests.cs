@@ -23,18 +23,14 @@ public class LiveClientTests : IClassFixture<McpClientFixture>
         Assert.NotEmpty(tools);
     }
 
-    [Fact]
+    [LiveOnlyFact]
     public async Task Client_Should_Invoke_Tool_Successfully()
     {
-        var stopwatch = new Stopwatch();
-        stopwatch.Start();
         var result = await _client.CallToolAsync(
             "azmcp-subscription-list",
             new Dictionary<string, object?>
             { });
 
-        stopwatch.Stop();
-        var elsec = stopwatch.ElapsedMilliseconds;
         var content = result.Content.FirstOrDefault(c => c.MimeType == "application/json")?.Text;
 
         Assert.False(string.IsNullOrWhiteSpace(content));
