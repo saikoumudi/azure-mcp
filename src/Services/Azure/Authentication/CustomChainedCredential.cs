@@ -34,12 +34,17 @@ public class CustomChainedCredential(string? tenantId = null) : TokenCredential
         {
             UseDefaultBrokerAccount = true
         });
+        
+    private static DefaultAzureCredential CreateDefaultCredential(string? tenantId)
+    {
+        var includeProdCreds = 
+            Environment.GetEnvironmentVariable("AZURE_MCP_INCLUDE_PRODUCTION_CREDENTIALS")?.Equals("true", StringComparison.OrdinalIgnoreCase) == true;
 
-    private static DefaultAzureCredential CreateDefaultCredential(string? tenantId) =>
-        new(new DefaultAzureCredentialOptions
+        return new DefaultAzureCredential(new DefaultAzureCredentialOptions
         {
             TenantId = string.IsNullOrEmpty(tenantId) ? null : tenantId,
-            ExcludeWorkloadIdentityCredential = true,
-            ExcludeManagedIdentityCredential = true,
+            ExcludeWorkloadIdentityCredential = !includeProdCreds,
+            ExcludeManagedIdentityCredential = !includeProdCreds
         });
+    }
 }
