@@ -6,7 +6,6 @@ using Azure.ResourceManager;
 using AzureMcp.Arguments;
 using AzureMcp.Services.Azure.Authentication;
 using AzureMcp.Services.Interfaces;
-using Microsoft.AspNetCore.Razor.TagHelpers;
 using System.Reflection;
 using System.Runtime.Versioning;
 
@@ -16,8 +15,8 @@ public abstract class BaseAzureService(ITenantService? tenantService = null)
 {
     private static readonly UserAgentPolicy SharedUserAgentPolicy;
     internal static readonly string DefaultUserAgent;
-    private static readonly  CachingTokenCredential SharedTokenCredential;
-    private string? _lastTenantId;
+    private static readonly TokenCredentialManager CredentialManager;
+
     private ArmClient? _armClient;
     private string? _lastArmClientTenantId;
     private RetryPolicyArguments? _lastRetryPolicy;
@@ -32,25 +31,12 @@ public abstract class BaseAzureService(ITenantService? tenantService = null)
 
         DefaultUserAgent = $"azmcp/{version} ({framework}; {platform})";
         SharedUserAgentPolicy = new UserAgentPolicy(DefaultUserAgent);
-        SharedTokenCredential = new CachingTokenCredential(new CustomChainedCredential());
+        CredentialManager = new TokenCredentialManager();
     }
 
-    public static async Task WarmupTokenCredentialAsync()
-    {
-        var context = new TokenRequestContext(new[] { "https://management.azure.com/.default" });
+    public static Task WarmupSharedCredentialAsync() => CredentialManager.WarmupSharedTokenAsync();
 
-        try
-        {
-            // Force token fetch and populate the cache
-            var token = await SharedTokenCredential.GetTokenAsync(context, CancellationToken.None);
-            // Optionally log or ignore the token
-        }
-        catch (Exception ex)
-        {
-            // Optional: handle or log warmup failure
-            Console.WriteLine($"Token warmup failed: {ex.Message}");
-        }
-    }
+    public static Task WarmupTenantCredentialsAsync(IEnumerable<string> tenantIds) => CredentialManager.WarmupTenantTokensAsync(tenantIds);
 
     protected string UserAgent { get; } = DefaultUserAgent;
 
@@ -60,11 +46,15 @@ public abstract class BaseAzureService(ITenantService? tenantService = null)
         return await _tenantService.GetTenantId(tenant);
     }
 
-
     protected TokenCredential GetCredential(string? tenant = null)
     {
-        var tenantId = string.IsNullOrEmpty(tenant) ? null : Task.Run(() => ResolveTenantIdAsync(tenant)).GetAwaiter().GetResult();
-        return SharedTokenCredential;
+        var tenantId = string.IsNullOrWhiteSpace(tenant)
+            ? null
+            : Task.Run(() => ResolveTenantIdAsync(tenant)).GetAwaiter().GetResult();
+
+        return string.IsNullOrWhiteSpace(tenantId)
+            ? CredentialManager.GetSharedCredential()
+            : CredentialManager.GetOrCreateTenantCredential(tenantId);
     }
 
     protected static T AddDefaultPolicies<T>(T clientOptions) where T : ClientOptions
