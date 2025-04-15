@@ -1,29 +1,32 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using AzureMcp.Tests.Client.Helpers;
 using ModelContextProtocol.Client;
 using System.Text.Json;
 using Xunit;
 
-namespace AzureMCP.Tests.Commands.Client;
+namespace AzureMcp.Tests.Client;
 
-public class LiveClientTests : IClassFixture<McpClientFixture>
+public class ClientToolTests : IClassFixture<McpClientFixture>
 {
     private readonly IMcpClient _client;
 
-    public LiveClientTests(McpClientFixture fixture)
+    public ClientToolTests(McpClientFixture fixture)
     {
         _client = fixture.Client;
     }
 
-    [LiveOnlyFact]
+    [Fact]
+    [Trait("Category", "Live")]
     public async Task Should_List_Tools()
     {
         var tools = await _client.ListToolsAsync();
         Assert.NotEmpty(tools);
     }
 
-    [LiveOnlyFact]
+    [Fact]
+    [Trait("Category", "Live")]
     public async Task Client_Should_Invoke_Tool_Successfully()
     {
         var result = await _client.CallToolAsync(
@@ -44,7 +47,8 @@ public class LiveClientTests : IClassFixture<McpClientFixture>
         Assert.NotEmpty(subscriptionsArray.EnumerateArray());
     }
 
-    [LiveOnlyFact]
+    [Fact]
+    [Trait("Category", "Live")]
     public async Task Client_Should_Handle_Invalid_Tools()
     {
         var result = await _client.CallToolAsync(
@@ -55,7 +59,8 @@ public class LiveClientTests : IClassFixture<McpClientFixture>
         Assert.True(string.IsNullOrWhiteSpace(content));
     }
 
-    [LiveOnlyFact]
+    [Fact]
+    [Trait("Category", "Live")]
     public async Task Client_Should_Ping_Server_Successfully()
     {
         await _client.PingAsync();

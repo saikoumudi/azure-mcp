@@ -1,8 +1,10 @@
 #!/usr/bin/env pwsh
+#Requires -Version 7
 
 [CmdletBinding()]
 param(
-    [string] $TestResultsPath
+    [string] $TestResultsPath,
+    [switch] $Live
 )
 
 $ErrorActionPreference = 'Stop'
@@ -11,18 +13,28 @@ $ErrorActionPreference = 'Stop'
 $RepoRoot = $RepoRoot.Path.Replace('\', '/')
 
 if (!$TestResultsPath) {
-    $TestResultsPath = "$RepoRoot/tests/TestResults"
+    $TestResultsPath = "$RepoRoot/.work/testResults"
 }
 
 # Clean previous results
 Remove-Item -Recurse -Force $TestResultsPath -ErrorAction SilentlyContinue
 
 # Run tests with coverage
-Write-Host "Running tests with coverage..."
+Write-Host "Running unit tests with coverage..."
 Invoke-LoggedCommand ("dotnet test '$RepoRoot/tests/AzureMcp.Tests.csproj'" +
   " --collect:'XPlat Code Coverage'" +
+  " --filter 'Category!~Live'" +
   " --results-directory '$TestResultsPath'" +
   " --logger 'trx'")
+
+if ($Live) {
+    # Run live tests
+    Write-Host "Running live tests..."
+    Invoke-LoggedCommand ("dotnet test '$RepoRoot/tests/AzureMcp.Tests.csproj'" +
+      " --filter 'Category~Live'" +
+      " --results-directory '$TestResultsPath'" +
+      " --logger 'trx'")
+}
 
 # Find the coverage file
 $coverageFile = Get-ChildItem -Path $TestResultsPath -Recurse -Filter "coverage.cobertura.xml"
@@ -47,7 +59,7 @@ if ($env:TF_BUILD) {
     # Generate reports
     Write-Host "Generating coverage reports..."
 
-    $reportDirectory = "$RepoRoot/tests/TestResults/CoverageReport"
+    $reportDirectory = "$TestResultsPath/coverageReport"
     Invoke-LoggedCommand ("reportgenerator" +
     " -reports:'$coverageFile'" +
     " -targetdir:'$reportDirectory'" +

@@ -1,4 +1,5 @@
 #!/bin/env pwsh
+#Requires -Version 7
 
 [CmdletBinding()]
 param(
@@ -31,12 +32,12 @@ if(!(Test-Path $ArtifactsPath)) {
 }
 
 $wrapperFolder = "$RepoRoot/.work/wrapper"
-Remove-Item -Path $wrapperFolder -Recurse -Force -ErrorAction SilentlyContinue
+Remove-Item -Path $wrapperFolder -Recurse -Force -ErrorAction SilentlyContinue -ProgressAction SilentlyContinue
 
 Push-Location $RepoRoot
 try {
     # Clear and recreate the output directory
-    Remove-Item -Path $OutputPath -Recurse -Force -ErrorAction SilentlyContinue
+    Remove-Item -Path $OutputPath -Recurse -Force -ErrorAction SilentlyContinue -ProgressAction SilentlyContinue
     New-Item -ItemType Directory -Force -Path $OutputPath | Out-Null
     
     $package = Get-Content "$npmPackagePath/package.json" -Raw | ConvertFrom-Json -AsHashtable

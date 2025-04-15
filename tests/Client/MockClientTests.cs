@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using AzureMcp.Commands.Server;
+using AzureMcp.Tests.Client.Helpers;
 using ModelContextProtocol.Protocol.Messages;
 using ModelContextProtocol.Protocol.Types;
 using ModelContextProtocol.Server;
@@ -9,7 +10,7 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using Xunit;
 
-namespace AzureMCP.Tests.Commands.Client;
+namespace AzureMcp.Tests.Client;
 
 public class MockClientTests
 {

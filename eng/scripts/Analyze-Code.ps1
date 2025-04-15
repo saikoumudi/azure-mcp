@@ -1,4 +1,5 @@
 #!/bin/env pwsh
+#Requires -Version 7
 
 . "$PSScriptRoot/../common/scripts/common.ps1"
 $RepoRoot = $RepoRoot.Path.Replace('\', '/')

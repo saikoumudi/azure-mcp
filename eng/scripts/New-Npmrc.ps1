@@ -1,4 +1,5 @@
 #!/bin/env pwsh
+#Requires -Version 7
 
 Write-Host "Installing authentication tool" -ForegroundColor Yellow
 if($IsLinux) {

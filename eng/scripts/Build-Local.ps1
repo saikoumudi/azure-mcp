@@ -1,9 +1,11 @@
 #!/bin/env pwsh
+#Requires -Version 7
 
 [CmdletBinding(DefaultParameterSetName='none')]
 param(
     [switch] $SelfContained,
     [switch] $ReadyToRun,
+    [switch] $Trimmed,
     [switch] $UsePaths,
     [switch] $AllPlatforms,
     [switch] $VerifyNpx
@@ -19,12 +21,13 @@ function Build($os, $arch) {
         -OperatingSystem $os `
         -Architecture $arch `
         -SelfContained:$SelfContained `
+        -Trimmed:$Trimmed `
         -ReadyToRun:$ReadyToRun `
         -OutputPath $packagesPath
 }
 
-Remove-Item -Path $packagesPath -Recurse -Force -ErrorAction SilentlyContinue
-Remove-Item -Path $distPath -Recurse -Force -ErrorAction SilentlyContinue
+Remove-Item -Path $packagesPath -Recurse -Force -ErrorAction SilentlyContinue -ProgressAction SilentlyContinue
+Remove-Item -Path $distPath -Recurse -Force -ErrorAction SilentlyContinue -ProgressAction SilentlyContinue
 
 if($AllPlatforms) {
     Build -os linux -arch x64

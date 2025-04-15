@@ -1,4 +1,5 @@
 #!/bin/env pwsh
+#Requires -Version 7
 
 [CmdletBinding(DefaultParameterSetName='none')]
 param(
@@ -6,6 +7,7 @@ param(
     [string] $Version,
     [switch] $SelfContained,
     [switch] $ReadyToRun,
+    [switch] $Trimmed,
     [Parameter(Mandatory=$true, ParameterSetName='Named')]
     [ValidateSet('windows','linux','macOS')]
     [string] $OperatingSystem,
@@ -64,7 +66,7 @@ try {
     Write-Host "Building version $Version, $os-$arch in $outputDir" -ForegroundColor Green
     
     # Clear and recreate the package output directory
-    Remove-Item -Path $outputDir -Recurse -Force -ErrorAction SilentlyContinue
+    Remove-Item -Path $outputDir -Recurse -Force -ErrorAction SilentlyContinue -ProgressAction SilentlyContinue
     New-Item -ItemType Directory -Force -Path $outputDir | Out-Null
 
     $command = "dotnet publish '$projectFile' --runtime '$os-$arch' --output '$outputDir' /p:Version=$Version" 
@@ -75,6 +77,10 @@ try {
 
     if($ReadyToRun) {
         $command += " /p:PublishReadyToRun=true"
+    }
+
+    if($Trimmed) {
+        $command += " /p:PublishTrimmed=true"
     }
 
     Invoke-LoggedCommand $command -GroupOutput

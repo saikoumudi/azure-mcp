@@ -12,7 +12,7 @@
     <RootNamespace>AzureMcp</RootNamespace>
 
     <!-- Publishing settings -->
-    <PublishSingleFile>true</PublishSingleFile>
+    <PublishSingleFile>false</PublishSingleFile>
     <SelfContained>false</SelfContained>
     <PublishReadyToRun>false</PublishReadyToRun>
     <PublishTrimmed>false</PublishTrimmed>

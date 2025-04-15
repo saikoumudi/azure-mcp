@@ -3,9 +3,10 @@
 
 using ModelContextProtocol.Client;
 using ModelContextProtocol.Protocol.Transport;
+using System.Reflection;
 using Xunit;
 
-namespace AzureMCP.Tests.Commands.Client;
+namespace AzureMcp.Tests.Client.Helpers;
 
 public class McpClientFixture : IAsyncLifetime
 {
@@ -13,14 +14,15 @@ public class McpClientFixture : IAsyncLifetime
 
     public async Task InitializeAsync()
     {
-        var azMcpPath = Environment.GetEnvironmentVariable("AZURE_MCP_PATH");
+        var testAssemblyPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+        var executablePath = OperatingSystem.IsWindows() ? Path.Combine(testAssemblyPath!, "azmcp.exe") : Path.Combine(testAssemblyPath!, "azmcp");
 
-        if (!string.IsNullOrWhiteSpace(azMcpPath))
+        if (!string.IsNullOrWhiteSpace(executablePath))
         {
             var clientTransport = new StdioClientTransport(new StdioClientTransportOptions
             {
                 Name = "Test Server",
-                Command = azMcpPath,
+                Command = executablePath,
                 Arguments = new[] { "server", "start" },
             });
 

@@ -1,4 +1,5 @@
 #!/bin/env pwsh
+#Requires -Version 7
 
 [CmdletBinding(DefaultParameterSetName='none')]
 param(
@@ -59,7 +60,7 @@ foreach ($packageJson in $packageJsonFiles) {
         Compress-Archive -Path $binaryFilePath -DestinationPath $archivePath
 
         Write-Host "Deleting $binaryFilePath" -ForegroundColor Yellow
-        Remove-Item -Path $binaryFilePath -Force
+        Remove-Item -Path $binaryFilePath -Force -ProgressAction SilentlyContinue
     }
 
     Write-Host "Copying $packageDirectory to $OutputPath`n" -ForegroundColor Yellow

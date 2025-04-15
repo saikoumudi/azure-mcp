@@ -1,3 +1,6 @@
+#!/bin/env pwsh
+#Requires -Version 7
+
 # Script to add copyright headers to all files
 param(
     [switch]$Force
