@@ -1,5 +1,26 @@
 # Troubleshooting
 
+## Observability with OpenTelemetry
+
+The server supports observability with [OpenTelemetry](https://opentelemetry.io/).
+
+To export telemetry to an OTLP endpoint set the `OTEL_DISABLE_SDK` environment variable to `false`. By default, when OpenTelemetry is enabled, the
+server exports telemetry using the default gRPC endpoint at `localhost:4317`. See the [OTLP exporter documentation](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/src/OpenTelemetry.Exporter.OpenTelemetryProtocol/README.md) for optional configuration details.
+
+You can try it out locally with the [standalone Aspire dashboard](https://learn.microsoft.com/dotnet/aspire/fundamentals/dashboard/standalone):
+
+```bash
+docker run --rm -it -d \
+    -p 18888:18888 \
+    -p 4317:18889 \
+    --name aspire-dashboard \
+    mcr.microsoft.com/dotnet/aspire-dashboard:9.0
+```
+
+To export telemetry to Azure Monitor, set the `APPLICATIONINSIGHTS_CONNECTION_STRING` environment variable.
+
+![image](/docs/images/mcp-trace-aspire.png)
+
 ## Logging
 
 The Azure MCP Server is instrumented at various levels of detail using the .NET [EventSource](https://learn.microsoft.com/dotnet/api/system.diagnostics.tracing.eventsource) to emit information. Logging is performed for each operation and follows the pattern of marking the starting point of the operation, its completion, and any exceptions encountered. These logs are invaluable for diagnosing issues that may arise from using the Azure MCP Server.

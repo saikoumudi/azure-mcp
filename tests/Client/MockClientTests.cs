@@ -76,7 +76,7 @@ public class MockClientTests
                     {
                         if (request.Params?.Name == "azmcp-subscription-list")
                         {
-                            return Task.FromResult(new CallToolResponse
+                            return ValueTask.FromResult(new CallToolResponse
                             {
                                 Content =
                                 [
@@ -136,7 +136,7 @@ public class MockClientTests
                 {
                     ListToolsHandler = (request, ct) =>
                     {
-                        return Task.FromResult(new ListToolsResult
+                        return ValueTask.FromResult(new ListToolsResult
                         {
                             Tools = [new() { Name = "ListTools" }]
                         });
@@ -165,7 +165,7 @@ public class MockClientTests
                 {
                     CallToolHandler = (request, ct) =>
                     {
-                        return Task.FromResult(new CallToolResponse
+                        return ValueTask.FromResult(new CallToolResponse
                         {
                             Content = [new Content { Text = "dummyTool" }]
                         });
@@ -201,9 +201,8 @@ public class MockClientTests
         var options = CreateOptions(serverCapabilities);
         configureOptions?.Invoke(options);
 
-        await using var server = new AzureMcpServer(options);
-
-        var runTask = server.SetTransportAndRunAsync(transport);
+        await using var server = McpServerFactory.Create(transport, options);
+        var runTask = server.RunAsync();
 
         var receivedMessage = new TaskCompletionSource<JsonRpcResponse>();
 

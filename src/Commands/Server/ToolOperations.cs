@@ -33,13 +33,13 @@ public class ToolOperations
 
     public ToolsCapability ToolsCapability { get; }
 
-    private Task<ListToolsResult> OnListTools(RequestContext<ListToolsRequestParams> requestContext,
+    private ValueTask<ListToolsResult> OnListTools(RequestContext<ListToolsRequestParams> requestContext,
         CancellationToken cancellationToken)
     {
         var allCommands = _commandFactory.AllCommands;
         if (allCommands.Count == 0)
         {
-            return Task.FromResult(new ListToolsResult { Tools = [] });
+            return ValueTask.FromResult(new ListToolsResult { Tools = [] });
         }
 
         var tools = CommandFactory.GetVisibleCommands(allCommands)
@@ -50,10 +50,10 @@ public class ToolOperations
 
         _logger.LogInformation("Listing {NumberOfTools} tools.", tools.Count);
 
-        return Task.FromResult(listToolsResult);
+        return ValueTask.FromResult(listToolsResult);
     }
 
-    private async Task<CallToolResponse> OnCallTools(RequestContext<CallToolRequestParams> parameters,
+    private async ValueTask<CallToolResponse> OnCallTools(RequestContext<CallToolRequestParams> parameters,
         CancellationToken cancellationToken)
     {
         if (parameters.Params == null)

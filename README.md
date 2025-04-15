@@ -132,7 +132,7 @@ For those who like to take the scenic route or need more control over the instal
 ### Windows Auth Setup
 Copy paste the contents of this install script to a powershell prompt or download and run the script:
 
-https://github.com/Azure/azure-mcp/blob/main/eng/scripts/New-Npmrc.ps1 
+https://github.com/Azure/azure-mcp/blob/main/eng/scripts/New-Npmrc.ps1
 
 ### Linux Auth Setup (including Codespaces, Dev Containers)
 
@@ -158,7 +158,7 @@ See [Troubleshooting guide](/TROUBLESHOOTING.md) for help with common issues and
 
 ## 🔑 Authentication
 
-Azure MCP Server seamlessly integrates with your host operating system's authentication mechanisms, making it super easy to get started! We use Azure Identity under the hood, which means you get all the goodness of DefaultAzureCredential. 
+Azure MCP Server seamlessly integrates with your host operating system's authentication mechanisms, making it super easy to get started! We use Azure Identity under the hood, which means you get all the goodness of DefaultAzureCredential.
 
 ### 🎭 How Authentication Works
 
