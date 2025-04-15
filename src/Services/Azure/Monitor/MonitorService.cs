@@ -106,7 +106,7 @@ public class MonitorService(ISubscriptionService subscriptionService, IResourceG
         {
             var (_, resolvedWorkspaceName) = await GetWorkspaceInfo(workspace, subscription, tenant, retryPolicy);
 
-            var resourceGroupResource = await _resourceGroupService.GetResourceGroupResource(subscription, resourceGroup, tenant, retryPolicy) ?? 
+            var resourceGroupResource = await _resourceGroupService.GetResourceGroupResource(subscription, resourceGroup, tenant, retryPolicy) ??
                 throw new Exception($"Resource group {resourceGroup} not found in subscription {subscription}");
             var workspaceResponse = await resourceGroupResource.GetOperationalInsightsWorkspaceAsync(resolvedWorkspaceName)
                 .ConfigureAwait(false);
@@ -281,13 +281,13 @@ public class MonitorService(ISubscriptionService subscriptionService, IResourceG
 
     private async Task<(string id, string name)> GetWorkspaceInfo(
         string workspace,
-        string subscriptionId,
+        string subscription,
         string? tenant = null,
         RetryPolicyArguments? retryPolicy = null)
     {
         // If we're given an ID and need an ID, or given a name and need a name, return as is
         bool isId = IsWorkspaceId(workspace);
-        var workspaces = await ListWorkspaces(subscriptionId, tenant, retryPolicy);
+        var workspaces = await ListWorkspaces(subscription, tenant, retryPolicy);
 
         // Find the workspace
         var matchingWorkspace = workspaces.FirstOrDefault(w =>

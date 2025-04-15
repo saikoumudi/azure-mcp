@@ -125,7 +125,7 @@ public sealed class ServiceStartCommand(IServiceProvider serviceProvider) : Base
                 var entryAssembly = Assembly.GetEntryAssembly();
                 var assemblyName = entryAssembly?.GetName();
                 var serverName = entryAssembly?.GetCustomAttribute<AssemblyTitleAttribute>()?.Title ?? "Azure MCP Server";
-                
+
                 mcpServerOptions.ServerInfo = new Implementation
                 {
                     Name = serverName,

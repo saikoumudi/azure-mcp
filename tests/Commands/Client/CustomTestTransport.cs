@@ -48,12 +48,12 @@ public class CustomTestTransport : ITransport
         {
             await WriteMessageAsync(notification, cancellationToken);
             MessageListener?.Invoke(message);
-        } 
+        }
         else if (message is JsonRpcResponse response)
         {
             MessageListener?.Invoke(message);
-        } 
-        else 
+        }
+        else
         {
             throw new NotSupportedException($"Message type {message.GetType()} is not supported.");
         }

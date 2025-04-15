@@ -3,6 +3,8 @@
 
 using AzureMcp.Arguments;
 using AzureMcp.Models.Argument;
+using AzureMcp.Models.Command;
+using AzureMcp.Services.Interfaces;
 using System.CommandLine;
 using System.CommandLine.Parsing;
 
@@ -30,7 +32,34 @@ public abstract class SubscriptionCommand<TArgs> : GlobalCommand<TArgs>
         return ArgumentBuilder<TArgs>
             .Create(ArgumentDefinitions.Common.Subscription.Name, ArgumentDefinitions.Common.Subscription.Description)
             .WithValueAccessor(args => args.Subscription ?? string.Empty)
+            .WithSuggestedValuesLoader(async (context, args) =>
+            {
+
+                var subArgs = args as SubscriptionArguments;
+                if (string.IsNullOrEmpty(subArgs?.Subscription))
+                {
+                    return await GetSubscriptionOptions(context);
+                }
+                return [];
+
+            })
             .WithIsRequired(ArgumentDefinitions.Common.Subscription.Required);
+    }
+
+    // Helper method to get subscription options
+    protected virtual async Task<List<ArgumentOption>> GetSubscriptionOptions(CommandContext context)
+    {
+        try
+        {
+            var subscriptionService = context.GetService<ISubscriptionService>();
+            var subscriptions = await subscriptionService.GetSubscriptions();
+            return subscriptions ?? [];
+        }
+        catch
+        {
+            // Silently handle subscription fetch failures
+            return [];
+        }
     }
 
     protected override TArgs BindArguments(ParseResult parseResult)
@@ -39,19 +68,4 @@ public abstract class SubscriptionCommand<TArgs> : GlobalCommand<TArgs>
         args.Subscription = parseResult.GetValueForOption(_subscriptionOption);
         return args;
     }
-
-    protected ArgumentBuilder<TArgs> CreateResourceGroupArgument() =>
-        ArgumentBuilder<TArgs>
-            .Create(ArgumentDefinitions.Common.ResourceGroup.Name, ArgumentDefinitions.Common.ResourceGroup.Description)
-            .WithValueAccessor(args => (args as SubscriptionArguments)?.ResourceGroup ?? string.Empty)
-            .WithSuggestedValuesLoader(async (context, args) =>
-            {
-                var subArgs = args as SubscriptionArguments;
-                if (string.IsNullOrEmpty(subArgs?.Subscription))
-                {
-                    return [];
-                }
-                return await GetResourceGroupOptions(context, subArgs.Subscription);
-            })
-            .WithIsRequired(true);
 }

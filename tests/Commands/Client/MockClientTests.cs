@@ -1,13 +1,13 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using AzureMcp.Commands.Server;
 using ModelContextProtocol.Protocol.Messages;
 using ModelContextProtocol.Protocol.Types;
 using ModelContextProtocol.Server;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using Xunit;
-using AzureMcp.Commands.Server;
 
 namespace AzureMCP.Tests.Commands.Client;
 
@@ -27,7 +27,7 @@ public class MockClientTests
             ProtocolVersion = "2024",
             InitializationTimeout = TimeSpan.FromSeconds(30),
             Capabilities = capabilities,
-            ServerInfo = new Implementation { Name = "Azure MCP", Version = "1.0.0-beta" } 
+            ServerInfo = new Implementation { Name = "Azure MCP", Version = "1.0.0-beta" }
         };
     }
 
@@ -129,7 +129,7 @@ public class MockClientTests
     {
         await Invoke_Request_To_Server(
             method: "tools/list",
-            new ServerCapabilities 
+            new ServerCapabilities
             {
                 Tools = new()
                 {
@@ -171,7 +171,7 @@ public class MockClientTests
                     },
                     ListToolsHandler = (request, ct) => throw new NotImplementedException(),
                 }
-            }, 
+            },
             configureOptions: null,
             assertResult: response =>
             {

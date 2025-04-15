@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
 # run-live-client-test.ps1
 
 # Step 1: Run the build script

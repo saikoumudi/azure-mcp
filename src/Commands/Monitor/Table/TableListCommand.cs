@@ -84,6 +84,7 @@ public sealed class TableListCommand() : BaseMonitorCommand<TableListArguments>
     {
         var args = base.BindArguments(parseResult);
         args.TableType = parseResult.GetValueForOption(_tableTypeOption) ?? ArgumentDefinitions.Monitor.TableType.DefaultValue;
+        args.ResourceGroup = parseResult.GetValueForOption(_resourceGroupOption) ?? ArgumentDefinitions.Common.ResourceGroup.DefaultValue;
         return args;
     }
 

@@ -1,5 +1,8 @@
-using ModelContextProtocol.Protocol.Transport;
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 using ModelContextProtocol.Client;
+using ModelContextProtocol.Protocol.Transport;
 using Xunit;
 
 namespace AzureMCP.Tests.Commands.Client;

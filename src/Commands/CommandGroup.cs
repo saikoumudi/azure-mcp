@@ -26,7 +26,7 @@ public class CommandGroup(string name, string description)
         else
         {
             // Find or create the subgroup
-            var subGroup = SubGroup.FirstOrDefault(g => g.Name == parts[0]) ?? 
+            var subGroup = SubGroup.FirstOrDefault(g => g.Name == parts[0]) ??
                 throw new InvalidOperationException($"Subgroup {parts[0]} not found. Group must be registered before commands.");
 
             // Recursively add command to subgroup
@@ -53,7 +53,7 @@ public class CommandGroup(string name, string description)
         else
         {
             // Find the subgroup and recursively get the command
-            var subGroup = SubGroup.FirstOrDefault(g => g.Name == parts[0]) ?? 
+            var subGroup = SubGroup.FirstOrDefault(g => g.Name == parts[0]) ??
                 throw new InvalidOperationException($"Subgroup {parts[0]} not found.");
 
             return subGroup.GetCommand(parts[1]);
