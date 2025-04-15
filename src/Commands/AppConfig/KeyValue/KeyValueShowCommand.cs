@@ -4,6 +4,7 @@
 using AzureMcp.Arguments.AppConfig.KeyValue;
 using AzureMcp.Models.Command;
 using AzureMcp.Services.Interfaces;
+using Microsoft.Extensions.Logging;
 using ModelContextProtocol.Server;
 using System.CommandLine.Parsing;
 
@@ -11,6 +12,13 @@ namespace AzureMcp.Commands.AppConfig.KeyValue;
 
 public sealed class KeyValueShowCommand : BaseKeyValueCommand<KeyValueShowArguments>
 {
+    private readonly ILogger<KeyValueShowCommand> _logger;
+
+    public KeyValueShowCommand(ILogger<KeyValueShowCommand> logger) : base()
+    {
+        _logger = logger;
+    }
+
     protected override string GetCommandName() => "show";
 
     protected override string GetCommandDescription() =>
@@ -45,6 +53,7 @@ public sealed class KeyValueShowCommand : BaseKeyValueCommand<KeyValueShowArgume
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "An exception occurred getting value. Key: {Key}.", args.Key);
             HandleException(context.Response, ex);
         }
 

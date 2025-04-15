@@ -1,6 +1,8 @@
-using System.Diagnostics;
-using System.Text.Json;
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 using ModelContextProtocol.Client;
+using System.Text.Json;
 using Xunit;
 
 namespace AzureMCP.Tests.Commands.Client;
@@ -29,7 +31,7 @@ public class LiveClientTests : IClassFixture<McpClientFixture>
         var result = await _client.CallToolAsync(
             "azmcp-subscription-list",
             new Dictionary<string, object?>
-            {});
+            { });
 
         stopwatch.Stop();
         var elsec = stopwatch.ElapsedMilliseconds;
@@ -52,7 +54,7 @@ public class LiveClientTests : IClassFixture<McpClientFixture>
         var result = await _client.CallToolAsync(
                 "non_existent_tool",
                 new Dictionary<string, object?>());
-    
+
         var content = result.Content.FirstOrDefault(c => c.MimeType == "application/json")?.Text;
         Assert.True(string.IsNullOrWhiteSpace(content));
     }

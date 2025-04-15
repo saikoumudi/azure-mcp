@@ -5,15 +5,22 @@ using AzureMcp.Arguments.Monitor;
 using AzureMcp.Models.Argument;
 using AzureMcp.Models.Command;
 using AzureMcp.Services.Interfaces;
+using Microsoft.Extensions.Logging;
 using ModelContextProtocol.Server;
 using System.CommandLine;
 using System.CommandLine.Parsing;
 
 namespace AzureMcp.Commands.Monitor.Table;
 
-public sealed class TableListCommand() : BaseMonitorCommand<TableListArguments>
+public sealed class TableListCommand : BaseMonitorCommand<TableListArguments>
 {
+    private readonly ILogger<TableListCommand> _logger;
     private readonly Option<string> _tableTypeOption = ArgumentDefinitions.Monitor.TableType.ToOption();
+
+    public TableListCommand(ILogger<TableListCommand> logger) : base()
+    {
+        _logger = logger;
+    }
 
     protected override string GetCommandName() => "list";
 
@@ -64,6 +71,7 @@ public sealed class TableListCommand() : BaseMonitorCommand<TableListArguments>
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "Error listing tables.");
             HandleException(context.Response, ex);
         }
 
@@ -84,7 +92,7 @@ public sealed class TableListCommand() : BaseMonitorCommand<TableListArguments>
     {
         var args = base.BindArguments(parseResult);
         args.TableType = parseResult.GetValueForOption(_tableTypeOption) ?? ArgumentDefinitions.Monitor.TableType.DefaultValue;
+        args.ResourceGroup = parseResult.GetValueForOption(_resourceGroupOption) ?? ArgumentDefinitions.Common.ResourceGroup.DefaultValue;
         return args;
     }
-
 }

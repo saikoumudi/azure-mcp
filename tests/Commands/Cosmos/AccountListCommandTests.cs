@@ -7,6 +7,7 @@ using AzureMcp.Models.Argument;
 using AzureMcp.Models.Command;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 using System.CommandLine;
@@ -21,10 +22,12 @@ public class AccountListCommandTests
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly ICosmosService _cosmosService;
+    private readonly ILogger<AccountListCommand> _logger;
 
     public AccountListCommandTests()
     {
         _cosmosService = Substitute.For<ICosmosService>();
+        _logger = Substitute.For<ILogger<AccountListCommand>>();
 
         var collection = new ServiceCollection();
         collection.AddSingleton(_cosmosService);
@@ -40,7 +43,7 @@ public class AccountListCommandTests
         _cosmosService.GetCosmosAccounts(Arg.Is("sub123"), Arg.Any<string>(), Arg.Any<RetryPolicyArguments>())
             .Returns(expectedAccounts);
 
-        var command = new AccountListCommand();
+        var command = new AccountListCommand(_logger);
         var args = command.GetCommand().Parse(["--subscription", "sub123"]);
         var context = new CommandContext(_serviceProvider);
 
@@ -65,7 +68,7 @@ public class AccountListCommandTests
         _cosmosService.GetCosmosAccounts("sub123", null, null)
             .Returns([]);
 
-        var command = new AccountListCommand();
+        var command = new AccountListCommand(_logger);
         var args = command.GetCommand().Parse(["--subscription", "sub123"]);
         var context = new CommandContext(_serviceProvider);
 
@@ -95,7 +98,7 @@ public class AccountListCommandTests
         _cosmosService.GetCosmosAccounts(subscriptionId, null, defaultRetryPolicy)
             .ThrowsAsync(new Exception(expectedError));
 
-        var command = new AccountListCommand();
+        var command = new AccountListCommand(_logger);
         var args = command.GetCommand().Parse(["--subscription", subscriptionId]);
         var context = new CommandContext(_serviceProvider);
 

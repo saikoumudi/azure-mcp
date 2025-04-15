@@ -65,7 +65,7 @@ public class TenantService(ICacheService cacheService)
         var tenants = await GetTenants();
         var tenant = tenants.FirstOrDefault(t => t.Name.Equals(tenantName, StringComparison.OrdinalIgnoreCase)) ??
             throw new Exception($"Could not find tenant with name {tenantName}");
-        
+
         return tenant.Id;
     }
 

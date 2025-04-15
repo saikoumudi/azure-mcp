@@ -4,6 +4,7 @@
 using AzureMcp.Arguments.AppConfig.KeyValue;
 using AzureMcp.Models.Command;
 using AzureMcp.Services.Interfaces;
+using Microsoft.Extensions.Logging;
 using ModelContextProtocol.Server;
 using System.CommandLine.Parsing;
 
@@ -11,6 +12,13 @@ namespace AzureMcp.Commands.AppConfig.KeyValue;
 
 public sealed class KeyValueUnlockCommand : BaseKeyValueCommand<KeyValueUnlockArguments>
 {
+    private readonly ILogger<KeyValueUnlockCommand> _logger;
+
+    public KeyValueUnlockCommand(ILogger<KeyValueUnlockCommand> logger) : base()
+    {
+        _logger = logger;
+    }
+
     protected override string GetCommandName() => "unlock";
 
     protected override string GetCommandDescription() =>
@@ -46,6 +54,7 @@ public sealed class KeyValueUnlockCommand : BaseKeyValueCommand<KeyValueUnlockAr
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "An exception occurred unlocking key. Key: {Key}.", args.Key);
             HandleException(context.Response, ex);
         }
 

@@ -4,6 +4,7 @@
 using AzureMcp.Arguments.AppConfig.KeyValue;
 using AzureMcp.Models.Command;
 using AzureMcp.Services.Interfaces;
+using Microsoft.Extensions.Logging;
 using ModelContextProtocol.Server;
 using System.CommandLine.Parsing;
 
@@ -11,6 +12,13 @@ namespace AzureMcp.Commands.AppConfig.KeyValue;
 
 public sealed class KeyValueDeleteCommand : BaseKeyValueCommand<KeyValueDeleteArguments>
 {
+    private readonly ILogger<KeyValueDeleteCommand> _logger;
+
+    public KeyValueDeleteCommand(ILogger<KeyValueDeleteCommand> logger) : base()
+    {
+        _logger = logger;
+    }
+
     protected override string GetCommandName() => "delete";
 
     protected override string GetCommandDescription() =>
@@ -45,6 +53,7 @@ public sealed class KeyValueDeleteCommand : BaseKeyValueCommand<KeyValueDeleteAr
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "An exception occurred deleting value. Key: {Key}.", args.Key);
             HandleException(context.Response, ex);
         }
 

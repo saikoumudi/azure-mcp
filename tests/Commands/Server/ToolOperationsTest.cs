@@ -3,6 +3,8 @@
 
 using AzureMcp.Commands;
 using AzureMcp.Commands.Server;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using ModelContextProtocol.Protocol.Types;
 using ModelContextProtocol.Server;
 using NSubstitute;
@@ -13,19 +15,23 @@ public class ToolOperationsTest
 {
     private readonly CommandFactory _commandFactory;
     private readonly IServiceProvider _serviceProvider;
+    private readonly ILogger<ToolOperations> _logger;
+    private readonly ILogger<CommandFactory> _commandFactoryLogger;
     private readonly IMcpServer _server;
 
     public ToolOperationsTest()
     {
+        _logger = Substitute.For<ILogger<ToolOperations>>();
+        _commandFactoryLogger = Substitute.For<ILogger<CommandFactory>>();
         _server = Substitute.For<IMcpServer>();
-        _serviceProvider = Substitute.For<IServiceProvider>();
-        _commandFactory = new CommandFactory(_serviceProvider);
+        _serviceProvider = new ServiceCollection().AddLogging().BuildServiceProvider();
+        _commandFactory = new CommandFactory(_serviceProvider, _commandFactoryLogger);
     }
 
     [Fact]
     public async Task GetsAllTools()
     {
-        var operations = new ToolOperations(_serviceProvider, _commandFactory);
+        var operations = new ToolOperations(_serviceProvider, _commandFactory, _logger);
         var requestContext = new RequestContext<ListToolsRequestParams>(_server, new ListToolsRequestParams());
 
         var handler = operations.ToolsCapability.ListToolsHandler;

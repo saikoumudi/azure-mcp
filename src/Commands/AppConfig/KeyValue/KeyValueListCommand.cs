@@ -5,6 +5,7 @@ using AzureMcp.Arguments.AppConfig.KeyValue;
 using AzureMcp.Models.Argument;
 using AzureMcp.Models.Command;
 using AzureMcp.Services.Interfaces;
+using Microsoft.Extensions.Logging;
 using ModelContextProtocol.Server;
 using System.CommandLine;
 using System.CommandLine.Parsing;
@@ -13,6 +14,13 @@ namespace AzureMcp.Commands.AppConfig.KeyValue;
 
 public sealed class KeyValueListCommand : BaseAppConfigCommand<KeyValueListArguments>
 {
+    private readonly ILogger<KeyValueListCommand> _logger;
+
+    public KeyValueListCommand(ILogger<KeyValueListCommand> logger) : base()
+    {
+        _logger = logger;
+    }
+
     // KeyValueList has different key and label descriptions, which is why we are defining here instead of using BaseKeyValueCommand
     private readonly Option<string> _keyOption = ArgumentDefinitions.AppConfig.KeyValueList.Key.ToOption();
     private readonly Option<string> _labelOption = ArgumentDefinitions.AppConfig.KeyValueList.Label.ToOption();
@@ -87,6 +95,7 @@ public sealed class KeyValueListCommand : BaseAppConfigCommand<KeyValueListArgum
         }
         catch (Exception ex)
         {
+            _logger.LogError("An exception occurred processing command. Exception: {Exception}", ex);
             HandleException(context.Response, ex);
         }
 

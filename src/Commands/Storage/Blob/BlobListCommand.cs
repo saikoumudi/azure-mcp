@@ -5,6 +5,7 @@ using AzureMcp.Arguments.Storage.Blob;
 using AzureMcp.Commands.Storage.Blob.Container;
 using AzureMcp.Models.Command;
 using AzureMcp.Services.Interfaces;
+using Microsoft.Extensions.Logging;
 using ModelContextProtocol.Server;
 using System.CommandLine.Parsing;
 
@@ -12,6 +13,13 @@ namespace AzureMcp.Commands.Storage.Blob;
 
 public sealed class BlobListCommand : BaseContainerCommand<BlobListArguments>
 {
+    private readonly ILogger<BlobListCommand> _logger;
+
+    public BlobListCommand(ILogger<BlobListCommand> logger) : base()
+    {
+        _logger = logger;
+    }
+
     protected override string GetCommandName() => "list";
 
     protected override string GetCommandDescription() =>
@@ -46,6 +54,7 @@ public sealed class BlobListCommand : BaseContainerCommand<BlobListArguments>
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "Error listing storage blobs.  Account: {Account}, Container: {Container}.", args.Account, args.Container);
             HandleException(context.Response, ex);
         }
 

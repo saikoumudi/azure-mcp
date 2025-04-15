@@ -4,6 +4,7 @@
 using AzureMcp.Arguments.Cosmos;
 using AzureMcp.Models.Command;
 using AzureMcp.Services.Interfaces;
+using Microsoft.Extensions.Logging;
 using ModelContextProtocol.Server;
 using System.CommandLine.Parsing;
 
@@ -11,6 +12,13 @@ namespace AzureMcp.Commands.Cosmos;
 
 public sealed class ContainerListCommand : BaseDatabaseCommand<ContainerListArguments>
 {
+    private readonly ILogger<ContainerListCommand> _logger;
+
+    public ContainerListCommand(ILogger<ContainerListCommand> logger) : base()
+    {
+        _logger = logger;
+    }
+
     protected override string GetCommandName() => "list";
 
     protected override string GetCommandDescription() =>

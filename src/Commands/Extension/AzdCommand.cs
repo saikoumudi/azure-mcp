@@ -7,14 +7,17 @@ using AzureMcp.Models.Command;
 using AzureMcp.Services.Azure;
 using AzureMcp.Services.Interfaces;
 using ModelContextProtocol.Server;
+using Microsoft.Extensions.Logging;
 using System.CommandLine;
 using System.CommandLine.Parsing;
 using System.Runtime.InteropServices;
 
 namespace AzureMcp.Commands.Extension;
 
-public sealed class AzdCommand(int processTimeoutSeconds = 300) : GlobalCommand<AzdArguments>
+public sealed class AzdCommand : GlobalCommand<AzdArguments>
 {
+    private readonly ILogger<AzdCommand> _logger;
+    private readonly int _processTimeoutSeconds;
     private readonly Option<string> _commandOption = ArgumentDefinitions.Extension.Azd.Command.ToOption();
     private static string? _cachedAzdPath;
 
@@ -25,6 +28,12 @@ public sealed class AzdCommand(int processTimeoutSeconds = 300) : GlobalCommand<
         // Linux and MacOS
         Path.Combine("usr", "local", "bin"),
     ];
+
+    public AzdCommand(ILogger<AzdCommand> logger, int processTimeoutSeconds = 300) : base()
+    {
+        _logger = logger;
+        _processTimeoutSeconds = processTimeoutSeconds;
+    }
 
     protected override string GetCommandName() => "azd";
 
@@ -92,7 +101,7 @@ public sealed class AzdCommand(int processTimeoutSeconds = 300) : GlobalCommand<
             });
 
             var azdPath = FindAzdCliPath() ?? throw new FileNotFoundException("Azure Developer CLI executable not found in PATH or common installation locations. Please ensure Azure Developer CLI is installed.");
-            var result = await processService.ExecuteAsync(azdPath, command, processTimeoutSeconds);
+            var result = await processService.ExecuteAsync(azdPath, command, _processTimeoutSeconds);
 
             if (string.IsNullOrWhiteSpace(result.Error) && result.ExitCode == 0)
             {
@@ -105,6 +114,7 @@ public sealed class AzdCommand(int processTimeoutSeconds = 300) : GlobalCommand<
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "An exception occurred executing command. Command: {Command}.", args.Command);
             HandleException(context.Response, ex);
         }
 

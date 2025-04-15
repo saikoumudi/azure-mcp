@@ -4,6 +4,7 @@
 using AzureMcp.Arguments.Cosmos;
 using AzureMcp.Models.Command;
 using AzureMcp.Services.Interfaces;
+using Microsoft.Extensions.Logging;
 using ModelContextProtocol.Server;
 using System.CommandLine.Parsing;
 
@@ -11,6 +12,13 @@ namespace AzureMcp.Commands.Cosmos;
 
 public sealed class DatabaseListCommand : BaseCosmosCommand<DatabaseListArguments>
 {
+    private readonly ILogger<DatabaseListCommand> _logger;
+
+    public DatabaseListCommand(ILogger<DatabaseListCommand> logger) : base()
+    {
+        _logger = logger;
+    }
+
     protected override string GetCommandName() => "list";
 
     protected override string GetCommandDescription() =>
@@ -44,6 +52,7 @@ public sealed class DatabaseListCommand : BaseCosmosCommand<DatabaseListArgument
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "An exception occurred listing databases. Account: {Account}.", args.Account);
             HandleException(context.Response, ex);
         }
 

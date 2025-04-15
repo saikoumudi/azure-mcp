@@ -126,28 +126,27 @@ public abstract class GlobalCommand<TArgs> : BaseCommand
         return AuthMethodArgument.GetAuthMethodOptions();
     }
 
-    // Helper method to get subscription options
-    protected virtual async Task<List<ArgumentOption>> GetSubscriptionOptions(CommandContext context)
-    {
-        try
-        {
-            var subscriptionService = context.GetService<ISubscriptionService>();
-            var subscriptions = await subscriptionService.GetSubscriptions();
-            return subscriptions ?? [];
-        }
-        catch
-        {
-            // Silently handle subscription fetch failures
-            return [];
-        }
-    }
+    protected ArgumentBuilder<TArgs> CreateResourceGroupArgument() =>
+        ArgumentBuilder<TArgs>
+            .Create(ArgumentDefinitions.Common.ResourceGroup.Name, ArgumentDefinitions.Common.ResourceGroup.Description)
+            .WithValueAccessor(args => (args as SubscriptionArguments)?.ResourceGroup ?? string.Empty)
+            .WithSuggestedValuesLoader(async (context, args) =>
+            {
+                var subArgs = args as SubscriptionArguments;
+                if (string.IsNullOrEmpty(subArgs?.Subscription))
+                {
+                    return [];
+                }
+                return await GetResourceGroupOptions(context, subArgs.Subscription, subArgs.Tenant!);
+            })
+            .WithIsRequired(true);
 
-    protected async Task<List<ArgumentOption>> GetResourceGroupOptions(CommandContext context, string subscriptionId)
+    protected async Task<List<ArgumentOption>> GetResourceGroupOptions(CommandContext context, string subscription, string tenant = "")
     {
-        if (string.IsNullOrEmpty(subscriptionId)) return [];
+        if (string.IsNullOrEmpty(subscription)) return [];
 
         var resourceGroupService = context.GetService<IResourceGroupService>();
-        var resourceGroup = await resourceGroupService.GetResourceGroups(subscriptionId);
+        var resourceGroup = await resourceGroupService.GetResourceGroups(subscription, tenant);
 
         return resourceGroup?.Select(rg => new ArgumentOption { Name = rg.Name, Id = rg.Id }).ToList() ?? [];
     }

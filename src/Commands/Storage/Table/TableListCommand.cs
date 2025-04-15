@@ -5,6 +5,7 @@ using AzureMcp.Arguments.Storage.Table;
 using AzureMcp.Models;
 using AzureMcp.Models.Command;
 using AzureMcp.Services.Interfaces;
+using Microsoft.Extensions.Logging;
 using ModelContextProtocol.Server;
 using System.CommandLine.Parsing;
 
@@ -12,6 +13,13 @@ namespace AzureMcp.Commands.Storage.Table;
 
 public sealed class TableListCommand : BaseStorageCommand<TableListArguments>
 {
+    private readonly ILogger<TableListCommand> _logger;
+
+    public TableListCommand(ILogger<TableListCommand> logger) : base()
+    {
+        _logger = logger;
+    }
+
     protected override string GetCommandName() => "list";
 
     protected override string GetCommandDescription() =>
@@ -66,6 +74,7 @@ public sealed class TableListCommand : BaseStorageCommand<TableListArguments>
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "Error listing tables. Account: {Account}.", args.Account);
             HandleException(context.Response, ex);
         }
 

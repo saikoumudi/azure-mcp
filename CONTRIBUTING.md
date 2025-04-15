@@ -6,10 +6,10 @@ Thank you for your interest in contributing to Azure MCP! This document provides
 
 ### Prerequisites
 
-1. Install [VS Code Insiders](https://code.visualstudio.com/insiders/)
-2. Install the pre-release versions of:
-   - [GitHub Copilot](https://marketplace.visualstudio.com/items?itemName=GitHub.copilot)
-   - [GitHub Copilot Chat](https://marketplace.visualstudio.com/items?itemName=GitHub.copilot-chat)
+1. Install either the stable or Insiders release of VS Code.
+   * [Stable release](https://code.visualstudio.com/download)
+   * [Insiders release](https://code.visualstudio.com/insiders)
+2. Install [GitHub Copilot](https://marketplace.visualstudio.com/items?itemName=GitHub.copilot) and [GitHub Copilot Chat](https://marketplace.visualstudio.com/items?itemName=GitHub.copilot-chat) extensions.
 
 ### Project Structure
 

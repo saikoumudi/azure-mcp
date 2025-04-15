@@ -5,6 +5,7 @@ using AzureMcp.Arguments.Storage.Account;
 using AzureMcp.Models.Argument;
 using AzureMcp.Models.Command;
 using AzureMcp.Services.Interfaces;
+using Microsoft.Extensions.Logging;
 using ModelContextProtocol.Server;
 using System.CommandLine.Parsing;
 
@@ -12,6 +13,13 @@ namespace AzureMcp.Commands.Storage.Account;
 
 public sealed class AccountListCommand : SubscriptionCommand<AccountListArguments>
 {
+    private readonly ILogger<AccountListCommand> _logger;
+
+    public AccountListCommand(ILogger<AccountListCommand> logger) : base()
+    {
+        _logger = logger;
+    }
+
     protected override string GetCommandName() => "list";
 
     protected override string GetCommandDescription() =>
@@ -43,6 +51,7 @@ public sealed class AccountListCommand : SubscriptionCommand<AccountListArgument
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "Error listing storage accounts");
             HandleException(context.Response, ex);
         }
 
