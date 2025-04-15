@@ -6,6 +6,7 @@ using Azure.ResourceManager;
 using AzureMcp.Arguments;
 using AzureMcp.Services.Azure.Authentication;
 using AzureMcp.Services.Interfaces;
+using Microsoft.AspNetCore.Razor.TagHelpers;
 using System.Reflection;
 using System.Runtime.Versioning;
 
@@ -15,8 +16,7 @@ public abstract class BaseAzureService(ITenantService? tenantService = null)
 {
     private static readonly UserAgentPolicy SharedUserAgentPolicy;
     internal static readonly string DefaultUserAgent;
-
-    private CustomChainedCredential? _credential;
+    private static readonly  CachingTokenCredential SharedTokenCredential;
     private string? _lastTenantId;
     private ArmClient? _armClient;
     private string? _lastArmClientTenantId;
@@ -32,6 +32,24 @@ public abstract class BaseAzureService(ITenantService? tenantService = null)
 
         DefaultUserAgent = $"azmcp/{version} ({framework}; {platform})";
         SharedUserAgentPolicy = new UserAgentPolicy(DefaultUserAgent);
+        SharedTokenCredential = new CachingTokenCredential(new CustomChainedCredential());
+    }
+
+    public static async Task WarmupTokenCredentialAsync()
+    {
+        var context = new TokenRequestContext(new[] { "https://management.azure.com/.default" });
+
+        try
+        {
+            // Force token fetch and populate the cache
+            var token = await SharedTokenCredential.GetTokenAsync(context, CancellationToken.None);
+            // Optionally log or ignore the token
+        }
+        catch (Exception ex)
+        {
+            // Optional: handle or log warmup failure
+            Console.WriteLine($"Token warmup failed: {ex.Message}");
+        }
     }
 
     protected string UserAgent { get; } = DefaultUserAgent;
@@ -42,27 +60,11 @@ public abstract class BaseAzureService(ITenantService? tenantService = null)
         return await _tenantService.GetTenantId(tenant);
     }
 
+
     protected TokenCredential GetCredential(string? tenant = null)
     {
         var tenantId = string.IsNullOrEmpty(tenant) ? null : Task.Run(() => ResolveTenantIdAsync(tenant)).GetAwaiter().GetResult();
-
-        // Return cached credential if it exists and tenant ID hasn't changed
-        if (_credential != null && _lastTenantId == tenantId)
-        {
-            return _credential;
-        }
-
-        try
-        {
-            _credential = new CustomChainedCredential(tenantId);
-            _lastTenantId = tenantId;
-
-            return _credential;
-        }
-        catch (Exception ex)
-        {
-            throw new Exception($"Failed to get credential: {ex.Message}", ex);
-        }
+        return SharedTokenCredential;
     }
 
     protected static T AddDefaultPolicies<T>(T clientOptions) where T : ClientOptions

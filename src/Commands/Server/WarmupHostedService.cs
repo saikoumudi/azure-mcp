@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using AzureMcp.Services.Azure;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.Hosting;
 
@@ -19,12 +20,7 @@ public class WarmupHostedService : IHostedService
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        await _subscriptionService.GetSubscriptions(null, null);
-        var tenants = await _tenantService.GetTenants();
-        foreach (var tenant in tenants)
-        {
-            _ = await _subscriptionService.GetSubscriptions(tenant.Id, null);
-        }
+        await BaseAzureService.WarmupTokenCredentialAsync();
     }
 
     public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
