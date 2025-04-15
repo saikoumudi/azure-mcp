@@ -36,12 +36,7 @@ public sealed class ToolsListCommand : BaseCommand
         try
         {
             var factory = context.GetService<CommandFactory>();
-            var tools = await Task.Run(() => factory.AllCommands
-                .Where(kvp =>
-                {
-                    var parts = kvp.Key.Split(CommandFactory.Separator, StringSplitOptions.RemoveEmptyEntries);
-                    return !parts.Any(x => x is "tools" or "server");
-                })
+            var tools = await Task.Run(() => CommandFactory.GetVisibleCommands(factory.AllCommands)
                 .Select(kvp => CreateCommand(kvp.Key, kvp.Value))
                 .ToList());
 
@@ -52,7 +47,7 @@ public sealed class ToolsListCommand : BaseCommand
         {
             _logger.LogError(ex, "An exception occurred processing tool.");
             HandleException(context.Response, ex);
-            
+
             return context.Response;
         }
     }

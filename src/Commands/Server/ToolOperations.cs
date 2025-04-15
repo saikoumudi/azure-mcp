@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using AzureMcp.Models;
 using AzureMcp.Models.Command;
 using Microsoft.Extensions.Logging;
 using ModelContextProtocol.Protocol.Types;
@@ -43,8 +42,7 @@ public class ToolOperations
             return Task.FromResult(new ListToolsResult { Tools = [] });
         }
 
-        var tools = allCommands
-            .Where(kvp => kvp.Value.GetType().GetCustomAttribute<HiddenCommandAttribute>() == null)
+        var tools = CommandFactory.GetVisibleCommands(allCommands)
             .Select(kvp => GetTool(kvp.Key, kvp.Value))
             .ToList();
 
