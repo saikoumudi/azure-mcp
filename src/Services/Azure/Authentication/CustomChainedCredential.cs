@@ -38,6 +38,13 @@ public class CustomChainedCredential(string? tenantId = null) : TokenCredential
     private static DefaultAzureCredential CreateDefaultCredential(string? tenantId) =>
         new(new DefaultAzureCredentialOptions
         {
-            TenantId = string.IsNullOrEmpty(tenantId) ? null : tenantId
+            TenantId = string.IsNullOrEmpty(tenantId) ? null : tenantId,
+            ExcludeWorkloadIdentityCredential = true,
+            ExcludeManagedIdentityCredential = true,
         });
+
+    public static AzureCliCredential CreateAzureCliCredential()
+    {
+        return new AzureCliCredential();
+    }
 }

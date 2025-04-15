@@ -170,6 +170,7 @@ public sealed class ServiceStartCommand(IServiceProvider serviceProvider) : Base
 
             services.AddHostedService<StdioMcpServerHostedService>();
         }
+        services.AddHostedService<WarmupHostedService>();
     }
 
     private static void ConfigureServices(IServiceCollection services, IServiceProvider rootServiceProvider)
