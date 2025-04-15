@@ -42,9 +42,4 @@ public class CustomChainedCredential(string? tenantId = null) : TokenCredential
             ExcludeWorkloadIdentityCredential = true,
             ExcludeManagedIdentityCredential = true,
         });
-
-    public static AzureCliCredential CreateAzureCliCredential()
-    {
-        return new AzureCliCredential();
-    }
 }
