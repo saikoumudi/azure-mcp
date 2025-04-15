@@ -5,18 +5,25 @@ using AzureMcp.Arguments.Monitor;
 using AzureMcp.Models.Argument;
 using AzureMcp.Models.Command;
 using AzureMcp.Services.Interfaces;
+using Microsoft.Extensions.Logging;
 using ModelContextProtocol.Server;
 using System.CommandLine;
 using System.CommandLine.Parsing;
 
 namespace AzureMcp.Commands.Monitor.Log;
 
-public sealed class LogQueryCommand() : BaseMonitorCommand<LogQueryArguments>
+public sealed class LogQueryCommand : BaseMonitorCommand<LogQueryArguments>
 {
+    private readonly ILogger<LogQueryCommand> _logger;
     private readonly Option<string> _tableNameOption = ArgumentDefinitions.Monitor.TableName.ToOption();
     private readonly Option<string> _queryOption = ArgumentDefinitions.Monitor.Query.ToOption();
     private readonly Option<int> _hoursOption = ArgumentDefinitions.Monitor.Hours.ToOption();
     private readonly Option<int> _limitOption = ArgumentDefinitions.Monitor.Limit.ToOption();
+
+    public LogQueryCommand(ILogger<LogQueryCommand> logger) : base()
+    {
+        _logger = logger;
+    }
 
     protected override string GetCommandName() => "query";
 
@@ -47,7 +54,6 @@ public sealed class LogQueryCommand() : BaseMonitorCommand<LogQueryArguments>
         AddArgument(CreateHoursArgument());
         AddArgument(CreateLimitArgument());
         AddArgument(CreateResourceGroupArgument());
-
     }
 
     [McpServerTool(Destructive = false, ReadOnly = true)]
@@ -77,6 +83,7 @@ public sealed class LogQueryCommand() : BaseMonitorCommand<LogQueryArguments>
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "Error executing log query command.");
             HandleException(context.Response, ex);
         }
 

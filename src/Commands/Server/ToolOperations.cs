@@ -3,6 +3,7 @@
 
 using AzureMcp.Models;
 using AzureMcp.Models.Command;
+using Microsoft.Extensions.Logging;
 using ModelContextProtocol.Protocol.Types;
 using ModelContextProtocol.Server;
 using ModelContextProtocol.Utils.Json;
@@ -16,11 +17,14 @@ public class ToolOperations
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly CommandFactory _commandFactory;
+    private readonly ILogger<ToolOperations> _logger;
 
-    public ToolOperations(IServiceProvider serviceProvider, CommandFactory commandFactory)
+    public ToolOperations(IServiceProvider serviceProvider, CommandFactory commandFactory, ILogger<ToolOperations> logger)
     {
         _serviceProvider = serviceProvider;
         _commandFactory = commandFactory;
+        _logger = logger;
+
         ToolsCapability = new ToolsCapability
         {
             CallToolHandler = OnCallTools,
@@ -46,6 +50,8 @@ public class ToolOperations
 
         var listToolsResult = new ListToolsResult { Tools = tools };
 
+        _logger.LogInformation("Listing {NumberOfTools} tools.", tools.Count);
+
         return Task.FromResult(listToolsResult);
     }
 
@@ -54,9 +60,16 @@ public class ToolOperations
     {
         if (parameters.Params == null)
         {
+            var content = new Content
+            {
+                Text = "Cannot call tools with null parameters.",
+            };
+
+            _logger.LogWarning(content.Text);
+
             return new CallToolResponse
             {
-                Content = [new Content { Text = "Could not parse parameters from tool request." }],
+                Content = [content],
                 IsError = true,
             };
         }
@@ -64,13 +77,20 @@ public class ToolOperations
         var command = _commandFactory.FindCommandByName(parameters.Params.Name);
         if (command == null)
         {
-            return new CallToolResponse
+            var content = new Content
             {
-                Content = [new Content { Text = $"Could not find command: {parameters.Params.Name}" }],
-                IsError = true,
+                Text = $"Could not find command: {parameters.Params.Name}",
             };
 
+            _logger.LogWarning(content.Text);
+
+            return new CallToolResponse
+            {
+                Content = [content],
+                IsError = true,
+            };
         }
+
         var commandContext = new CommandContext(_serviceProvider);
 
         var args = parameters.Params.Arguments != null
@@ -79,13 +99,31 @@ public class ToolOperations
         var realCommand = command.GetCommand();
         var commandOptions = realCommand.Parse(args);
 
-        var commandResponse = await command.ExecuteAsync(commandContext, commandOptions);
-        var jsonResponse = JsonSerializer.Serialize(commandResponse.Results);
+        _logger.LogTrace("Invoking '{Tool}'.", realCommand.Name);
 
-        return new CallToolResponse
+        try
         {
-            Content = [new Content { Text = jsonResponse, MimeType = "application/json" }],
-        };
+            var commandResponse = await command.ExecuteAsync(commandContext, commandOptions);
+            var jsonResponse = JsonSerializer.Serialize(commandResponse.Results);
+
+            return new CallToolResponse
+            {
+                Content = [
+                    new Content {
+                        Text = jsonResponse,
+                        MimeType = "application/json" }],
+            };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An exception occurred running '{Tool}'. ", realCommand.Name);
+
+            throw;
+        }
+        finally
+        {
+            _logger.LogTrace("Finished executing '{Tool}'.", realCommand.Name);
+        }
     }
 
     private static Tool GetTool(string fullName, IBaseCommand command)

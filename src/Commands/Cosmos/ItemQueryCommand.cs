@@ -5,6 +5,7 @@ using AzureMcp.Arguments.Cosmos;
 using AzureMcp.Models.Argument;
 using AzureMcp.Models.Command;
 using AzureMcp.Services.Interfaces;
+using Microsoft.Extensions.Logging;
 using ModelContextProtocol.Server;
 using System.CommandLine;
 using System.CommandLine.Parsing;
@@ -13,6 +14,13 @@ namespace AzureMcp.Commands.Cosmos;
 
 public sealed class ItemQueryCommand : BaseContainerCommand<ItemQueryArguments>
 {
+    private readonly ILogger<ItemQueryCommand> _logger;
+
+    public ItemQueryCommand(ILogger<ItemQueryCommand> logger) : base()
+    {
+        _logger = logger;
+    }
+
     private const string DefaultQuery = "SELECT * FROM c";
 
     private readonly Option<string> _queryOption = ArgumentDefinitions.Cosmos.Query.ToOption();
@@ -81,6 +89,9 @@ public sealed class ItemQueryCommand : BaseContainerCommand<ItemQueryArguments>
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "An exception occurred querying container. Account: {Account}, Database: {Database},"
+                + " Container: {Container}", args.Account, args.Database, args.Container);
+
             HandleException(context.Response, ex);
         }
 

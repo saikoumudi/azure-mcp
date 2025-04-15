@@ -5,6 +5,7 @@ using AzureMcp.Arguments.Group;
 using AzureMcp.Models.Argument;
 using AzureMcp.Models.Command;
 using AzureMcp.Services.Interfaces;
+using Microsoft.Extensions.Logging;
 using ModelContextProtocol.Server;
 using System.CommandLine.Parsing;
 
@@ -12,6 +13,13 @@ namespace AzureMcp.Commands.Group;
 
 public sealed class GroupListCommand : SubscriptionCommand<BaseGroupArguments>
 {
+    private readonly ILogger<GroupListCommand> _logger;
+
+    public GroupListCommand(ILogger<GroupListCommand> logger) : base()
+    {
+        _logger = logger;
+    }
+
     protected override string GetCommandName() => "list";
 
     protected override string GetCommandDescription() =>
@@ -45,6 +53,7 @@ public sealed class GroupListCommand : SubscriptionCommand<BaseGroupArguments>
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "An exception occurred listing resource groups.");
             HandleException(context.Response, ex);
         }
 

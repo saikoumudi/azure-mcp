@@ -4,6 +4,7 @@
 using AzureMcp.Arguments.AppConfig.KeyValue;
 using AzureMcp.Models.Command;
 using AzureMcp.Services.Interfaces;
+using Microsoft.Extensions.Logging;
 using ModelContextProtocol.Server;
 using System.CommandLine.Parsing;
 
@@ -11,6 +12,13 @@ namespace AzureMcp.Commands.AppConfig.KeyValue;
 
 public sealed class KeyValueLockCommand : BaseKeyValueCommand<KeyValueLockArguments>
 {
+    private readonly ILogger<KeyValueLockCommand> _logger;
+
+    public KeyValueLockCommand(ILogger<KeyValueLockCommand> logger) : base()
+    {
+        _logger = logger;
+    }
+
     protected override string GetCommandName() => "lock";
 
     protected override string GetCommandDescription() =>
@@ -45,6 +53,7 @@ public sealed class KeyValueLockCommand : BaseKeyValueCommand<KeyValueLockArgume
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "An exception occurred locking value. Key: {Key}, Label: {Label}", args.Key, args.Label);
             HandleException(context.Response, ex);
         }
 

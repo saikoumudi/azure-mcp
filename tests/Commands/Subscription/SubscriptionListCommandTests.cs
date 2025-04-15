@@ -8,6 +8,7 @@ using AzureMcp.Models.Argument;
 using AzureMcp.Models.Command;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using ModelContextProtocol.Server;
 using NSubstitute;
 using System.CommandLine;
@@ -21,6 +22,7 @@ public class SubscriptionListCommandTests
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly IMcpServer _mcpServer;
+    private readonly ILogger<SubscriptionListCommand> _logger;
     private readonly ISubscriptionService _subscriptionService;
     private readonly SubscriptionListCommand _command;
     private readonly CommandContext _context;
@@ -30,13 +32,13 @@ public class SubscriptionListCommandTests
     {
         _mcpServer = Substitute.For<IMcpServer>();
         _subscriptionService = Substitute.For<ISubscriptionService>();
-
+        _logger = Substitute.For<ILogger<SubscriptionListCommand>>();
         var collection = new ServiceCollection()
             .AddSingleton(_mcpServer)
             .AddSingleton(_subscriptionService);
 
         _serviceProvider = collection.BuildServiceProvider();
-        _command = new();
+        _command = new(_logger);
         _context = new(_serviceProvider);
         _parser = new(_command.GetCommand());
     }

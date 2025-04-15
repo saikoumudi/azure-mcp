@@ -4,13 +4,21 @@
 using AzureMcp.Arguments.Monitor;
 using AzureMcp.Models.Command;
 using AzureMcp.Services.Interfaces;
+using Microsoft.Extensions.Logging;
 using ModelContextProtocol.Server;
 using System.CommandLine.Parsing;
 
 namespace AzureMcp.Commands.Monitor.Workspace;
 
-public sealed class WorkspaceListCommand() : SubscriptionCommand<WorkspaceListArguments>
+public sealed class WorkspaceListCommand : SubscriptionCommand<WorkspaceListArguments>
 {
+    private readonly ILogger<WorkspaceListCommand> _logger;
+
+    public WorkspaceListCommand(ILogger<WorkspaceListCommand> logger) : base()
+    {
+        _logger = logger;
+    }
+
     protected override string GetCommandName() => "list";
 
     protected override string GetCommandDescription() =>
@@ -44,6 +52,7 @@ public sealed class WorkspaceListCommand() : SubscriptionCommand<WorkspaceListAr
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "Error listing workspaces.");
             HandleException(context.Response, ex);
         }
 

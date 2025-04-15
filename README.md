@@ -152,6 +152,9 @@ If you don't have a Windows machine, follow the manual steps listed in the "Othe
 3. Try a prompt that tells the agent to use the Azure MCP Server, such as "List my Azure Storage containers"
 4. The agent should be able to use the Azure MCP Server tools to complete your query
 
+## Troubleshooting
+
+See [Troubleshooting guide](/TROUBLESHOOTING.md) for help with common issues and logging.
 
 ## 🔑 Authentication
 
@@ -181,7 +184,7 @@ Your credentials are always handled securely through the official Azure Identity
 
 We welcome contributions to Azure MCP! Whether you're fixing bugs, adding new features, or improving documentation, your contributions are welcome.
 
-Please read our [Contributing Guide](https://github.com/Azure/azure-mcp/blob/main/CONTRIBUTING.md) for guidelines on:
+Please read our [Contributing Guide](/CONTRIBUTING.md) for guidelines on:
 
 - 🛠️ Setting up your development environment
 - ✨ Adding new commands

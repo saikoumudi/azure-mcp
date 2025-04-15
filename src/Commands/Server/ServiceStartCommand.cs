@@ -73,10 +73,12 @@ public sealed class ServiceStartCommand(IServiceProvider serviceProvider) : Base
             ConfigureServices(builder.Services, _serviceProvider);
             ConfigureMcpServer(builder.Services, serverArguments.Transport);
 
-            builder.WebHost.ConfigureKestrel(server =>
-            {
-                server.ListenLocalhost(serverArguments.Port);
-            });
+            builder.WebHost
+                .ConfigureKestrel(server => server.ListenLocalhost(serverArguments.Port))
+                .ConfigureLogging(logging =>
+                {
+                    logging.AddEventSourceLogger();
+                });
 
             var application = builder.Build();
 
@@ -87,7 +89,11 @@ public sealed class ServiceStartCommand(IServiceProvider serviceProvider) : Base
         else
         {
             return Host.CreateDefaultBuilder()
-                .ConfigureLogging(logging => logging.ClearProviders())
+                .ConfigureLogging(logging =>
+                {
+                    logging.ClearProviders();
+                    logging.AddEventSourceLogger();
+                })
                 .ConfigureServices(services =>
                 {
                     ConfigureServices(services, _serviceProvider);

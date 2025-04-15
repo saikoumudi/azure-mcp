@@ -6,14 +6,17 @@ using AzureMcp.Models.Argument;
 using AzureMcp.Models.Command;
 using AzureMcp.Services.Interfaces;
 using ModelContextProtocol.Server;
+using Microsoft.Extensions.Logging;
 using System.CommandLine;
 using System.CommandLine.Parsing;
 using System.Runtime.InteropServices;
 
 namespace AzureMcp.Commands.Extension;
 
-public sealed class AzCommand(int processTimeoutSeconds = 300) : GlobalCommand<AzArguments>
+public sealed class AzCommand : GlobalCommand<AzArguments>
 {
+    private readonly ILogger<AzCommand> _logger;
+    private readonly int _processTimeoutSeconds;
     private readonly Option<string> _commandOption = ArgumentDefinitions.Extension.Az.Command.ToOption();
     private static string? _cachedAzPath;
 
@@ -25,6 +28,12 @@ public sealed class AzCommand(int processTimeoutSeconds = 300) : GlobalCommand<A
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Programs", "Python", "Python310", "Scripts"),
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Programs", "Python", "Python311", "Scripts")
     ];
+
+    public AzCommand(ILogger<AzCommand> logger, int processTimeoutSeconds = 300) : base()
+    {
+        _logger = logger;
+        _processTimeoutSeconds = processTimeoutSeconds;
+    }
 
     protected override string GetCommandName() => "az";
 
@@ -127,7 +136,7 @@ public sealed class AzCommand(int processTimeoutSeconds = 300) : GlobalCommand<A
             var processService = context.GetService<IExternalProcessService>();
 
             var azPath = FindAzCliPath() ?? throw new FileNotFoundException("Azure CLI executable not found in PATH or common installation locations. Please ensure Azure CLI is installed.");
-            var result = await processService.ExecuteAsync(azPath, command, processTimeoutSeconds);
+            var result = await processService.ExecuteAsync(azPath, command, _processTimeoutSeconds);
 
             if (result.ExitCode != 0)
             {
@@ -139,6 +148,7 @@ public sealed class AzCommand(int processTimeoutSeconds = 300) : GlobalCommand<A
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "An exception occurred executing command. Command: {Command}.", args.Command);
             HandleException(context.Response, ex);
         }
 

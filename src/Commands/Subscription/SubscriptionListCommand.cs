@@ -5,6 +5,7 @@ using AzureMcp.Arguments.Subscription;
 using AzureMcp.Models.Argument;
 using AzureMcp.Models.Command;
 using AzureMcp.Services.Interfaces;
+using Microsoft.Extensions.Logging;
 using ModelContextProtocol.Server;
 using System.CommandLine.Parsing;
 
@@ -12,6 +13,13 @@ namespace AzureMcp.Commands.Subscription;
 
 public sealed class SubscriptionListCommand : GlobalCommand<SubscriptionListArguments>
 {
+    private readonly ILogger<SubscriptionListCommand> _logger;
+
+    public SubscriptionListCommand(ILogger<SubscriptionListCommand> logger) : base()
+    {
+        _logger = logger;
+    }
+
     protected override string GetCommandName() => "list";
 
     protected override string GetCommandDescription() =>
@@ -40,6 +48,7 @@ public sealed class SubscriptionListCommand : GlobalCommand<SubscriptionListArgu
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "Error listing subscriptions.");
             HandleException(context.Response, ex);
         }
 

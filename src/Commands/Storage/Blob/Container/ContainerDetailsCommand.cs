@@ -5,6 +5,7 @@ using AzureMcp.Arguments.Storage.Blob.Container;
 using AzureMcp.Models.Argument;
 using AzureMcp.Models.Command;
 using AzureMcp.Services.Interfaces;
+using Microsoft.Extensions.Logging;
 using ModelContextProtocol.Server;
 using System.CommandLine.Parsing;
 
@@ -12,6 +13,13 @@ namespace AzureMcp.Commands.Storage.Blob.Container;
 
 public sealed class ContainerDetailsCommand : BaseContainerCommand<ContainerDetailsArguments>
 {
+    private readonly ILogger<ContainerDetailsCommand> _logger;
+
+    public ContainerDetailsCommand(ILogger<ContainerDetailsCommand> logger) : base()
+    {
+        _logger = logger;
+    }
+
     protected override string GetCommandName() => "details";
 
     protected override string GetCommandDescription() =>
@@ -23,10 +31,10 @@ public sealed class ContainerDetailsCommand : BaseContainerCommand<ContainerDeta
     [McpServerTool(Destructive = false, ReadOnly = true)]
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
+        var args = BindArguments(parseResult);
+
         try
         {
-            var args = BindArguments(parseResult);
-
             if (!await ProcessArguments(context, args))
             {
                 return context.Response;
@@ -46,6 +54,7 @@ public sealed class ContainerDetailsCommand : BaseContainerCommand<ContainerDeta
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "Error getting container details. Account: {Account}, Container: {Container}.", args.Account, args.Container);
             HandleException(context.Response, ex);
             return context.Response;
         }

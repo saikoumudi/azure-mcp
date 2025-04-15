@@ -5,6 +5,7 @@ using AzureMcp.Arguments.AppConfig.KeyValue;
 using AzureMcp.Models.Argument;
 using AzureMcp.Models.Command;
 using AzureMcp.Services.Interfaces;
+using Microsoft.Extensions.Logging;
 using ModelContextProtocol.Server;
 using System.CommandLine;
 using System.CommandLine.Parsing;
@@ -14,6 +15,12 @@ namespace AzureMcp.Commands.AppConfig.KeyValue;
 public sealed class KeyValueSetCommand : BaseKeyValueCommand<KeyValueSetArguments>
 {
     private readonly Option<string> _valueOption = ArgumentDefinitions.AppConfig.Value.ToOption();
+    private readonly ILogger<KeyValueSetCommand> _logger;
+
+    public KeyValueSetCommand(ILogger<KeyValueSetCommand> logger) : base()
+    {
+        _logger = logger;
+    }
 
     protected override string GetCommandName() => "set";
 
@@ -75,6 +82,7 @@ public sealed class KeyValueSetCommand : BaseKeyValueCommand<KeyValueSetArgument
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "An exception occurred setting value. Key: {Key}.", args.Key);
             HandleException(context.Response, ex);
         }
 

@@ -6,6 +6,8 @@ using AzureMcp.Commands.Server;
 using AzureMcp.Commands.Storage.Blob;
 using AzureMcp.Commands.Subscription;
 using AzureMcp.Models.Command;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using System.CommandLine;
 using System.Text.Encodings.Web;
 using System.Text.Json;
@@ -16,6 +18,7 @@ namespace AzureMcp.Commands;
 public class CommandFactory
 {
     private readonly IServiceProvider _serviceProvider;
+    private readonly ILogger<CommandFactory> _logger;
     private readonly RootCommand _rootCommand;
     private readonly CommandGroup _rootGroup;
     private readonly JsonSerializerOptions _jsonOptions;
@@ -27,9 +30,10 @@ public class CommandFactory
     /// </summary>
     private readonly Dictionary<string, IBaseCommand> _commandMap;
 
-    public CommandFactory(IServiceProvider serviceProvider)
+    public CommandFactory(IServiceProvider serviceProvider, ILogger<CommandFactory> logger)
     {
         _serviceProvider = serviceProvider;
+        _logger = logger;
         _rootGroup = new CommandGroup("azmcp", "Azure MCP Server");
         _rootCommand = CreateRootCommand();
         _commandMap = CreateCommmandDictionary(_rootGroup, string.Empty);
@@ -83,14 +87,12 @@ public class CommandFactory
         cosmosContainer.AddSubGroup(cosmosItem);
 
         // Register Cosmos commands
-        databases.AddCommand("list", new DatabaseListCommand());
-        cosmosContainer.AddCommand("list", new Cosmos.ContainerListCommand());
-        cosmosAccount.AddCommand("list", new Cosmos.AccountListCommand());
-        cosmosItem.AddCommand("query", new ItemQueryCommand());
-
-
+        databases.AddCommand("list", new DatabaseListCommand(GetLogger<DatabaseListCommand>()));
+        cosmosContainer.AddCommand("list", new Cosmos.ContainerListCommand(GetLogger<Cosmos.ContainerListCommand>()));
+        cosmosAccount.AddCommand("list", new Cosmos.AccountListCommand(GetLogger<Cosmos.AccountListCommand>()));
+        cosmosItem.AddCommand("query", new ItemQueryCommand(GetLogger<ItemQueryCommand>()));
     }
-
+    
     private void RegisterStorageCommands()
     {
         // Create Storage command group
@@ -112,11 +114,17 @@ public class CommandFactory
         blobs.AddSubGroup(blobContainer);
 
         // Register Storage commands
-        storageAccount.AddCommand("list", new Storage.Account.AccountListCommand());
-        tables.AddCommand("list", new Storage.Table.TableListCommand());
-        blobs.AddCommand("list", new BlobListCommand());
-        blobContainer.AddCommand("list", new Storage.Blob.Container.ContainerListCommand());
-        blobContainer.AddCommand("details", new Storage.Blob.Container.ContainerDetailsCommand());
+        storageAccount.AddCommand("list", new Storage.Account.AccountListCommand(
+            GetLogger<Storage.Account.AccountListCommand>()));
+        tables.AddCommand("list", new Storage.Table.TableListCommand(
+            GetLogger<Storage.Table.TableListCommand>()));
+
+        blobs.AddCommand("list", new BlobListCommand(GetLogger<BlobListCommand>()));
+        
+        blobContainer.AddCommand("list", new Storage.Blob.Container.ContainerListCommand(
+            GetLogger<Storage.Blob.Container.ContainerListCommand>()));
+        blobContainer.AddCommand("details", new Storage.Blob.Container.ContainerDetailsCommand(
+            GetLogger<Storage.Blob.Container.ContainerDetailsCommand>()));
     }
 
     private void RegisterMonitorCommands()
@@ -136,11 +144,12 @@ public class CommandFactory
         monitor.AddSubGroup(monitorTable);
 
         // Register Monitor commands
-        logs.AddCommand("query", new Monitor.Log.LogQueryCommand());
-        workspaces.AddCommand("list", new Monitor.Workspace.WorkspaceListCommand());
-        monitorTable.AddCommand("list", new Monitor.Table.TableListCommand());
-
-
+        logs.AddCommand("query", new Monitor.Log.LogQueryCommand(
+            GetLogger<Monitor.Log.LogQueryCommand>()));
+        workspaces.AddCommand("list", new Monitor.Workspace.WorkspaceListCommand(
+            GetLogger<Monitor.Workspace.WorkspaceListCommand>()));
+        monitorTable.AddCommand("list", new Monitor.Table.TableListCommand(
+            GetLogger<Monitor.Table.TableListCommand>()));
     }
 
     private void RegisterAppConfigCommands()
@@ -154,13 +163,13 @@ public class CommandFactory
         var keyValue = new CommandGroup("kv", "App Configuration key-value setting operations - Commands for managing complete configuration settings including values, labels, and metadata");
         appConfig.AddSubGroup(keyValue);
 
-        accounts.AddCommand("list", new AppConfig.Account.AccountListCommand());
-        keyValue.AddCommand("list", new AppConfig.KeyValue.KeyValueListCommand());
-        keyValue.AddCommand("lock", new AppConfig.KeyValue.KeyValueLockCommand());
-        keyValue.AddCommand("unlock", new AppConfig.KeyValue.KeyValueUnlockCommand());
-        keyValue.AddCommand("set", new AppConfig.KeyValue.KeyValueSetCommand());
-        keyValue.AddCommand("show", new AppConfig.KeyValue.KeyValueShowCommand());
-        keyValue.AddCommand("delete", new AppConfig.KeyValue.KeyValueDeleteCommand());
+        accounts.AddCommand("list", new AppConfig.Account.AccountListCommand(GetLogger<AppConfig.Account.AccountListCommand>()));
+        keyValue.AddCommand("list", new AppConfig.KeyValue.KeyValueListCommand(GetLogger<AppConfig.KeyValue.KeyValueListCommand>()));
+        keyValue.AddCommand("lock", new AppConfig.KeyValue.KeyValueLockCommand(GetLogger<AppConfig.KeyValue.KeyValueLockCommand>()));
+        keyValue.AddCommand("unlock", new AppConfig.KeyValue.KeyValueUnlockCommand(GetLogger<AppConfig.KeyValue.KeyValueUnlockCommand>()));
+        keyValue.AddCommand("set", new AppConfig.KeyValue.KeyValueSetCommand(GetLogger<AppConfig.KeyValue.KeyValueSetCommand>()));
+        keyValue.AddCommand("show", new AppConfig.KeyValue.KeyValueShowCommand(GetLogger<AppConfig.KeyValue.KeyValueShowCommand>()));
+        keyValue.AddCommand("delete", new AppConfig.KeyValue.KeyValueDeleteCommand(GetLogger<AppConfig.KeyValue.KeyValueDeleteCommand>()));
     }
 
     private void RegisterToolsCommands()
@@ -169,7 +178,7 @@ public class CommandFactory
         var tools = new CommandGroup("tools", "CLI tools operations - Commands for discovering and exploring the functionality available in this CLI tool.");
         _rootGroup.AddSubGroup(tools);
 
-        tools.AddCommand("list", new Tools.ToolsListCommand());
+        tools.AddCommand("list", new Tools.ToolsListCommand(GetLogger<Tools.ToolsListCommand>()));
     }
 
     private void RegisterExtensionCommands()
@@ -177,8 +186,8 @@ public class CommandFactory
         var extension = new CommandGroup("extension", "Extension commands for additional functionality");
         _rootGroup.AddSubGroup(extension);
 
-        extension.AddCommand("az", new Extension.AzCommand());
-        extension.AddCommand("azd", new Extension.AzdCommand());
+        extension.AddCommand("az", new Extension.AzCommand(GetLogger<Extension.AzCommand>()));
+        extension.AddCommand("azd", new Extension.AzdCommand(GetLogger<Extension.AzdCommand>()));
     }
 
     private void RegisterSubscriptionCommands()
@@ -188,7 +197,7 @@ public class CommandFactory
         _rootGroup.AddSubGroup(subscription);
 
         // Register Subscription commands
-        subscription.AddCommand("list", new SubscriptionListCommand());
+        subscription.AddCommand("list", new SubscriptionListCommand(GetLogger<SubscriptionListCommand>()));
     }
 
     private void RegisterGroupCommands()
@@ -198,7 +207,7 @@ public class CommandFactory
         _rootGroup.AddSubGroup(group);
 
         // Register Group commands
-        group.AddCommand("list", new Group.GroupListCommand());
+        group.AddCommand("list", new Group.GroupListCommand(GetLogger<Group.GroupListCommand>()));
     }
 
     private void RegisterMcpServerCommands()
@@ -257,21 +266,40 @@ public class CommandFactory
     {
         command.SetHandler(async context =>
         {
-            var startTime = DateTime.UtcNow;
+            _logger.LogTrace("Executing '{Command}'.", command.Name);
+
             var cmdContext = new CommandContext(_serviceProvider);
-            var response = await implementation.ExecuteAsync(cmdContext, context.ParseResult);
-
-            // Calculate execution time
-            var endTime = DateTime.UtcNow;
-            response.Duration = (long)(endTime - startTime).TotalMilliseconds;
-
-            if (response.Status == 200 && response.Results == null)
+            var startTime = DateTime.UtcNow;
+            try
             {
-                response.Results = new List<object>();
-            }
+                var response = await implementation.ExecuteAsync(cmdContext, context.ParseResult);
 
-            Console.WriteLine(JsonSerializer.Serialize(response, _jsonOptions));
+                // Calculate execution time
+                var endTime = DateTime.UtcNow;
+                response.Duration = (long)(endTime - startTime).TotalMilliseconds;
+
+                if (response.Status == 200 && response.Results == null)
+                {
+                    response.Results = new List<object>();
+                }
+
+                Console.WriteLine(JsonSerializer.Serialize(response, _jsonOptions));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("An exception occurred while executing '{Command}'. Exception: {Exception}",
+                    command.Name, ex);
+            }
+            finally
+            {
+                _logger.LogTrace("Finished running '{Command}'.", command.Name);
+            }
         });
+    }
+
+    private ILogger<T> GetLogger<T>()
+    {
+        return _serviceProvider.GetRequiredService<ILogger<T>>();
     }
 
     private static IBaseCommand? FindCommandInGroup(CommandGroup group, Queue<string> nameParts)
