@@ -6,8 +6,8 @@ using AzureMcp.Models.Argument;
 using AzureMcp.Models.Command;
 using AzureMcp.Services.Azure;
 using AzureMcp.Services.Interfaces;
-using ModelContextProtocol.Server;
 using Microsoft.Extensions.Logging;
+using ModelContextProtocol.Server;
 using System.CommandLine;
 using System.CommandLine.Parsing;
 using System.Runtime.InteropServices;
@@ -38,19 +38,13 @@ public sealed class AzdCommand : GlobalCommand<AzdArguments>
     protected override string GetCommandName() => "azd";
 
     protected override string GetCommandDescription() =>
-        "Your job is to help accelerate getting users projects up and running in their Azure environments by executing the Azure Developer CLI (azd) commands.\n" +
-        "This tool can help find application templates based on their requirements, manage azd environments and easily provision and deploy them to their Azure environment \n\n" +
-        "You have the following rules:\n\n" +
-        "- Use this tool to execute ALL azd commands: Example: 'up'.\n" +
-        "- If the workspaces contains an 'azure.yaml' files they likely already have an azd project, otherwise you can initialize a new one by calling 'init'.\n" +
-        "- Always confirm with the user before performing destructive commands like 'up', 'down', 'provision' or 'deploy'.\n" +
-        "- Always pass the '--cwd' arguments with the fully qualified path to the workspace.\n" +
-        "- When a command requires an environment, use the '-e' argument to specify the environment name.\n" +
-        "- After executing a command the tool may propose next steps. Confirm if the user wanted to proceed with any suggestions.\n" +
-        "- When an error occurs, try to resolve the error by prompting the user for missing information and retrying the command.\n" +
-        "- This tool can ONLY write code that interacts with Azure. It CANNOT generate charts, tables, graphs, etc.\n" +
-        "- This tool can delete or modify resources in your Azure environment. Always be cautious and include appropriate warnings when providing commands to users.\n\n" +
-        "Be concise, professional and to the point. Do not give generic advice, always reply with detailed & contextual data sourced from the current Azure environment.";
+        "Use this tool to always run all Azure Developer CLI (azd) commands. " +
+        "Most common activities will be helping users initialize projects, manage environments, provision and deploy infrastructure and apps to their Azure environment. " +
+        "If an azure.yaml file exists in the workspace, treat it as an existing azd project; otherwise, use init to create one. " +
+        "Always pass --cwd with the full workspace path, and use -e to specify the environment when required. Confirm with the user before performing destructive operations. " +
+        "After each command, suggest next steps if available, and ask before proceeding. On errors, prompt for missing info and retry. " +
+        "Be concise and contextual, using data from the user's environment and workspace to provide accurate, actionable responses. " +
+        "This tool can create, modify or delete resources in Azure. Always warn and confirm action with the user before performing destructive commands like 'up', 'down', 'provision' or 'deploy'.";
 
     protected override void RegisterOptions(Command command)
     {

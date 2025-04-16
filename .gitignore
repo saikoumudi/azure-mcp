@@ -8,3 +8,5 @@ tests/TestResults
 
 node_modules
 .npmrc
+.testsettings.json
+

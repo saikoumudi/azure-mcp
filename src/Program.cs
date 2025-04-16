@@ -17,6 +17,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.CommandLine;
 using System.Text.Json;
+using AzureMcp.Extensions;
 
 try
 {
@@ -45,6 +46,7 @@ catch (Exception ex)
 
 static void ConfigureServices(IServiceCollection services)
 {
+    services.ConfigureOpenTelemetry();
     services.AddMemoryCache();
     services.AddLogging(builder =>
     {

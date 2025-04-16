@@ -1,7 +1,8 @@
-// Copyright (c) Microsoft Corporation.
+﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
 using AzureMcp.Arguments.Server;
+using AzureMcp.Extensions;
 using AzureMcp.Models;
 using AzureMcp.Models.Argument;
 using AzureMcp.Models.Command;
@@ -12,13 +13,15 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using ModelContextProtocol.Protocol.Transport;
 using ModelContextProtocol.Protocol.Types;
 using ModelContextProtocol.Server;
+using OpenTelemetry.Logs;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Trace;
 using System.CommandLine;
 using System.CommandLine.Parsing;
 using System.Reflection;
+using Microsoft.Extensions.Azure;
 
 namespace AzureMcp.Commands.Server;
 
@@ -125,6 +128,8 @@ public sealed class ServiceStartCommand(IServiceProvider serviceProvider) : Base
     private static void ConfigureMcpServer(IServiceCollection services, string transport)
     {
         services.AddSingleton<ToolOperations>();
+        services.AddSingleton<AzureEventSourceLogForwarder>();
+        services.AddHostedService<OtelService>();
 
         services.AddOptions<McpServerOptions>()
             .Configure<ToolOperations>((mcpServerOptions, toolOperations) =>
@@ -148,40 +153,22 @@ public sealed class ServiceStartCommand(IServiceProvider serviceProvider) : Base
 
             });
 
-        services.AddSingleton(provider =>
-        {
-            var transport = provider.GetService<ITransport>();
-            var options = provider.GetRequiredService<IOptions<McpServerOptions>>();
-            var loggerFactory = provider.GetRequiredService<ILoggerFactory>();
-
-            if (transport == null)
-            {
-                return new AzureMcpServer(options.Value, loggerFactory, provider);
-            }
-            else
-            {
-                return McpServerFactory.Create(transport, options.Value, loggerFactory);
-            }
-
-        });
+        var mcpServerBuilder = services.AddMcpServer();
 
         if (transport != TransportTypes.Sse)
         {
-            services.AddSingleton<ITransport>(provider =>
-            {
-                var options = provider.GetRequiredService<IOptions<McpServerOptions>>();
-
-                return new StdioServerTransport(options,
-                    provider.GetRequiredService<ILoggerFactory>());
-            });
-
-            services.AddHostedService<StdioMcpServerHostedService>();
+            mcpServerBuilder.WithStdioServerTransport();
+        }
+        else
+        {
+            mcpServerBuilder.WithHttpTransport();
         }
         services.AddHostedService<WarmupHostedService>();
     }
 
     private static void ConfigureServices(IServiceCollection services, IServiceProvider rootServiceProvider)
     {
+        services.ConfigureOpenTelemetry();
         services.AddMemoryCache();
         services.AddSingleton(rootServiceProvider.GetRequiredService<CommandFactory>());
         services.AddSingleton(rootServiceProvider.GetRequiredService<ICacheService>());
@@ -199,5 +186,35 @@ public sealed class ServiceStartCommand(IServiceProvider serviceProvider) : Base
     {
         /// <inheritdoc />
         protected override Task ExecuteAsync(CancellationToken stoppingToken) => session.RunAsync(stoppingToken);
+    }
+
+    /// <summary>
+    /// Resolves (and starts) the OpenTelemetry services.
+    /// </summary>
+    private sealed class OtelService : BackgroundService
+    {
+        private readonly MeterProvider? _meterProvider;
+        private readonly TracerProvider? _tracerProvider;
+        private readonly LoggerProvider? _loggerProvider;
+        private readonly AzureEventSourceLogForwarder _logForwarder;
+
+        public OtelService(IServiceProvider provider)
+        {
+            _meterProvider = provider.GetService<MeterProvider>();
+            _tracerProvider = provider.GetService<TracerProvider>();
+            _loggerProvider = provider.GetService<LoggerProvider>();
+            _logForwarder = provider.GetRequiredService<AzureEventSourceLogForwarder>();
+            _logForwarder.Start();
+        }
+
+        protected override Task ExecuteAsync(CancellationToken stoppingToken) => Task.CompletedTask;
+
+        public override void Dispose()
+        {
+            _meterProvider?.Dispose();
+            _tracerProvider?.Dispose();
+            _loggerProvider?.Dispose();
+            _logForwarder.Dispose();
+        }
     }
 }

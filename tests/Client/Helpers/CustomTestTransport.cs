@@ -5,7 +5,7 @@ using ModelContextProtocol.Protocol.Messages;
 using ModelContextProtocol.Protocol.Transport;
 using System.Threading.Channels;
 
-namespace AzureMCP.Tests.Commands.Client;
+namespace AzureMcp.Tests.Client.Helpers;
 
 public class CustomTestTransport : ITransport
 {

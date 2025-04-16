@@ -1,4 +1,5 @@
 #!/bin/env pwsh
+#Requires -Version 7
 
 [CmdletBinding(DefaultParameterSetName='none')]
 param(
@@ -20,7 +21,7 @@ foreach ($archiveFile in $archiveFiles) {
         Expand-Archive -Path $archiveFile -DestinationPath $archiveFile.DirectoryName -Force
     }
 
-    Remove-Item -Path $archiveFile -Force
+    Remove-Item -Path $archiveFile -Force -ProgressAction SilentlyContinue
 }
 
 Write-Host "##[group] $Path Contents after:"

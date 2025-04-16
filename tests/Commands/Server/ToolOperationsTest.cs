@@ -32,7 +32,7 @@ public class ToolOperationsTest
     public async Task GetsAllTools()
     {
         var operations = new ToolOperations(_serviceProvider, _commandFactory, _logger);
-        var requestContext = new RequestContext<ListToolsRequestParams>(_server, new ListToolsRequestParams());
+        var requestContext = new RequestContext<ListToolsRequestParams>(_server);
 
         var handler = operations.ToolsCapability.ListToolsHandler;
 

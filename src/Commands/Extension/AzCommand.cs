@@ -5,8 +5,8 @@ using AzureMcp.Arguments.Extension;
 using AzureMcp.Models.Argument;
 using AzureMcp.Models.Command;
 using AzureMcp.Services.Interfaces;
-using ModelContextProtocol.Server;
 using Microsoft.Extensions.Logging;
+using ModelContextProtocol.Server;
 using System.CommandLine;
 using System.CommandLine.Parsing;
 using System.Runtime.InteropServices;
@@ -39,18 +39,17 @@ public sealed class AzCommand : GlobalCommand<AzArguments>
 
     protected override string GetCommandDescription() =>
         """
-        Your job is to answer questions about an Azure environment by executing Azure CLI commands. You have the following rules:
+Your job is to answer questions about an Azure environment by executing Azure CLI commands. You have the following rules:
 
-        - You should use the Azure CLI to manage Azure resources and services. Do not use any other tool.
-        - You should provide a valid Azure CLI command. For example: 'group list'.
-        - When deleting or modifying resources, ALWAYS request user confirmation.
-        - Whenever a command fails, retry it 3 times before giving up with an improved version of the code based on the returned feedback.
-        - When listing resources, ensure pagination is handled correctly so that all resources are returned.
-        - This tool can ONLY write code that interacts with Azure. It CANNOT generate charts, tables, graphs, etc.
-        - This tool can delete or modify resources in your Azure environment. Always be cautious and include appropriate warnings when providing commands to users.
-
-        Be concise, professional and to the point. Do not give generic advice, always reply with detailed & contextual data sourced from the current Azure environment.
-        """;
+- Use the Azure CLI to manage Azure resources and services. Do not use any other tool.
+- Provide a valid Azure CLI command. For example: 'group list'.
+- When deleting or modifying resources, ALWAYS request user confirmation.
+- If a command fails, retry 3 times before giving up with an improved version of the code based on the returned feedback.
+- When listing resources, ensure pagination is handled correctly so that all resources are returned.
+- You can ONLY write code that interacts with Azure. It CANNOT generate charts, tables, graphs, etc.
+- You can delete or modify resources in your Azure environment. Always be cautious and include appropriate warnings when providing commands to users.
+- Be concise, professional and to the point. Do not give generic advice, always reply with detailed & contextual data sourced from the current Azure environment.
+""";
 
     protected override void RegisterOptions(Command command)
     {

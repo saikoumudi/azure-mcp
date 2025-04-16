@@ -48,6 +48,7 @@ public class CosmosService(ISubscriptionService subscriptionService, ITenantServ
         var keys = await cosmosAccount.GetKeysAsync();
 
         var clientOptions = new CosmosClientOptions { AllowBulkExecution = true };
+        clientOptions.CosmosClientTelemetryOptions.DisableDistributedTracing = false;
         clientOptions.CustomHandlers.Add(new UserPolicyRequestHandler(UserAgent));
 
         if (retryPolicy != null)

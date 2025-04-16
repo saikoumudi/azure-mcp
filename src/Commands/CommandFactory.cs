@@ -5,10 +5,12 @@ using AzureMcp.Commands.Cosmos;
 using AzureMcp.Commands.Server;
 using AzureMcp.Commands.Storage.Blob;
 using AzureMcp.Commands.Subscription;
+using AzureMcp.Models;
 using AzureMcp.Models.Command;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.CommandLine;
+using System.Reflection;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -92,7 +94,7 @@ public class CommandFactory
         cosmosAccount.AddCommand("list", new Cosmos.AccountListCommand(GetLogger<Cosmos.AccountListCommand>()));
         cosmosItem.AddCommand("query", new ItemQueryCommand(GetLogger<ItemQueryCommand>()));
     }
-    
+
     private void RegisterStorageCommands()
     {
         // Create Storage command group
@@ -120,7 +122,7 @@ public class CommandFactory
             GetLogger<Storage.Table.TableListCommand>()));
 
         blobs.AddCommand("list", new BlobListCommand(GetLogger<BlobListCommand>()));
-        
+
         blobContainer.AddCommand("list", new Storage.Blob.Container.ContainerListCommand(
             GetLogger<Storage.Blob.Container.ContainerListCommand>()));
         blobContainer.AddCommand("details", new Storage.Blob.Container.ContainerDetailsCommand(
@@ -360,4 +362,11 @@ public class CommandFactory
     private static string GetPrefix(string currentPrefix, string additional) => string.IsNullOrEmpty(currentPrefix)
         ? additional
         : currentPrefix + Separator + additional;
+
+    public static IEnumerable<KeyValuePair<string, IBaseCommand>> GetVisibleCommands(IEnumerable<KeyValuePair<string, IBaseCommand>> commands)
+    {
+        return commands
+            .Where(kvp => kvp.Value.GetType().GetCustomAttribute<HiddenCommandAttribute>() == null)
+            .OrderBy(kvp => kvp.Key);
+    }
 }

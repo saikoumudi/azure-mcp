@@ -40,6 +40,7 @@ public class AuthenticationIntegrationTests : IAsyncLifetime
     public Task DisposeAsync() => Task.CompletedTask;
 
     [SkipIfDotnetTestFact]
+    [Trait("Category", "Live")]
     public async Task LoginWithIdentityBroker_ThenListSubscriptions_ShouldSucceed()
     {
         // Test implementation remains unchanged since we handle skipping in the attribute
