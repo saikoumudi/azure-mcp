@@ -21,7 +21,7 @@ public class TokenCredentialManagerTests
     [Fact]
     public void GetSharedCredential_ReturnsNonNullCredential()
     {
-        var credential = _manager.GetSharedCredential();
+        var credential = _manager.SharedCredential;
         Assert.NotNull(credential);
         Assert.IsType<CachedTokenCredential>(credential);
     }

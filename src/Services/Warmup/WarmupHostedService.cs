@@ -24,9 +24,8 @@ public class WarmupHostedService : IHostedService
             var tenants = await _tenantService.GetTenants();
             var tenantIds = tenants
                 .Where(t => !string.IsNullOrWhiteSpace(t.Id))
-                .Select(t => t.Id!)
-                .ToList();
-
+                .Select(t => t.Id!);
+                
             await BaseAzureService.WarmupTenantCredentialsAsync(tenantIds);
         }
         catch (Exception ex)

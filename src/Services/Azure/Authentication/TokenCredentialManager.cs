@@ -25,7 +25,7 @@ public class TokenCredentialManager
         _sharedCredential = new CachedTokenCredential(new CustomChainedCredential());
     }
 
-    public TokenCredential GetSharedCredential() => _sharedCredential;
+    public TokenCredential SharedCredential => _sharedCredential;
 
     public TokenCredential GetOrCreateTenantCredential(string tenantId)
     {
@@ -41,44 +41,37 @@ public class TokenCredentialManager
 
     public async Task WarmupSharedTokenAsync()
     {
+        await WarmupCredentialAsync(_sharedCredential);
+    }
+
+    public async Task WarmupTenantTokensAsync(IEnumerable<string> tenantIds)
+    {
+        var warmupTasks = tenantIds.Select(tenantId =>
+        {
+            var credential = GetOrCreateTenantCredential(tenantId);
+            return WarmupCredentialAsync(credential);
+        });
+
+        await Task.WhenAll(warmupTasks);
+    }
+
+    private async Task WarmupCredentialAsync(TokenCredential credential)
+    {
         var scopeTasks = ScopesToWarm.Select(async scope =>
         {
             try
             {
                 var context = new TokenRequestContext(new[] { scope });
-                _ = await _sharedCredential.GetTokenAsync(context, CancellationToken.None);
+                _ = await credential.GetTokenAsync(context, CancellationToken.None);
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Shared token warmup failed for scope {scope}: {ex.Message}");
+                // Optionally log or handle exception
+                _ = ex.ToString(); // No-op
+
             }
         });
 
         await Task.WhenAll(scopeTasks);
-    }
-
-    public async Task WarmupTenantTokensAsync(IEnumerable<string> tenantIds)
-    {
-        var warmupTasks = tenantIds.Select(async tenantId =>
-        {
-            var credential = GetOrCreateTenantCredential(tenantId);
-
-            var scopeTasks = ScopesToWarm.Select(async scope =>
-            {
-                try
-                {
-                    var context = new TokenRequestContext(new[] { scope });
-                    _ = await credential.GetTokenAsync(context, CancellationToken.None);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Tenant {tenantId} warmup failed for scope {scope}: {ex.Message}");
-                }
-            });
-
-            await Task.WhenAll(scopeTasks);
-        });
-
-        await Task.WhenAll(warmupTasks);
     }
 }

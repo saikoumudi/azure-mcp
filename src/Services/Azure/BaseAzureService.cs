@@ -53,7 +53,7 @@ public abstract class BaseAzureService(ITenantService? tenantService = null)
             : Task.Run(() => ResolveTenantIdAsync(tenant)).GetAwaiter().GetResult();
 
         return string.IsNullOrWhiteSpace(tenantId)
-            ? CredentialManager.GetSharedCredential()
+            ? CredentialManager.SharedCredential
             : CredentialManager.GetOrCreateTenantCredential(tenantId);
     }
 
