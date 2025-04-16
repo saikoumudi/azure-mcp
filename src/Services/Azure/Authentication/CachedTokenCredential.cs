@@ -40,15 +40,9 @@ public class CachedTokenCredential : TokenCredential
             return token;
         }
 
-        AccessToken newToken;
-        if (async)
-        {
-            newToken = await _innerCredential.GetTokenAsync(requestContext, cancellationToken).ConfigureAwait(false);
-        }
-        else
-        {
-            newToken = _innerCredential.GetToken(requestContext, cancellationToken);
-        }
+        AccessToken newToken = async ?
+            await _innerCredential.GetTokenAsync(requestContext, cancellationToken).ConfigureAwait(false) :
+            _innerCredential.GetToken(requestContext, cancellationToken);
 
         CacheToken(key, newToken);
         return newToken;

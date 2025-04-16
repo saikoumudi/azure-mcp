@@ -16,7 +16,7 @@ public class CachingTokenCredentialTests
     [Fact]
     public async Task ReturnsTokenFromInnerCredential_IfNotCached()
     {
-        var expected = new AccessToken("token123", DateTimeOffset.UtcNow.AddMinutes(5));
+        var expected = new AccessToken("token123", DateTimeOffset.UtcNow.AddMinutes(60));
         var inner = Substitute.For<TokenCredential>();
         inner.GetTokenAsync(Arg.Any<TokenRequestContext>(), Arg.Any<CancellationToken>())
              .Returns(expected);
@@ -32,7 +32,7 @@ public class CachingTokenCredentialTests
     [Fact]
     public async Task ReturnsCachedToken_IfNotExpired()
     {
-        var expected = new AccessToken("cached-token", DateTimeOffset.UtcNow.AddMinutes(5));
+        var expected = new AccessToken("cached-token", DateTimeOffset.UtcNow.AddMinutes(60));
         var inner = Substitute.For<TokenCredential>();
         inner.GetTokenAsync(Arg.Any<TokenRequestContext>(), Arg.Any<CancellationToken>())
              .Returns(expected);
@@ -49,8 +49,8 @@ public class CachingTokenCredentialTests
     [Fact]
     public async Task RefreshesToken_IfExpired()
     {
-        var expired = new AccessToken("expired", DateTimeOffset.UtcNow.AddMinutes(-2));
-        var fresh = new AccessToken("fresh", DateTimeOffset.UtcNow.AddMinutes(5));
+        var expired = new AccessToken("expired", DateTimeOffset.UtcNow.AddMinutes(-5));
+        var fresh = new AccessToken("fresh", DateTimeOffset.UtcNow.AddMinutes(60));
 
         var inner = Substitute.For<TokenCredential>();
         inner.GetTokenAsync(Arg.Any<TokenRequestContext>(), Arg.Any<CancellationToken>())
@@ -91,7 +91,7 @@ public class CachingTokenCredentialTests
     [Fact]
     public async Task HandlesConcurrentAccess_WithoutErrors()
     {
-        var token = new AccessToken("concurrent-token", DateTimeOffset.UtcNow.AddMinutes(5));
+        var token = new AccessToken("concurrent-token", DateTimeOffset.UtcNow.AddMinutes(60));
 
         var inner = Substitute.For<TokenCredential>();
         inner.GetTokenAsync(Arg.Any<TokenRequestContext>(), Arg.Any<CancellationToken>())

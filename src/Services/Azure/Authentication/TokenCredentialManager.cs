@@ -9,7 +9,7 @@ namespace AzureMcp.Services.Azure.Authentication;
 public class TokenCredentialManager
 {
     private readonly CachedTokenCredential _sharedCredential;
-    private readonly IMemoryCache _tenantCache;
+    private readonly IMemoryCache _tenantCredentialCache;
     private static readonly string[] ScopesToWarm = new[]
     {
         "https://management.azure.com/.default",
@@ -21,7 +21,7 @@ public class TokenCredentialManager
 
     public TokenCredentialManager(IMemoryCache? memoryCache = null)
     {
-        _tenantCache = memoryCache ?? new MemoryCache(new MemoryCacheOptions());
+        _tenantCredentialCache = memoryCache ?? new MemoryCache(new MemoryCacheOptions());
         _sharedCredential = new CachedTokenCredential(new CustomChainedCredential());
     }
 
@@ -29,13 +29,13 @@ public class TokenCredentialManager
 
     public TokenCredential GetOrCreateTenantCredential(string tenantId)
     {
-        if (_tenantCache.TryGetValue(tenantId, out var obj) && obj is TokenCredential cached)
+        if (_tenantCredentialCache.TryGetValue(tenantId, out var obj) && obj is TokenCredential cached)
         {
             return cached;
         }
 
         var credential = new CachedTokenCredential(new CustomChainedCredential(tenantId));
-        _tenantCache.Set(tenantId, credential, TimeSpan.FromHours(12));
+        _tenantCredentialCache.Set(tenantId, credential, TimeSpan.FromHours(12));
         return credential;
     }
 
@@ -64,12 +64,7 @@ public class TokenCredentialManager
                 var context = new TokenRequestContext(new[] { scope });
                 _ = await credential.GetTokenAsync(context, CancellationToken.None);
             }
-            catch (Exception ex)
-            {
-                // Optionally log or handle exception
-                _ = ex.ToString(); // No-op
-
-            }
+            catch (Exception){ /* No-op */}
         });
 
         await Task.WhenAll(scopeTasks);
