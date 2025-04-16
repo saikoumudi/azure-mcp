@@ -8,7 +8,7 @@ namespace AzureMcp.Services.Azure.Authentication;
 
 public class TokenCredentialManager
 {
-    private readonly CachingTokenCredential _sharedCredential;
+    private readonly CachedTokenCredential _sharedCredential;
     private readonly IMemoryCache _tenantCache;
     private static readonly string[] ScopesToWarm = new[]
     {
@@ -22,7 +22,7 @@ public class TokenCredentialManager
     public TokenCredentialManager(IMemoryCache? memoryCache = null)
     {
         _tenantCache = memoryCache ?? new MemoryCache(new MemoryCacheOptions());
-        _sharedCredential = new CachingTokenCredential(new CustomChainedCredential());
+        _sharedCredential = new CachedTokenCredential(new CustomChainedCredential());
     }
 
     public TokenCredential GetSharedCredential() => _sharedCredential;
@@ -34,7 +34,7 @@ public class TokenCredentialManager
             return cached;
         }
 
-        var credential = new CachingTokenCredential(new CustomChainedCredential(tenantId));
+        var credential = new CachedTokenCredential(new CustomChainedCredential(tenantId));
         _tenantCache.Set(tenantId, credential, TimeSpan.FromHours(12));
         return credential;
     }

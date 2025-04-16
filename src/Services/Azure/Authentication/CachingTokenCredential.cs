@@ -6,47 +6,54 @@ using Microsoft.Extensions.Caching.Memory;
 
 namespace AzureMcp.Services.Azure.Authentication;
 
-public class CachingTokenCredential : TokenCredential
+public class CachedTokenCredential : TokenCredential
 {
     private readonly TokenCredential _innerCredential;
+    private static readonly TimeSpan ExpiryBuffer = TimeSpan.FromMinutes(5);
 
     private readonly MemoryCache _cache = new(new MemoryCacheOptions
     {
         SizeLimit = 100 // Max number of unique tokens to cache
     });
 
-    public CachingTokenCredential(TokenCredential innerCredential)
+    public CachedTokenCredential(TokenCredential innerCredential)
     {
         _innerCredential = innerCredential ?? throw new ArgumentNullException(nameof(innerCredential));
     }
 
     public override AccessToken GetToken(TokenRequestContext requestContext, CancellationToken cancellationToken)
     {
-        var key = GetCacheKey(requestContext);
-
-        if (_cache.TryGetValue(key, out AccessToken token) && token.ExpiresOn > DateTimeOffset.UtcNow)
-        {
-            return token;
-        }
-
-        var newToken = _innerCredential.GetToken(requestContext, cancellationToken);
-        CacheToken(key, newToken);
-        return newToken;
+        return GetOrRefreshTokenAsync(requestContext, cancellationToken, async: false).GetAwaiter().GetResult();
     }
 
-    public override async ValueTask<AccessToken> GetTokenAsync(TokenRequestContext requestContext, CancellationToken cancellationToken)
+    public override ValueTask<AccessToken> GetTokenAsync(TokenRequestContext requestContext, CancellationToken cancellationToken)
+    {
+        return new ValueTask<AccessToken>(GetOrRefreshTokenAsync(requestContext, cancellationToken, async: true));
+    }
+
+    private async Task<AccessToken> GetOrRefreshTokenAsync(TokenRequestContext requestContext, CancellationToken cancellationToken, bool async)
     {
         var key = GetCacheKey(requestContext);
 
-        if (_cache.TryGetValue(key, out AccessToken token) && token.ExpiresOn > DateTimeOffset.UtcNow)
+        if (_cache.TryGetValue(key, out AccessToken token) && token.ExpiresOn > DateTimeOffset.UtcNow.Add(ExpiryBuffer))
         {
             return token;
         }
 
-        var newToken = await _innerCredential.GetTokenAsync(requestContext, cancellationToken).ConfigureAwait(false);
+        AccessToken newToken;
+        if (async)
+        {
+            newToken = await _innerCredential.GetTokenAsync(requestContext, cancellationToken).ConfigureAwait(false);
+        }
+        else
+        {
+            newToken = _innerCredential.GetToken(requestContext, cancellationToken);
+        }
+
         CacheToken(key, newToken);
         return newToken;
     }
+
 
     private void CacheToken(string key, AccessToken token)
     {

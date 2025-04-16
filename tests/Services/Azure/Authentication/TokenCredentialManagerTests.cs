@@ -23,7 +23,7 @@ public class TokenCredentialManagerTests
     {
         var credential = _manager.GetSharedCredential();
         Assert.NotNull(credential);
-        Assert.IsType<CachingTokenCredential>(credential);
+        Assert.IsType<CachedTokenCredential>(credential);
     }
 
     [Fact]

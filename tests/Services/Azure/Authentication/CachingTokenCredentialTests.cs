@@ -21,7 +21,7 @@ public class CachingTokenCredentialTests
         inner.GetTokenAsync(Arg.Any<TokenRequestContext>(), Arg.Any<CancellationToken>())
              .Returns(expected);
 
-        var caching = new CachingTokenCredential(inner);
+        var caching = new CachedTokenCredential(inner);
 
         var result = await caching.GetTokenAsync(RequestContext, CancellationToken.None);
 
@@ -37,7 +37,7 @@ public class CachingTokenCredentialTests
         inner.GetTokenAsync(Arg.Any<TokenRequestContext>(), Arg.Any<CancellationToken>())
              .Returns(expected);
 
-        var caching = new CachingTokenCredential(inner);
+        var caching = new CachedTokenCredential(inner);
 
         var first = await caching.GetTokenAsync(RequestContext, CancellationToken.None);
         var second = await caching.GetTokenAsync(RequestContext, CancellationToken.None);
@@ -56,7 +56,7 @@ public class CachingTokenCredentialTests
         inner.GetTokenAsync(Arg.Any<TokenRequestContext>(), Arg.Any<CancellationToken>())
              .Returns(_ => expired, _ => fresh);
 
-        var caching = new CachingTokenCredential(inner);
+        var caching = new CachedTokenCredential(inner);
 
         var first = await caching.GetTokenAsync(RequestContext, CancellationToken.None);
         var second = await caching.GetTokenAsync(RequestContext, CancellationToken.None);
@@ -75,7 +75,7 @@ public class CachingTokenCredentialTests
         inner.GetTokenAsync(Arg.Any<TokenRequestContext>(), Arg.Any<CancellationToken>())
              .Returns(tokenA, tokenB);
 
-        var caching = new CachingTokenCredential(inner);
+        var caching = new CachedTokenCredential(inner);
 
         var context1 = new TokenRequestContext(new[] { "https://a.com/.default" });
         var context2 = new TokenRequestContext(new[] { "https://b.com/.default" });
@@ -97,7 +97,7 @@ public class CachingTokenCredentialTests
         inner.GetTokenAsync(Arg.Any<TokenRequestContext>(), Arg.Any<CancellationToken>())
              .Returns(token);
 
-        var caching = new CachingTokenCredential(inner);
+        var caching = new CachedTokenCredential(inner);
 
         var tasks = Enumerable.Range(0, 10)
             .Select(_ => caching.GetTokenAsync(RequestContext, CancellationToken.None).AsTask())
