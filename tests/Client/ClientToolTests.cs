@@ -2,7 +2,9 @@
 // Licensed under the MIT License.
 
 using AzureMcp.Tests.Client.Helpers;
+using ModelContextProtocol;
 using ModelContextProtocol.Client;
+using ModelContextProtocol.Protocol.Types;
 using System.Text.Json;
 using Xunit;
 
@@ -65,5 +67,76 @@ public class ClientToolTests : IClassFixture<McpClientFixture>
     {
         await _client.PingAsync();
         // If no exception is thrown, the ping was successful.
+    }
+
+
+    [Fact]
+    [Trait("Category", "Live")]
+    public async Task Should_Error_When_Resources_List_Not_Supported()
+    {
+        var ex = await Assert.ThrowsAsync<McpException>(() => _client.ListResourcesAsync());
+        Assert.Contains("Request failed", ex.Message);
+        Assert.Equal(-32601, ex.ErrorCode);
+    }
+
+    [Fact]
+    [Trait("Category", "Live")]
+    public async Task Should_Error_When_Resources_Read_Not_Supported()
+    {
+        var ex = await Assert.ThrowsAsync<McpException>(() => _client.ReadResourceAsync("test://resource"));
+        Assert.Contains("Request failed", ex.Message);
+        Assert.Equal(-32601, ex.ErrorCode);
+    }
+
+    [Fact]
+    [Trait("Category", "Live")]
+    public async Task Should_Error_When_Resources_Templates_List_Not_Supported()
+    {
+        var ex = await Assert.ThrowsAsync<McpException>(() => _client.ListResourceTemplatesAsync());
+        Assert.Contains("Request failed", ex.Message);
+        Assert.Equal(-32601, ex.ErrorCode);
+    }
+
+    [Fact]
+    [Trait("Category", "Live")]
+    public async Task Should_Error_When_Resources_Subscribe_Not_Supported()
+    {
+        var ex = await Assert.ThrowsAsync<McpException>(() => _client.SubscribeToResourceAsync("test://resource"));
+        Assert.Contains("Request failed", ex.Message);
+        Assert.Equal(-32601, ex.ErrorCode);
+    }
+
+    [Fact]
+    [Trait("Category", "Live")]
+    public async Task Should_Error_When_Resources_Unsubscribe_Not_Supported()
+    {
+        var ex = await Assert.ThrowsAsync<McpException>(() => _client.UnsubscribeFromResourceAsync("test://resource"));
+        Assert.Contains("Request failed", ex.Message);
+        Assert.Equal(-32601, ex.ErrorCode);
+    }
+
+    [Fact]
+    [Trait("Category", "Live")]
+    public async Task Should_Not_Hang_On_Logging_SetLevel_Not_Supported()
+    {
+        await _client.SetLoggingLevel(LoggingLevel.Info);
+    }
+
+    [Fact]
+    [Trait("Category", "Live")]
+    public async Task Should_Error_When_Prompts_List_Not_Supported()
+    {
+        var ex = await Assert.ThrowsAsync<McpException>(() => _client.ListPromptsAsync());
+        Assert.Contains("Request failed", ex.Message);
+        Assert.Equal(-32601, ex.ErrorCode);
+    }
+
+    [Fact]
+    [Trait("Category", "Live")]
+    public async Task Should_Error_When_Prompts_Get_Not_Supported()
+    {
+        var ex = await Assert.ThrowsAsync<McpException>(() => _client.GetPromptAsync("unsupported_prompt"));
+        Assert.Contains("Request failed", ex.Message);
+        Assert.Equal(-32601, ex.ErrorCode);
     }
 }
