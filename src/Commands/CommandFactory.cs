@@ -9,6 +9,7 @@ using AzureMcp.Models;
 using AzureMcp.Models.Command;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using AzureMcp.Commands.Datadog;
 using System.CommandLine;
 using System.Reflection;
 using System.Text.Encodings.Web;
@@ -58,6 +59,7 @@ public class CommandFactory
     {
         // Register top-level command groups
         RegisterCosmosCommands();
+        RegisterDatadogCommands();
         RegisterStorageCommands();
         RegisterMonitorCommands();
         RegisterAppConfigCommands();
@@ -222,6 +224,19 @@ public class CommandFactory
         var startServer = new ServiceStartCommand(_serviceProvider);
         mcpServer.AddCommand("start", startServer);
 
+    }
+
+    private void RegisterDatadogCommands()
+    {
+        // Create Datadog command group
+        var datadog = new CommandGroup("datadog", "Datadog operations - Commands for managing and querying Datadog monitored resources.");
+        _rootGroup.AddSubGroup(datadog);
+
+        // Create monitored-resources subgroup
+        var monitoredResources = new CommandGroup("monitored-resources", "Datadog monitored resources operations - Commands for listing monitored resources in Datadog.");
+        datadog.AddSubGroup(monitoredResources);
+
+        monitoredResources.AddCommand("list", new Datadog.MonitoredResources.MonitoredResourcesListCommand(GetLogger<Datadog.MonitoredResources.MonitoredResourcesListCommand>()));
     }
 
     private void ConfigureCommands(CommandGroup group)
