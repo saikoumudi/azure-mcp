@@ -1,19 +1,26 @@
 # Release History
 
-## 0.0.12 (Unreleased)
+## 0.0.13 (2025-05-06)
 
 ### Features Added
 
-### Breaking Changes
+- Support for Azure PostgreSQL. https://github.com/Azure/azure-mcp/pull/81
 
-### Bugs Fixed
+## 0.0.12 (2025-05-05)
+
+### Features Added
+
+- Azure Search Tools https://github.com/Azure/azure-mcp/pull/83
 
 ### Other Changes
+
+- Arguments no longer echoed in response: https://github.com/Azure/azure-mcp/pull/79
+- Editorconfig and gitattributes updated: https://github.com/Azure/azure-mcp/pull/91
 
 ## 0.0.11 (2025-04-29)
 
 ### Features Added
- 
+
 ### Breaking Changes
 
 ### Bugs Fixed
@@ -32,7 +39,7 @@
 - Support for Azure Resource Groups.
 - Support for Azure CLI.
 - Support for Azure Developer CLI (azd).
- 
+
 ### Breaking Changes
 
 ### Bugs Fixed

@@ -1,6 +1,11 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System.CommandLine;
+using System.Reflection;
+using System.Text.Encodings.Web;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using AzureMcp.Commands.Cosmos;
 using AzureMcp.Commands.Server;
 using AzureMcp.Commands.Storage.Blob;
@@ -9,11 +14,6 @@ using AzureMcp.Models;
 using AzureMcp.Models.Command;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using System.CommandLine;
-using System.Reflection;
-using System.Text.Encodings.Web;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 
 namespace AzureMcp.Commands;
 
@@ -23,7 +23,7 @@ public class CommandFactory
     private readonly ILogger<CommandFactory> _logger;
     private readonly RootCommand _rootCommand;
     private readonly CommandGroup _rootGroup;
-    private readonly JsonSerializerOptions _jsonOptions;
+    private readonly ModelsJsonContext _srcGenWithOptions;
 
     internal static readonly char Separator = '-';
 
@@ -54,14 +54,13 @@ public class CommandFactory
         _rootGroup = new CommandGroup("azmcp", "Azure MCP Server");
         _rootCommand = CreateRootCommand();
         _commandMap = CreateCommmandDictionary(_rootGroup, string.Empty);
-        _jsonOptions = new JsonSerializerOptions
+        _srcGenWithOptions = new ModelsJsonContext(new JsonSerializerOptions
         {
             WriteIndented = true,
             Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
-        };
-        _jsonOptions.Converters.Add(new StringConverter());
+        });
     }
 
     public RootCommand RootCommand => _rootCommand;
@@ -78,6 +77,7 @@ public class CommandFactory
         RegisterMonitorCommands();
         RegisterAppConfigCommands();
         RegisterSearchCommands();
+        RegisterPostgresCommands();
         RegisterToolsCommands();
         RegisterExtensionCommands();
         RegisterSubscriptionCommands();
@@ -110,6 +110,28 @@ public class CommandFactory
         cosmosContainer.AddCommand("list", new Cosmos.ContainerListCommand(GetLogger<Cosmos.ContainerListCommand>()));
         cosmosAccount.AddCommand("list", new Cosmos.AccountListCommand(GetLogger<Cosmos.AccountListCommand>()));
         cosmosItem.AddCommand("query", new ItemQueryCommand(GetLogger<ItemQueryCommand>()));
+    }
+
+    private void RegisterPostgresCommands()
+    {
+        var pg = new CommandGroup("postgres", "PostgreSQL operations - Commands for listing and managing Azure Database for PostgreSQL - Flexible server.");
+        _rootGroup.AddSubGroup(pg);
+
+        var database = new CommandGroup("database", "PostgreSQL database operations");
+        pg.AddSubGroup(database);
+        database.AddCommand("list", new Postgres.Database.DatabaseListCommand(GetLogger<Postgres.Database.DatabaseListCommand>()));
+        database.AddCommand("query", new Postgres.Database.DatabaseQueryCommand(GetLogger<Postgres.Database.DatabaseQueryCommand>()));
+
+        var table = new CommandGroup("table", "PostgreSQL table operations");
+        pg.AddSubGroup(table);
+        table.AddCommand("list", new Postgres.Table.TableListCommand(GetLogger<Postgres.Table.TableListCommand>()));
+        table.AddCommand("schema", new Postgres.Table.GetSchemaCommand(GetLogger<Postgres.Table.GetSchemaCommand>()));
+
+        var server = new CommandGroup("server", "PostgreSQL server operations");
+        pg.AddSubGroup(server);
+        server.AddCommand("list", new Postgres.Server.ServerListCommand(GetLogger<Postgres.Server.ServerListCommand>()));
+        server.AddCommand("config", new Postgres.Server.GetConfigCommand(GetLogger<Postgres.Server.GetConfigCommand>()));
+        server.AddCommand("param", new Postgres.Server.GetParamCommand(GetLogger<Postgres.Server.GetParamCommand>()));
     }
 
     private void RegisterStorageCommands()
@@ -254,7 +276,7 @@ public class CommandFactory
         _rootGroup.AddSubGroup(mcpServer);
 
         // Register MCP Server commands
-        var startServer = new ServiceStartCommand(_serviceProvider);
+        var startServer = new ServiceStartCommand();
         mcpServer.AddCommand("start", startServer);
 
     }
@@ -317,10 +339,10 @@ public class CommandFactory
 
                 if (response.Status == 200 && response.Results == null)
                 {
-                    response.Results = new List<object>();
+                    response.Results = ResponseResult.Create(new List<string>(), JsonSourceGenerationContext.Default.ListString);
                 }
 
-                Console.WriteLine(JsonSerializer.Serialize(response, _jsonOptions));
+                Console.WriteLine(JsonSerializer.Serialize(response, _srcGenWithOptions.CommandResponse));
             }
             catch (Exception ex)
             {

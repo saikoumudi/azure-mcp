@@ -1,14 +1,14 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System.Diagnostics;
+using System.Reflection;
 using Azure.Monitor.OpenTelemetry.AspNetCore;
 using Microsoft.Extensions.DependencyInjection;
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
-using System.Diagnostics;
-using System.Reflection;
 
 namespace AzureMcp.Extensions;
 
@@ -57,7 +57,12 @@ public static class OpenTelemetryExtensions
         var appInsightsConnectionString = Environment.GetEnvironmentVariable("APPLICATIONINSIGHTS_CONNECTION_STRING");
         if (!string.IsNullOrEmpty(appInsightsConnectionString))
         {
-            services.AddOpenTelemetry().UseAzureMonitor();
+            services
+                .ConfigureOpenTelemetryTracerProvider((_, b) => b.AddSource("*"))
+                .ConfigureOpenTelemetryMeterProvider((_, b) => b.AddMeter("*"))
+                .AddOpenTelemetry()
+                    .ConfigureResource(r => r.AddService("azmcp", serviceVersion: Assembly.GetExecutingAssembly()?.GetName()?.Version?.ToString()))
+                    .UseAzureMonitor();
             return true;
         }
 

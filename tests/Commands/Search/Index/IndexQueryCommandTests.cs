@@ -1,6 +1,9 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System.CommandLine;
+using System.CommandLine.Parsing;
+using System.Text.Json;
 using AzureMcp.Arguments;
 using AzureMcp.Commands.Search.Index;
 using AzureMcp.Models.Command;
@@ -9,12 +12,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
-using System.CommandLine;
-using System.CommandLine.Parsing;
-using System.Text.Json;
 using Xunit;
 
-namespace AzureMcp.Tests.Commands.Search.Index;
+namespace AzureMcp.Tests.Commands.Search;
 
 public class IndexQueryCommandTests
 {
@@ -41,13 +41,21 @@ public class IndexQueryCommandTests
         var indexName = "index1";
         var queryText = "test query";
 
-        var expectedResults = new
-        {
-            totalCount = 1,
-            results = new[] {
-                JsonDocument.Parse("{\"id\":\"1\",\"title\":\"Test Document\"}").RootElement
-            }
-        };
+        List<JsonElement> expectedResults = [
+            JsonDocument.Parse(
+                """
+                {
+                    "totalCount": 1,
+                    "results": [
+                        {
+                            "id": "1",
+                            "title": "Test Document"
+                        }
+                    ]
+                }
+                """
+            ).RootElement
+        ];
 
         _searchService
             .QueryIndex(
@@ -121,10 +129,10 @@ public class IndexQueryCommandTests
         // Assert
         Assert.NotNull(response);
         Assert.Equal(400, response.Status);
-        Assert.NotNull(response.Arguments);
-        Assert.Contains(response.Arguments ?? [], a => a.Name == "service-name" && a.Required);
-        Assert.Contains(response.Arguments ?? [], a => a.Name == "index-name" && a.Required);
-        Assert.Contains(response.Arguments ?? [], a => a.Name == "query" && a.Required);
+        Assert.NotNull(response.Message);
+        Assert.Contains("service-name", response.Message);
+        Assert.Contains("index-name", response.Message);
+        Assert.Contains("query", response.Message);
     }
 
     [Fact]
