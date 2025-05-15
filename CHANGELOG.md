@@ -1,14 +1,16 @@
 # Release History
 
-## 0.0.17 (Unreleased)
-
-### Features Added
-
-### Breaking Changes
+## 0.0.18 (2025-05-14)
 
 ### Bugs Fixed
 
-### Other Changes
+- Include option to exclude managed keys. https://github.com/Azure/azure-mcp/pull/202
+
+## 0.0.17 (2025-05-13)
+
+### Bugs Fixed
+
+- Added an opt-in timeout for browser-based authentication to handle cases where the process waits indefinitely if the user closes the browser. https://github.com/Azure/azure-mcp/pull/189
 
 ## 0.0.16 (2025-05-13)
 
