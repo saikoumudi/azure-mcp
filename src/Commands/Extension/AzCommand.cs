@@ -124,8 +124,8 @@ Your job is to answer questions about an Azure environment by executing Azure CL
         try
         {
             var credentials = JsonSerializer.Deserialize<Dictionary<string, string>>(credentialsJson);
-            if (credentials == null || !credentials.TryGetValue("clientId", out var clientId) || 
-                !credentials.TryGetValue("clientSecret", out var clientSecret) || 
+            if (credentials == null || !credentials.TryGetValue("clientId", out var clientId) ||
+                !credentials.TryGetValue("clientSecret", out var clientSecret) ||
                 !credentials.TryGetValue("tenantId", out var tenantId))
             {
                 logger.LogWarning("Invalid AZURE_CREDENTIALS format. Skipping authentication. Ensure it contains clientId, clientSecret, and tenantId.");
@@ -170,7 +170,7 @@ Your job is to answer questions about an Azure environment by executing Azure CL
             var command = args.Command;
             var processService = context.GetService<IExternalProcessService>();
 
-            // Try to authenticate, but continue even if it fails
+            // Try to authenticate, but continue even if it fails.
             await AuthenticateWithAzureCredentialsAsync(processService, _logger);
 
             var azPath = FindAzCliPath() ?? throw new FileNotFoundException("Azure CLI executable not found in PATH or common installation locations. Please ensure Azure CLI is installed.");
