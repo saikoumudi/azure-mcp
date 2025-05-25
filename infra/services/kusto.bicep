@@ -14,6 +14,10 @@ param tenantId string = '72f988bf-86f1-41af-91ab-2d7cd011db47'
 @description('The client OID to grant access to test resources.')
 param testApplicationOid string
 
+@description('The type of the test application principal. Lease empty for user.')
+param testApplicationType string = ''
+
+var shouldCreateRoleAssignments = testApplicationType == 'App'
 
 resource kustoCluster 'Microsoft.Kusto/clusters@2024-04-13' = {
   name: baseName
@@ -31,5 +35,29 @@ resource kustoCluster 'Microsoft.Kusto/clusters@2024-04-13' = {
     location: location
     name: 'ToDoLists'
     kind: 'ReadWrite'
+  }
+}
+
+// Role assignment for test application - Cluster Admin
+resource testAppClusterAdminRole 'Microsoft.Kusto/clusters/principalAssignments@2024-04-13' = if(shouldCreateRoleAssignments) {
+  parent: kustoCluster
+  name: guid(kustoCluster.id, 'cluster', testApplicationOid)
+  properties: {
+    tenantId: tenantId
+    principalId: testApplicationOid
+    principalType: 'App'
+    role: 'AllDatabasesAdmin'
+  }
+}
+
+// Role assignment for test application - Database Admin
+resource testAppDatabaseAdminRole 'Microsoft.Kusto/clusters/databases/principalAssignments@2024-04-13' = if(shouldCreateRoleAssignments) {
+  parent: kustoCluster::kustoDatabase
+  name: guid(kustoCluster.id, 'database', testApplicationOid)
+  properties: {
+    tenantId: tenantId
+    principalId: testApplicationOid
+    principalType: 'App'
+    role: 'Admin'
   }
 }
