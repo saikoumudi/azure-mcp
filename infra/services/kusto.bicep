@@ -36,28 +36,14 @@ resource kustoCluster 'Microsoft.Kusto/clusters@2024-04-13' = {
     name: 'ToDoLists'
     kind: 'ReadWrite'
   }
-}
 
-// Role assignment for test application - Cluster Admin
-resource testAppClusterAdminRole 'Microsoft.Kusto/clusters/principalAssignments@2024-04-13' = if(shouldCreateRoleAssignments) {
-  parent: kustoCluster
-  name: guid(kustoCluster.id, 'cluster', testApplicationOid)
-  properties: {
-    tenantId: tenantId
-    principalId: testApplicationOid
-    principalType: 'App'
-    role: 'AllDatabasesAdmin'
-  }
-}
-
-// Role assignment for test application - Database Admin
-resource testAppDatabaseAdminRole 'Microsoft.Kusto/clusters/databases/principalAssignments@2024-04-13' = if(shouldCreateRoleAssignments) {
-  parent: kustoCluster::kustoDatabase
-  name: guid(kustoCluster.id, 'database', testApplicationOid)
-  properties: {
-    tenantId: tenantId
-    principalId: testApplicationOid
-    principalType: 'App'
-    role: 'Admin'
+  resource kustoPrincipals 'principalAssignments' = if(shouldCreateRoleAssignments) {
+    name: guid(kustoCluster.id, testApplicationOid)
+    properties: {
+      tenantId: tenantId
+      principalId: testApplicationOid
+      principalType: 'App'
+      role: 'AllDatabasesAdmin'
+    }
   }
 }
