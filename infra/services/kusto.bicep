@@ -37,7 +37,7 @@ resource kustoCluster 'Microsoft.Kusto/clusters@2024-04-13' = {
     kind: 'ReadWrite'
   }
 
-  resource kustoPrincipals 'principalAssignments' = if(shouldCreateRoleAssignments) {
+  resource kustoPrincipals 'principalAssignments' = {
     name: guid(kustoCluster.id, testApplicationOid)
     properties: {
       tenantId: tenantId
