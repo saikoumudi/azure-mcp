@@ -20,7 +20,7 @@ param testApplicationType string = ''
 var shouldCreateRoleAssignments = testApplicationType == 'App'
 
 // Owner role definition ID for role assignment
-var ownerRoleDefinitionId = 'ea037b3f-7b9c-48b6-820f-8f0d04de3690'
+var ownerRoleDefinitionId = '8e3af657-a8ff-443c-a75c-2fe8c4bcb635'
 
 resource kustoCluster 'Microsoft.Kusto/clusters@2024-04-13' = {
   name: baseName
