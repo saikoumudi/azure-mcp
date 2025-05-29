@@ -19,6 +19,9 @@ param testApplicationType string = ''
 
 var shouldCreateRoleAssignments = testApplicationType == 'App'
 
+// Owner role definition ID for role assignment
+var ownerRoleDefinitionId = 'ea037b3f-7b9c-48b6-820f-8f0d04de3690'
+
 resource kustoCluster 'Microsoft.Kusto/clusters@2024-04-13' = {
   name: baseName
   location: location
@@ -45,5 +48,15 @@ resource kustoCluster 'Microsoft.Kusto/clusters@2024-04-13' = {
       role: 'AllDatabasesAdmin'
       tenantId: tenantId
     }
+  }
+}
+
+// Role assignment for Owner role at resource group scope
+resource ownerRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(resourceGroup().id, testApplicationOid, ownerRoleDefinitionId)
+  properties: {
+    principalId: testApplicationOid
+    principalType: testApplicationType == 'App' ? 'ServicePrincipal' : 'User'
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', ownerRoleDefinitionId)
   }
 }
