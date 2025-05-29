@@ -56,7 +56,7 @@ resource ownerRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01
   name: guid(resourceGroup().id, testApplicationOid, ownerRoleDefinitionId)
   properties: {
     principalId: testApplicationOid
-    principalType: 'App'
+    principalType: 'ServicePrincipal'
     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', ownerRoleDefinitionId)
   }
 }
