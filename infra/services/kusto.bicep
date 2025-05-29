@@ -39,16 +39,6 @@ resource kustoCluster 'Microsoft.Kusto/clusters@2024-04-13' = {
     name: 'ToDoLists'
     kind: 'ReadWrite'
   }
-
-  resource kustoPrincipals 'principalAssignments' = {
-    name: guid(kustoCluster.id, testApplicationOid)
-    properties: {
-      principalId: testApplicationOid
-      principalType: 'App'
-      role: 'AllDatabasesAdmin'
-      tenantId: tenantId
-    }
-  }
 }
 
 // Role assignment for Owner role at resource group scope
