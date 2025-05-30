@@ -38,15 +38,15 @@ resource kustoCluster 'Microsoft.Kusto/clusters@2024-04-13' = {
     location: location
     name: 'ToDoLists'
     kind: 'ReadWrite'
-  }
-}
 
-// Role assignment for Owner role at resource group scope
-resource ownerRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(resourceGroup().id, testApplicationOid, ownerRoleDefinitionId)
-  properties: {
-    principalId: testApplicationOid
-    principalType: 'ServicePrincipal'
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', ownerRoleDefinitionId)
+    resource databasePrincipal 'principalAssignments' = {
+        name: guid(kustoCluster.id, testApplicationOid)
+        properties: {
+            principalId: testApplicationOid
+            principalType: 'App'
+            role: 'Admin'
+            tenantId: tenantId
+        }
+    }
   }
 }
