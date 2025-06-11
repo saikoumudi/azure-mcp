@@ -4,7 +4,8 @@
 [CmdletBinding()]
 param(
     [string] $TestResultsPath,
-    [switch] $Live
+    [switch] $Live,
+    [switch] $CoverageSummary
 )
 
 $ErrorActionPreference = 'Stop'
@@ -85,65 +86,66 @@ if ($env:TF_BUILD) {
 
 # Command Coverage Summary
 
-$CommandCoverageSummaryFile = "$TestResultsPath/Coverage.md"
+if($CoverageSummary) {
+    $CommandCoverageSummaryFile = "$TestResultsPath/Coverage.md"
 
-$xml = [xml](Get-Content $coverageFile.FullName)
+    $xml = [xml](Get-Content $coverageFile.FullName)
 
-$classes = $xml.coverage.packages.package.classes.class |
-    Where-Object { $_.name -match 'AzureMcp\.Commands\.' -and $_.filename -notlike '*\System.Text.Json.SourceGeneration\*' }
+    $classes = $xml.coverage.packages.package.classes.class |
+        Where-Object { $_.name -match 'AzureMcp\.Commands\.' -and $_.filename -notlike '*System.Text.Json.SourceGeneration*' }
 
-$fileGroups = $classes |
-    Group-Object { $_.filename } |
-    Sort-Object Name
+    $fileGroups = $classes |
+        Group-Object { $_.filename } |
+        Sort-Object Name
 
-$summary = $fileGroups | ForEach-Object {
-    # for live tests, we only want to look at the ExecuteAsync methods
-    $methods = if($Live) {
-        $_.Group | ForEach-Object {
-            if($_.name -like '*<ExecuteAsync>*'){
-                # Generated code for async ExecuteAsync methods
-                return $_.methods.method
-            } else {
-                # Non async methods named ExecuteAsync
-                return $_.methods.method | Where-Object { $_.name -eq 'ExecuteAsync' }
+    $summary = $fileGroups | ForEach-Object {
+        # for live tests, we only want to look at the ExecuteAsync methods
+        $methods = if($Live) {
+            $_.Group | ForEach-Object {
+                if($_.name -like '*<ExecuteAsync>*'){
+                    # Generated code for async ExecuteAsync methods
+                    return $_.methods.method
+                } else {
+                    # Non async methods named ExecuteAsync
+                    return $_.methods.method | Where-Object { $_.name -eq 'ExecuteAsync' }
+                }
+            }
+        }
+        else {
+            $_.Group.methods.method
+        }
+
+        $lines = $methods.lines.line
+        $covered = ($lines | Where-Object { $_.hits -gt 0 }).Count
+        $total = $lines.Count
+
+        if($total) {
+            return [pscustomobject]@{
+                file = $_.name
+                pct = if ($total -gt 0) { $covered * 100 / $total } else { 0 }
+                covered = $covered
+                lines = $total
             }
         }
     }
-    else {
-        $_.Group.methods.method
+
+    $maxFileWidth = ($summary | Measure-Object { $_.file.Length } -Maximum).Maximum
+
+    $header = $live ? "Live test code coverage for command ExecuteAsync methods" : "Unit test code coverage for command classes"
+
+    $output = ($env:TF_BUILD ? "" : "$header`n`n") +
+            "File $(' ' * ($maxFileWidth - 5)) | % Covered | Lines | Covered`n" +
+            "$('-' * $maxFileWidth) | --------: | ----: | ------:`n"
+
+    $summary | ForEach-Object {
+        # Format each line with the appropriate width
+        $output += ("{0,-$maxFileWidth} | {1,9} | {2,5} | {3,7}`n" -f $_.file, $_.pct.ToString("F0"), $_.lines, $_.covered)
     }
 
-    $lines = $methods.lines.line
-    $covered = ($lines | Where-Object { $_.hits -gt 0 }).Count
-    $total = $lines.Count
+    $output | Out-File -FilePath $CommandCoverageSummaryFile -Encoding utf8
 
-    if($total) {
-        return [pscustomobject]@{
-            file = $_.name
-            pct = if ($total -gt 0) { $covered * 100 / $total } else { 0 }
-            covered = $covered
-            lines = $total
-        }
+    if ($env:TF_BUILD) {
+        Write-Host "##vso[task.addattachment type=Distributedtask.Core.Summary;name=$header;]$(Resolve-Path $CommandCoverageSummaryFile)"
     }
 }
-
-$maxFileWidth = ($summary | Measure-Object { $_.file.Length } -Maximum).Maximum
-
-$header = $live ? "Live test code coverage for command ExecuteAsync methods" : "Unit test code coverage for command classes"
-
-$output = ($env:TF_BUILD ? "" : "$header`n`n") +
-          "File $(' ' * ($maxFileWidth - 5)) | % Covered | Lines | Covered`n" +
-          "$('-' * $maxFileWidth) | --------: | ----: | ------:`n"
-
-$summary | ForEach-Object {
-    # Format each line with the appropriate width
-    $output += ("{0,-$maxFileWidth} | {1,9} | {2,5} | {3,7}`n" -f $_.file, $_.pct.ToString("F0"), $_.lines, $_.covered)
-}
-
-$output | Out-File -FilePath $CommandCoverageSummaryFile -Encoding utf8
-
-if ($env:TF_BUILD) {
-    Write-Host "##vso[task.addattachment type=Distributedtask.Core.Summary;name=$header;]$(Resolve-Path $CommandCoverageSummaryFile)"
-}
-
 exit $testExitCode
