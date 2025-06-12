@@ -24,7 +24,6 @@ public static class CommandExtensions
         {
             return command.Parse(Array.Empty<string>());
         }
-
         var args = new List<string>();
         foreach (var (key, value) in arguments)
         {
@@ -36,14 +35,11 @@ public static class CommandExtensions
                 continue;
             }
 
-            args.Add($"--{key}");
-
             if (value.ValueKind == JsonValueKind.Null)
             {
                 continue;
             }
-
-            // Handle different value types
+            args.Add($"--{option.Name}"); // Use the actual option name for consistency            // Handle different value types
             var strValue = value.ValueKind switch
             {
                 JsonValueKind.True => "true",
