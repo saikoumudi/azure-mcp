@@ -308,6 +308,10 @@ For applications running in Azure:
 export AZURE_MCP_INCLUDE_PRODUCTION_CREDENTIALS=true
 ```
 
+For more details on these authentication methods, see:
+- [Managed Identity documentation](https://learn.microsoft.com/azure/active-directory/managed-identities-azure-resources/)
+- [Workload Identity Federation documentation](https://learn.microsoft.com/azure/active-directory/workload-identities/workload-identity-federation)
+
 ## Getting Help
 
 When working with administrators, provide:
@@ -319,3 +323,5 @@ When working with administrators, provide:
 5. **Logs:** Relevant log entries showing the authentication attempt
 
 For additional support, see the [Troubleshooting Guide](../TROUBLESHOOTING.md).
+
+If you need further assistance, you can request help by [filing a GitHub issue](https://github.com/Azure/azure-mcp/issues/new) in this repository.
