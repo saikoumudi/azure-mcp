@@ -288,7 +288,7 @@ See [Troubleshooting guide](https://github.com/Azure/azure-mcp/blob/main/TROUBLE
 ### 🔑 Authentication
 
 <details>
-<summary>We use Azure Identity SDK under the hood via DefaultAzureCredential, which tries these credentials in order:</summary>
+<summary>Authentication options including DefaultAzureCredential flow, RBAC permissions, troubleshooting, and production credentials</summary>
 
 The Azure MCP Server seamlessly integrates with your host operating system's authentication mechanisms, making it super easy to get started! We use Azure Identity under the hood via [`DefaultAzureCredential`](https://learn.microsoft.com/dotnet/azure/sdk/authentication/credential-chains?tabs=dac), which tries these credentials in order:
 
