@@ -304,6 +304,8 @@ If you're already logged in through any of these methods, the Azure MCP Server w
 
 If you're running into any issues with authentication, visit our [troubleshooting guide](https://github.com/Azure/azure-mcp/blob/main/TROUBLESHOOTING.md).
 
+For advanced authentication scenarios including protected resources, firewall restrictions, and enterprise environments, see our [detailed Authentication guide](https://github.com/Azure/azure-mcp/blob/main/docs/Authentication.md).
+
 ### Production Credentials
 
 By default, the Azure MCP Server excludes production credentials like Managed Identity and Workload Identity. To enable these credentials, set the environment variable:
