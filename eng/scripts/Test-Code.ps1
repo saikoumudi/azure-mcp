@@ -21,7 +21,7 @@ if (!$TestResultsPath) {
 Remove-Item -Recurse -Force $TestResultsPath -ErrorAction SilentlyContinue
 
 if($env:TF_BUILD) {
-    Move-Item -Path "$RepoRoot/tests/xunit.runner.ci.json" -Destination "$RepoRoot/tests/xunit.runner.json" -Force
+    Move-Item -Path "$RepoRoot/tests/xunit.runner.ci.json" -Destination "$RepoRoot/tests/xunit.runner.json" -Force -ErrorAction Continue
     Write-Host "Replaced xunit.runner.json with xunit.runner.ci.json"
 }
 
