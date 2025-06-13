@@ -310,18 +310,40 @@ When resources are heavily restricted:
 
 ### AADSTS500200 error: User account is a personal Microsoft account
 
-This error occurs because the Azure MCP server uses Azure Identity SDK's `DefaultAzureCredential` for authentication, which is specifically designed for Azure Active Directory (Azure Entra ID) authentication flows, as they're designed to work with Azure services that require Azure AD-based authentication and authorization. See the [Authentication](https://github.com/Azure/azure-mcp/blob/main/README.md#-authentication) section in for more details.
+This error occurs when trying to authenticate with a personal Microsoft account (@hotmail.com, @outlook.com, @live.com, @gmail.com, etc.) against Azure resources.
 
-Personal Microsoft accounts (@hotmail.com, @outlook.com, or @live.com) use a different authentication system that isn't compatible with these flows.
+#### Why This Happens
 
-To resolve this issue, you can:
-- Use a work or school account that's part of an Azure AD tenant.
-- Request access to an Azure subscription with your existing organizational account.
-    - Learn more: [Add organization users and manage access](https://learn.microsoft.com/azure/devops/organizations/accounts/add-organization-users?view=azure-devops&tabs=browser).
-- Create a new Azure subscription and associated Azure AD tenant.
-    - Learn more: [Associate or add an Azure subscription to your Microsoft Entra tenant](https://learn.microsoft.com/entra/fundamentals/how-subscriptions-associated-directory).
-- If you must use a personal account, first create an Azure AD tenant for your Azure subscription, then authenticate using that tenant.
-    - Learn more: [Quickstart: Create a new tenant in Microsoft Entra ID](https://learn.microsoft.com/entra/fundamentals/create-new-tenant), [Set up a new Microsoft Entra tenant](https://learn.microsoft.com/entra/identity-platform/quickstart-create-new-tenant).
+Azure MCP Server uses the Azure Identity SDK's `DefaultAzureCredential` for authentication, which requires **Microsoft Entra ID (formerly Azure AD)** credentials to access Azure resources. Personal Microsoft accounts use a different authentication system that isn't compatible with Azure resource access patterns.
+
+See the [Authentication guide](docs/Authentication.md) for detailed information about supported authentication methods.
+
+#### Resolution Options
+
+**Option 1: Use an Organizational Account (Recommended)**
+- Switch to a work or school account that's already part of a Microsoft Entra ID tenant
+- Contact your organization's IT administrator to gain access to your company's Azure subscription
+
+**Option 2: Request Access to Existing Azure Subscription**
+- Ask your organization to add your existing work account to their Azure subscription
+- Learn more: [Add organization users and manage access](https://learn.microsoft.com/azure/devops/organizations/accounts/add-organization-users?view=azure-devops&tabs=browser)
+
+**Option 3: Create a New Azure Subscription with Entra ID Tenant**
+- Create a new Azure subscription, which automatically creates a Microsoft Entra ID tenant
+- This gives you full control but requires setting up your own Azure environment
+- Learn more: [Associate or add an Azure subscription to your Microsoft Entra tenant](https://learn.microsoft.com/entra/fundamentals/how-subscriptions-associated-directory)
+
+**Option 4: Create a Microsoft Entra ID Tenant for Your Personal Account**
+- If you must use a personal account, create a new Microsoft Entra ID tenant first
+- Then associate your Azure subscription with this tenant
+- Learn more: 
+  - [Quickstart: Create a new tenant in Microsoft Entra ID](https://learn.microsoft.com/entra/fundamentals/create-new-tenant)
+  - [Set up a new Microsoft Entra tenant](https://learn.microsoft.com/entra/identity-platform/quickstart-create-new-tenant)
+
+#### Next Steps
+1. Choose the option that best fits your scenario
+2. Complete the authentication setup as described in the [Authentication guide](docs/Authentication.md)
+3. Verify access by running `az account show` to confirm you're authenticated with the correct account type
 
 ## Common issues
 
