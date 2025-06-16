@@ -1,0 +1,52 @@
+﻿// --------------------------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// --------------------------------------------------------------------------------------------
+
+using System.Diagnostics.CodeAnalysis;
+using Azure.Bicep.Types;
+using Azure.Bicep.Types.Az;
+using AzureMcp.Services.Azure.BicepSchema.ResourceProperties;
+using AzureMcp.Services.Azure.BicepSchema.ResourceProperties.Entities;
+using AzureMcp.Services.Azure.BicepSchema.Support;
+using Microsoft.Extensions.DependencyInjection;
+
+namespace AzureMcp.Services.Azure.BicepSchema;
+public static class SchemaGenerator
+{
+    public static string GetResponse(TypesDefinitionResult typesDefinitionResult, bool compactFormat)
+    {
+        var allComplexTypes = new List<ComplexType>();
+        allComplexTypes.AddRange(typesDefinitionResult.ResourceTypeEntities);
+        allComplexTypes.AddRange(typesDefinitionResult.ResourceFunctionTypeEntities);
+        allComplexTypes.AddRange(typesDefinitionResult.OtherComplexTypeEntities);
+
+        string serialized = JsonSerializer.Serialize(
+            allComplexTypes,
+            new JsonSerializerOptions
+            {
+                WriteIndented = !compactFormat
+            });
+        return serialized;
+    }
+
+    public static TypesDefinitionResult GetResourceTypeDefinitions(
+        IServiceProvider serviceProvider,
+        string resourceTypeName,
+        string? apiVersion = null)
+    {
+        ResourceVisitor resourceVisitor = serviceProvider.GetRequiredService<ResourceVisitor>();
+
+        if (string.IsNullOrEmpty(apiVersion))
+        {
+            apiVersion = ApiVersionSelector.SelectLatestStable(resourceVisitor.GetResourceApiVersions(resourceTypeName));
+        }
+
+        return resourceVisitor.LoadSingleResource(resourceTypeName, apiVersion);
+    }
+
+    public static void ConfigureServices(ServiceCollection services)
+    {
+        services.AddSingleton<ITypeLoader, AzTypeLoader>();
+        services.AddSingleton<ResourceVisitor>();
+    }
+}

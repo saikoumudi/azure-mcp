@@ -120,5 +120,6 @@ internal class Program
             services.AddSingleton(area);
             area.ConfigureServices(services);
         }
+        services.AddSingleton<IBicepSchemaService, BicepSchemaService>();
     }
 }
