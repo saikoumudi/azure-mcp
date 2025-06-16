@@ -304,7 +304,7 @@ If you're already logged in through any of these methods, the Azure MCP Server w
 
 If you're running into any issues with authentication, visit our [troubleshooting guide](https://github.com/Azure/azure-mcp/blob/main/TROUBLESHOOTING.md).
 
-For advanced authentication scenarios including protected resources, firewall restrictions, and enterprise environments, see our [detailed Authentication guide](https://github.com/Azure/azure-mcp/blob/main/docs/Authentication.md).
+For enterprise authentication scenarios including network restrictions, security policies, and protected resources, see our [Authentication and Security guide](https://github.com/Azure/azure-mcp/blob/main/docs/Authentication.md).
 
 ### Production Credentials
 

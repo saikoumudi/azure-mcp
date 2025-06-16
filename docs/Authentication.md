@@ -1,8 +1,8 @@
-# Authentication for Azure MCP Server
+# Authentication and Security for Azure MCP Server
 
-This document provides comprehensive authentication guidance for Azure MCP Server, with a focus on advanced scenarios including protected resources, firewall restrictions, and enterprise environments.
+This document provides comprehensive guidance for Azure MCP Server authentication and related security considerations in enterprise environments. While the core focus is authentication, it also covers network and security configurations that commonly affect authentication in enterprise scenarios.
 
-## Overview
+## Authentication Fundamentals
 
 Azure MCP Server uses the Azure Identity SDK's [`DefaultAzureCredential`](https://learn.microsoft.com/dotnet/azure/sdk/authentication/credential-chains?tabs=dac) for authentication, which tries credentials in the following order:
 
@@ -18,9 +18,9 @@ For production scenarios, additional credentials can be enabled:
 - **Managed Identity** (`ManagedIdentityCredential`) - For Azure-hosted applications
 - **Workload Identity** (`WorkloadIdentityCredential`) - For Kubernetes workloads
 
-## Advanced Authentication Scenarios
+## Authentication Scenarios in Enterprise Environments
 
-### Protected Resources with Local Auth Disabled
+### Authentication with Protected Resources (Local Auth Disabled)
 
 Many organizations disable local authentication methods (access keys, SAS tokens) on their Azure resources for security compliance. This affects resources like:
 
@@ -73,9 +73,9 @@ When local authentication is disabled, Azure MCP Server must use **Azure Entra I
 - Is there a preferred authentication method (user vs. service principal)?
 - Are there network restrictions (private endpoints, firewall rules)?
 
-### Firewall-Restricted Environments
+### Authentication Through Network Restrictions
 
-Organizations often implement network restrictions that can affect Azure MCP Server's ability to authenticate and access resources.
+Organizations often implement network restrictions that can affect Azure MCP Server's ability to authenticate and access resources. While these are network security configurations, they directly impact authentication flows.
 
 #### Common Network Restrictions
 
@@ -133,9 +133,9 @@ Service Bus: *.servicebus.windows.net:443
    - Ensure corporate CA certificates are trusted
    - May require certificate bundle updates
 
-### Private Endpoint Scenarios
+### Authentication with Private Endpoints
 
-When Azure resources are configured with private endpoints, additional network configuration is required.
+When Azure resources are configured with private endpoints, authentication flows require additional network configuration to reach the authentication endpoints.
 
 #### DNS Configuration
 
@@ -176,7 +176,7 @@ Ensure your development environment can reach the private endpoint:
 
 ### Service Principal Authentication in Restricted Environments
 
-For automated scenarios or when interactive authentication isn't possible:
+For automated scenarios or when interactive authentication isn't possible due to security policies:
 
 #### Creating Service Principal
 
@@ -204,9 +204,9 @@ export AZURE_TENANT_ID="your-tenant-id"
 3. **Certificate Authentication:** Prefer certificates over secrets when possible
 4. **Monitoring:** Enable audit logging for service principal usage
 
-### Conditional Access Policy Compliance
+### Authentication with Conditional Access Policies
 
-Organizations may enforce Conditional Access policies that affect authentication:
+Organizations may enforce Conditional Access policies that affect authentication flows:
 
 #### Common Policy Requirements
 
@@ -232,7 +232,7 @@ Organizations may enforce Conditional Access policies that affect authentication
 - Can I get an exception for development scenarios?
 - Are there specific authentication methods I should use?
 
-### Troubleshooting Advanced Scenarios
+### Troubleshooting Authentication in Enterprise Environments
 
 #### Diagnostic Commands
 
@@ -275,7 +275,7 @@ Organizations may enforce Conditional Access policies that affect authentication
    Solution: Configure firewall rules for Azure endpoints
    ```
 
-## Environment-Specific Configurations
+## Authentication Configuration by Environment
 
 ### Development Environment
 
