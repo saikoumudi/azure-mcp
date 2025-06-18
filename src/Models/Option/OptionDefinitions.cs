@@ -744,10 +744,10 @@ public static class OptionDefinitions
 
     public static class BicepSchema
     {
-        public const string ResourceTypeName = "resourceType";
+        public const string ResourceType = "resource-type";
 
-        public static readonly Option<string> ResourceType = new(
-            $"--{ResourceTypeName}",
+        public static readonly Option<string> ResourceTypeName = new(
+            $"--{ResourceType}",
             "The name of the Bicep Resource Type (e.g., keyvault)."
         )
         {

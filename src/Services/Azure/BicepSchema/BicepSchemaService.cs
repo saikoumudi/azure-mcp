@@ -23,5 +23,4 @@ namespace AzureMcp.Services.Azure.BicepSchema
             return resourceVisitor.LoadSingleResource(resourceTypeName, apiVersion);
         }
     }
-
 }

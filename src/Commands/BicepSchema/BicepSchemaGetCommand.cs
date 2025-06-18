@@ -16,7 +16,7 @@ namespace AzureMcp.Commands.BicepSchema
     {
         private const string CommandTitle = "Get Bicep Schema for a resource";
 
-        private readonly Option<string> _valueOption = OptionDefinitions.BicepSchema.ResourceType;
+        private readonly Option<string> _getResourceTypeOption = OptionDefinitions.BicepSchema.ResourceTypeName;
 
         private readonly ILogger<BicepSchemaGetCommand> _logger = logger;
         public override string Name => "get";
@@ -24,6 +24,8 @@ namespace AzureMcp.Commands.BicepSchema
         public override string Description =>
        """
         Provides the schema for the most recent apiVersion of an Azure resource.
+        The resource-type parameter must be in the full Azure Resource Manager format '{ResourceProvider}/{ResourceType}'.
+        (e.g., 'Microsoft.KeyVault/vaults', 'Microsoft.Storage/storageAccounts', 'Microsoft.Compute/virtualMachines').
         If you are asked to create or modify resources in a bicep ARM template, call this function multiple times,
         once for every resource type you are adding, even if you already have information about bicep resources from other sources.
         Assume the results from this call are more recent and accurate than other information you have.
@@ -49,13 +51,13 @@ namespace AzureMcp.Commands.BicepSchema
         protected override void RegisterOptions(Command command)
         {
             base.RegisterOptions(command);
-            command.AddOption(_valueOption);
+            command.AddOption(_getResourceTypeOption);
         }
 
         protected override BicepSchemaOptions BindOptions(ParseResult parseResult)
         {
             var options = base.BindOptions(parseResult);
-            options.ResourceTypeName = parseResult.GetValueForOption(_valueOption);
+            options.ResourceType = parseResult.GetValueForOption(_getResourceTypeOption);
             return options;
         }
 
@@ -72,10 +74,10 @@ namespace AzureMcp.Commands.BicepSchema
                 var bicepSchemaService = context.GetService<IBicepSchemaService>() ?? throw new InvalidOperationException("Bicep schema service is not available.");
                 var resourceTypeDefinitions = bicepSchemaService.GetResourceTypeDefinitions(
                     s_serviceProvider.Value,
-                    options.ResourceTypeName!);
+                    options.ResourceType!);
 
-                TypesDefinitionResult result = SchemaGenerator.GetResourceTypeDefinitions(s_serviceProvider.Value, options.ResourceTypeName!);
-                string response = SchemaGenerator.GetResponse(result, compactFormat: true);
+                TypesDefinitionResult result = SchemaGenerator.GetResourceTypeDefinitions(s_serviceProvider.Value, options.ResourceType!);
+                List<ComplexType> response = SchemaGenerator.GetResponse(result);
 
                 context.Response.Results = response is not null ?
                     ResponseResult.Create(
@@ -92,6 +94,6 @@ namespace AzureMcp.Commands.BicepSchema
 
         }
 
-        internal record BicepSchemaGetCommandResult(string BicepSchemaResult);
+        internal record BicepSchemaGetCommandResult(List<ComplexType> BicepSchemaResult);
     }
 }

@@ -12,24 +12,13 @@ using Microsoft.Extensions.DependencyInjection;
 namespace AzureMcp.Services.Azure.BicepSchema;
 public static class SchemaGenerator
 {
-    public static string GetResponse(TypesDefinitionResult typesDefinitionResult, bool compactFormat)
+    public static List<ComplexType> GetResponse(TypesDefinitionResult typesDefinitionResult)
     {
         var allComplexTypes = new List<ComplexType>();
         allComplexTypes.AddRange(typesDefinitionResult.ResourceTypeEntities);
         allComplexTypes.AddRange(typesDefinitionResult.ResourceFunctionTypeEntities);
         allComplexTypes.AddRange(typesDefinitionResult.OtherComplexTypeEntities);
-
-#pragma warning disable IL2026
-#pragma warning disable IL3050
-        string serialized = JsonSerializer.Serialize(
-            allComplexTypes,
-            new JsonSerializerOptions
-            {
-                WriteIndented = !compactFormat
-            });
-#pragma warning restore IL3050
-#pragma warning restore IL2026
-        return serialized;
+        return allComplexTypes;
     }
 
     public static TypesDefinitionResult GetResourceTypeDefinitions(

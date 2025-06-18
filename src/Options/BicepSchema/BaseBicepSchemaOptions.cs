@@ -5,7 +5,7 @@ namespace AzureMcp.Options.BicepSchema
 {
     public class BaseBicepSchemaOptions : SubscriptionOptions
     {
-        [JsonPropertyName(OptionDefinitions.BicepSchema.ResourceTypeName)]
-        public string? ResourceTypeName { get; set; }
+        [JsonPropertyName(OptionDefinitions.BicepSchema.ResourceType)]
+        public string? ResourceType { get; set; }
     }
 }
