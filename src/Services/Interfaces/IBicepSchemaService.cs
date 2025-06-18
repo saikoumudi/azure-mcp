@@ -1,4 +1,7 @@
-﻿using AzureMcp.Services.Azure.BicepSchema.ResourceProperties.Entities;
+﻿// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
+using AzureMcp.Services.Azure.BicepSchema.ResourceProperties.Entities;
 
 namespace AzureMcp.Services.Interfaces
 {
@@ -6,7 +9,7 @@ namespace AzureMcp.Services.Interfaces
     {
         TypesDefinitionResult GetResourceTypeDefinitions(
         IServiceProvider serviceProvider,
-        string? resourceTypeName,
+        string resourceTypeName,
         string? apiVersion = null);
     }
 }
