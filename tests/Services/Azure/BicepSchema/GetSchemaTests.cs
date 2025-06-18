@@ -2,10 +2,11 @@
 // Licensed under the MIT License.
 
 using System.Globalization;
+using System.Text.Json;
 using Azure.Bicep.Types;
-using AzureMcp.Services.Azure.BicepSchema;
-using AzureMcp.Services.Azure.BicepSchema.ResourceProperties;
-using AzureMcp.Services.Azure.BicepSchema.ResourceProperties.Entities;
+using AzureMcp.Areas.BicepSchema.Services;
+using AzureMcp.Areas.BicepSchema.Services.ResourceProperties;
+using AzureMcp.Areas.BicepSchema.Services.ResourceProperties.Entities;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json.Linq;
 using Xunit;
@@ -41,7 +42,7 @@ public class GetSchemaTests
         var exception = Assert.Throws<Exception>(() =>
         {
             TypesDefinitionResult result = SchemaGenerator.GetResourceTypeDefinitions(serviceProvider, "Microsoft.Unknown/virtualReshatot");
-            _ = SchemaGenerator.GetResponse(result, compactFormat: false);
+            _ = SchemaGenerator.GetResponse(result);
         });
         Assert.Equal("Resource type Microsoft.Unknown/virtualReshatot not found.", exception.Message);
     }
@@ -174,7 +175,8 @@ public class GetSchemaTests
         IServiceProvider serviceProvider = serviceCollection.BuildServiceProvider();
 
         TypesDefinitionResult result = SchemaGenerator.GetResourceTypeDefinitions(serviceProvider, "Microsoft.ApiManagement/service", "2024-05-01");
-        string response = SchemaGenerator.GetResponse(result, compactFormat);
+        List<ComplexType> allComplexTypesResult = SchemaGenerator.GetResponse(result);
+        string response = GetSerializedResponse(allComplexTypesResult, compactFormat);
         Assert.False(string.IsNullOrEmpty(response));
 
         Assert.Contains("Microsoft.ApiManagement/service@2024-05-01", response);
@@ -231,7 +233,8 @@ public class GetSchemaTests
         IServiceProvider serviceProvider = serviceCollection.BuildServiceProvider();
 
         TypesDefinitionResult result = SchemaGenerator.GetResourceTypeDefinitions(serviceProvider, $"{resourceType}", apiVersion);
-        string response = SchemaGenerator.GetResponse(result, compactFormat);
+        List<ComplexType> allComplexTypesResult = SchemaGenerator.GetResponse(result);
+        string response = GetSerializedResponse(allComplexTypesResult, compactFormat);
 
         // Verify
         Assert.Contains($"{resourceType}@{apiVersion}", response);
@@ -295,7 +298,8 @@ public class GetSchemaTests
         IServiceProvider serviceProvider = serviceCollection.BuildServiceProvider();
 
         TypesDefinitionResult result = SchemaGenerator.GetResourceTypeDefinitions(serviceProvider, $"{resourceType}", apiVersion);
-        string response = SchemaGenerator.GetResponse(result, compactFormat: false);
+        List<ComplexType> allComplexTypesResult = SchemaGenerator.GetResponse(result);
+        string response = GetSerializedResponse(allComplexTypesResult, compactFormat: false);
 
         Assert.Equal(expected, response);
     }
@@ -311,8 +315,9 @@ public class GetSchemaTests
         IServiceProvider serviceProvider = serviceCollection.BuildServiceProvider();
 
         TypesDefinitionResult result = SchemaGenerator.GetResourceTypeDefinitions(serviceProvider, $"{resourceType}", apiVersion);
-        string response = SchemaGenerator.GetResponse(result, compactFormat: false);
-        string responseCompact = SchemaGenerator.GetResponse(result, compactFormat: true);
+        List<ComplexType> allComplexTypesResult = SchemaGenerator.GetResponse(result);
+        string response = GetSerializedResponse(allComplexTypesResult, compactFormat: false);
+        string responseCompact = GetSerializedResponse(allComplexTypesResult, compactFormat: true);
 
         _output.WriteLine($"Schema size raw = {response.Length}");
         _output.WriteLine($"Schema size compact = {responseCompact.Length}");
@@ -324,6 +329,16 @@ public class GetSchemaTests
 
         Assert.True(responseCompact.Length > 5000);
         Assert.True(responseCompact.Length <= 317668);
+    }
+
+    private string GetSerializedResponse(List<ComplexType> allComplexTypesResult, bool compactFormat)
+    {
+        return JsonSerializer.Serialize(
+                allComplexTypesResult,
+                new JsonSerializerOptions
+                {
+                    WriteIndented = !compactFormat
+                });
     }
 
 #if false

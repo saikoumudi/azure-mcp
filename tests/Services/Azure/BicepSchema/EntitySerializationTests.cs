@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 using System.Text.Json;
-using AzureMcp.Services.Azure.BicepSchema.ResourceProperties.Entities;
+using AzureMcp.Areas.BicepSchema.Services.ResourceProperties.Entities;
 using Xunit;
 
 namespace AzureMcp.Tests.Services.Azure.BicepSchema;

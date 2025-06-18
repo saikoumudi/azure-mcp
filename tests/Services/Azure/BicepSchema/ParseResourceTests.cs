@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using AzureMcp.Services.Azure.BicepSchema.Support;
+using AzureMcp.Areas.BicepSchema.Services.Support;
 using Xunit;
 
 namespace AzureMcp.Tests.Services.Azure.BicepSchema;

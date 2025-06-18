@@ -4,10 +4,9 @@
 using System.CommandLine.Parsing;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using AzureMcp.Commands.BicepSchema;
+using AzureMcp.Areas.BicepSchema.Commands;
+using AzureMcp.Areas.BicepSchema.Services;
 using AzureMcp.Models.Command;
-using AzureMcp.Services.Azure.BicepSchema;
-using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
@@ -42,7 +41,7 @@ public class BicepSchemaGetCommandTests
     public async Task ExecuteAsync_ReturnsSchema_WhenResourceTypeExists()
     {
         var args = _parser.Parse([
-        "--resourceType", "Microsoft.Sql/servers/databases/schemas",
+        "--resource-type", "Microsoft.Sql/servers/databases/schemas",
         "--subscription", "knownSubscription"
         ]);
 
@@ -51,27 +50,44 @@ public class BicepSchemaGetCommandTests
         Assert.NotNull(response.Results);
 
 
-        //var json = JsonSerializer.Serialize(response.Results);
-        var result = JsonSerializer.Deserialize<BicepSchemaResult>(response.Results.ToString()!);
+        var json = JsonSerializer.Serialize(response.Results);
+        var result = JsonSerializer.Deserialize<BicepSchemaResultWrapper>(json);
+        var name = result?.BicepSchemaResult.FirstOrDefault()?.Name;
 
-        Assert.Contains(
-          "Microsoft.Sql/servers/databases/schemas@2021-11-01",
-        "result.ToString()");
+        Assert.Contains("Microsoft.Sql/servers/databases/schemas@2023-08-01", name);
     }
 
     [Fact]
-    public void ExecuteAsync_ReturnsError_WhenResourceTypeDoesNotExist()
+    public async Task ExecuteAsync_ReturnsError_WhenResourceTypeDoesNotExist()
     {
-        var result = _bicepSchemaService.GetResourceTypeDefinitions(
-            _serviceProvider, "Microsoft.Unknown/virtualReshatot");
-        string response = SchemaGenerator.GetResponse(result, compactFormat: true);
 
-        Assert.Contains("Resource type Microsoft.Unknown/virtualReshatot not found.", response);
+        var args = _parser.Parse([
+        "--resource-type", "Microsoft.Unknown/virtualReshatot",
+        "--subscription", "knownSubscription"
+        ]);
+
+        var response = await _command.ExecuteAsync(_context, args);
+        Assert.NotNull(response);
+        Assert.NotNull(response.Results);
+
+
+        var json = JsonSerializer.Serialize(response.Results);
+        var result = JsonSerializer.Deserialize<BicepSchemaResultWrapper>(json);
+       Assert.Contains("Resource type Microsoft.Unknown/virtualReshatot not found.", result?.message);
     }
 
-    private class BicepSchemaResult
+    private class BicepSchemaResultWrapper
     {
-        [JsonPropertyName("blobs")]
-        public List<string> Blobs { get; set; } = new();
+        [JsonPropertyName("BicepSchemaResult")]
+        public List<BicepSchemaItem> BicepSchemaResult { get; set; } = new();
+
+        public string? message { get; set; } = string.Empty;
     }
+
+    private class BicepSchemaItem
+    {
+        [JsonPropertyName("name")]
+        public string Name { get; set; } = string.Empty;
+    }
+
 }
