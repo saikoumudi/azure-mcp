@@ -1,6 +1,5 @@
-﻿// --------------------------------------------------------------------------------------------
-// Copyright (c) Microsoft Corporation. All rights reserved.
-// --------------------------------------------------------------------------------------------
+﻿// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
 
 using System.Diagnostics.CodeAnalysis;
 using Azure.Bicep.Types;
@@ -20,12 +19,16 @@ public static class SchemaGenerator
         allComplexTypes.AddRange(typesDefinitionResult.ResourceFunctionTypeEntities);
         allComplexTypes.AddRange(typesDefinitionResult.OtherComplexTypeEntities);
 
+#pragma warning disable IL2026
+#pragma warning disable IL3050
         string serialized = JsonSerializer.Serialize(
             allComplexTypes,
             new JsonSerializerOptions
             {
                 WriteIndented = !compactFormat
             });
+#pragma warning restore IL3050
+#pragma warning restore IL2026
         return serialized;
     }
 

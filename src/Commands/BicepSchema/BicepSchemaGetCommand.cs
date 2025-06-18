@@ -1,4 +1,8 @@
-﻿using AzureMcp.Commands.Subscription;
+﻿// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
+using AzureMcp.Commands.Subscription;
+using AzureMcp.Models.Option;
 using AzureMcp.Options.BicepSchema;
 using AzureMcp.Services.Azure.BicepSchema;
 using AzureMcp.Services.Azure.BicepSchema.ResourceProperties.Entities;
@@ -11,6 +15,8 @@ namespace AzureMcp.Commands.BicepSchema
     public sealed class BicepSchemaGetCommand(ILogger<BicepSchemaGetCommand> logger) : SubscriptionCommand<BicepSchemaOptions>
     {
         private const string CommandTitle = "Get Bicep Schema for a resource";
+
+        private readonly Option<string> _valueOption = OptionDefinitions.BicepSchema.ResourceType;
 
         private readonly ILogger<BicepSchemaGetCommand> _logger = logger;
         public override string Name => "get";
@@ -40,6 +46,19 @@ namespace AzureMcp.Commands.BicepSchema
             });
         }
 
+        protected override void RegisterOptions(Command command)
+        {
+            base.RegisterOptions(command);
+            command.AddOption(_valueOption);
+        }
+
+        protected override BicepSchemaOptions BindOptions(ParseResult parseResult)
+        {
+            var options = base.BindOptions(parseResult);
+            options.ResourceTypeName = parseResult.GetValueForOption(_valueOption);
+            return options;
+        }
+
         [McpServerTool(Destructive = false, ReadOnly = true, Title = CommandTitle)]
         public override Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
         {
@@ -53,15 +72,15 @@ namespace AzureMcp.Commands.BicepSchema
                 var bicepSchemaService = context.GetService<IBicepSchemaService>() ?? throw new InvalidOperationException("Bicep schema service is not available.");
                 var resourceTypeDefinitions = bicepSchemaService.GetResourceTypeDefinitions(
                     s_serviceProvider.Value,
-                    options.ResourceTypeName);
+                    options.ResourceTypeName!);
 
-                TypesDefinitionResult result = SchemaGenerator.GetResourceTypeDefinitions(s_serviceProvider.Value, options.ResourceTypeName);
-
+                TypesDefinitionResult result = SchemaGenerator.GetResourceTypeDefinitions(s_serviceProvider.Value, options.ResourceTypeName!);
                 string response = SchemaGenerator.GetResponse(result, compactFormat: true);
+
                 context.Response.Results = response is not null ?
                     ResponseResult.Create(
-                        new GetBicepSchemaCommandResult(response),
-                        BicepSchemaJsonContext.Default.GetBicepSchemaCommandResult) :
+                        new BicepSchemaGetCommandResult(response),
+                        BicepSchemaJsonContext.Default.BicepSchemaGetCommandResult) :
                      null;
             }
             catch (Exception ex)
@@ -73,6 +92,6 @@ namespace AzureMcp.Commands.BicepSchema
 
         }
 
-        internal record GetBicepSchemaCommandResult(string BicepSchemaResult);
+        internal record BicepSchemaGetCommandResult(string BicepSchemaResult);
     }
 }
