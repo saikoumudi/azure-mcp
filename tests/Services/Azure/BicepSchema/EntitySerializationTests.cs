@@ -478,7 +478,7 @@ public class EntitySerializationTests
 
         // Deserialize
         ComplexType? deserialized = JsonSerializer.Deserialize<ComplexType>(input);
-        Assert.IsType<DiscriminatedObjectTypeEntity>(deserialized); 
+        Assert.IsType<DiscriminatedObjectTypeEntity>(deserialized);
 
         // Assert deserialized object
         string reserialized = JsonSerializer.Serialize(deserialized, new JsonSerializerOptions() { WriteIndented = true });
