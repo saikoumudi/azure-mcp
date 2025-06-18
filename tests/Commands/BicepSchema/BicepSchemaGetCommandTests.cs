@@ -73,7 +73,7 @@ public class BicepSchemaGetCommandTests
 
         var json = JsonSerializer.Serialize(response.Results);
         var result = JsonSerializer.Deserialize<BicepSchemaResultWrapper>(json);
-       Assert.Contains("Resource type Microsoft.Unknown/virtualReshatot not found.", result?.message);
+        Assert.Contains("Resource type Microsoft.Unknown/virtualReshatot not found.", result?.message);
     }
 
     private class BicepSchemaResultWrapper
