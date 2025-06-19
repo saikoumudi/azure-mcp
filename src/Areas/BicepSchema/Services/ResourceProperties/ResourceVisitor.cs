@@ -298,7 +298,7 @@ public class ResourceVisitor
             GetTypeName(property.Type.Type),
             property.Description,
             GetFlags(property.Flags),
-            GetModifers(property.Type.Type));
+            GetModifiers(property.Type.Type));
     }
 
     private string GetTypeName(TypeBase typeBase)
@@ -327,7 +327,7 @@ public class ResourceVisitor
         return flags == ObjectTypePropertyFlags.None ? null : flags.ToString();
     }
 
-    private string? GetModifers(TypeBase typeBase)
+    private string? GetModifiers(TypeBase typeBase)
     {
         return typeBase switch
         {
