@@ -265,9 +265,9 @@ public class EntitySerializationTests
 
 
         // Assert deserialized object
-        string reserialized = JsonSerializer.Serialize(deserialized, new JsonSerializerOptions() { WriteIndented = true });
+        string serialized = JsonSerializer.Serialize(deserialized, new JsonSerializerOptions() { WriteIndented = true });
 
-        Assert.Equal(expected, reserialized);
+        Assert.Equal(expected, serialized);
     }
 
     [Fact]
@@ -320,9 +320,9 @@ public class EntitySerializationTests
         Assert.IsType<ResourceFunctionTypeEntity[]>(deserialized);
 
         // Assert deserialized object
-        string reserialized = JsonSerializer.Serialize(deserialized, new JsonSerializerOptions() { WriteIndented = true });
+        string serialized = JsonSerializer.Serialize(deserialized, new JsonSerializerOptions() { WriteIndented = true });
 
-        Assert.Equal(expected, reserialized);
+        Assert.Equal(expected, serialized);
     }
 
     [Fact]
@@ -481,8 +481,8 @@ public class EntitySerializationTests
         Assert.IsType<DiscriminatedObjectTypeEntity>(deserialized);
 
         // Assert deserialized object
-        string reserialized = JsonSerializer.Serialize(deserialized, new JsonSerializerOptions() { WriteIndented = true });
+        string serialized = JsonSerializer.Serialize(deserialized, new JsonSerializerOptions() { WriteIndented = true });
 
-        Assert.Equal(expected, reserialized);
+        Assert.Equal(expected, serialized);
     }
 }
