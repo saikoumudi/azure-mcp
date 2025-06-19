@@ -22,13 +22,13 @@ public partial class ApiVersionSelector
             ?? throw new Exception("List of apiVersions should not be empty");
     }
 
-    public static bool IsStableRelease(string apiVerion)
+    public static bool IsStableRelease(string apiVersion)
     {
-        return StableVersionRegex().IsMatch(apiVerion);
+        return StableVersionRegex().IsMatch(apiVersion);
     }
 
-    public static bool IsPrerelease(string apiVerion)
+    public static bool IsPrerelease(string apiVersion)
     {
-        return !IsStableRelease(apiVerion);
+        return !IsStableRelease(apiVersion);
     }
 }

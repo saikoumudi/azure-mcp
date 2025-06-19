@@ -62,7 +62,7 @@ public class BicepSchemaGetCommandTests
     {
 
         var args = _parser.Parse([
-        "--resource-type", "Microsoft.Unknown/virtualReshatot",
+        "--resource-type", "Microsoft.Unknown/virtualRandom",
         "--subscription", "knownSubscription"
         ]);
 
@@ -73,7 +73,7 @@ public class BicepSchemaGetCommandTests
 
         var json = JsonSerializer.Serialize(response.Results);
         var result = JsonSerializer.Deserialize<BicepSchemaResultWrapper>(json);
-        Assert.Contains("Resource type Microsoft.Unknown/virtualReshatot not found.", result?.message);
+        Assert.Contains("Resource type Microsoft.Unknown/virtualRandom not found.", result?.message);
     }
 
     private class BicepSchemaResultWrapper
