@@ -18,7 +18,7 @@ public class ApiVersionComparerTests
             "2021-01-02",
             "2021-02-01",
             "2021-02-01-alpha",
-            "2021-02-01-privatepeview",
+            "2021-02-01-privatepreview",
             "2024-11-01",
         };
 
@@ -28,7 +28,7 @@ public class ApiVersionComparerTests
             "2021-01-02",
             "2021-02-01-alpha",
             "2021-02-01-preview",
-            "2021-02-01-privatepeview",
+            "2021-02-01-privatepreview",
             "2021-02-01",
             "2024-11-01",
         };

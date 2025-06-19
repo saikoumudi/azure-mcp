@@ -189,9 +189,9 @@ public class EntitySerializationTests
         Assert.IsType<ResourceTypeEntity>(deserialized);
 
         // Assert deserialized object
-        string reserialized = JsonSerializer.Serialize(deserialized, new JsonSerializerOptions() { WriteIndented = true });
+        string serialized = JsonSerializer.Serialize(deserialized, new JsonSerializerOptions() { WriteIndented = true });
 
-        Assert.Equal(expected, reserialized);
+        Assert.Equal(expected, serialized);
     }
 
     [Fact]
