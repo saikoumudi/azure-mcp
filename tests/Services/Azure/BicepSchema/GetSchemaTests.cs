@@ -41,10 +41,10 @@ public class GetSchemaTests
 
         var exception = Assert.Throws<Exception>(() =>
         {
-            TypesDefinitionResult result = SchemaGenerator.GetResourceTypeDefinitions(serviceProvider, "Microsoft.Unknown/virtualReshatot");
+            TypesDefinitionResult result = SchemaGenerator.GetResourceTypeDefinitions(serviceProvider, "Microsoft.Unknown/virtualRandom");
             _ = SchemaGenerator.GetResponse(result);
         });
-        Assert.Equal("Resource type Microsoft.Unknown/virtualReshatot not found.", exception.Message);
+        Assert.Equal("Resource type Microsoft.Unknown/virtualRandom not found.", exception.Message);
     }
 
     [Fact]
