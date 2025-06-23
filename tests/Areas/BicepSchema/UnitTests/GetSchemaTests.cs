@@ -11,7 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json.Linq;
 using Xunit;
 
-namespace AzureMcp.Tests.Services.Azure.BicepSchema;
+namespace AzureMcp.Tests.Areas.BicepSchema.UnitTests;
 
 public class GetSchemaTests
 {

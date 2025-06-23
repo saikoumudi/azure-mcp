@@ -4,7 +4,7 @@
 using AzureMcp.Areas.BicepSchema.Services.ResourceProperties.Helpers;
 using Xunit;
 
-namespace AzureMcp.Tests.Services.Azure.BicepSchema;
+namespace AzureMcp.Tests.Areas.BicepSchema.UnitTests;
 
 public class ApiVersionComparerTests
 {

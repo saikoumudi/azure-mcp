@@ -4,7 +4,7 @@
 using AzureMcp.Services.Azure.BicepSchema.Support;
 using Xunit;
 
-namespace AzureMcp.Tests.Services.Azure.BicepSchema;
+namespace AzureMcp.Tests.Areas.BicepSchema.UnitTests;
 
 public class ApiVersionSelectorTests
 {
