@@ -9,7 +9,7 @@ public static class BicepSchemaOptionDefinitions
 
     public static readonly Option<string> ResourceTypeName = new(
         $"--{ResourceType}",
-        "The name of the Bicep Resource Type (e.g., keyvault)."
+        "The name of the Bicep Resource Type (e.g., Microsoft.Storage/storageAccounts)."
     )
     {
         IsRequired = true
