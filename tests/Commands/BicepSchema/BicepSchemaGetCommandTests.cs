@@ -41,8 +41,7 @@ public class BicepSchemaGetCommandTests
     public async Task ExecuteAsync_ReturnsSchema_WhenResourceTypeExists()
     {
         var args = _parser.Parse([
-        "--resource-type", "Microsoft.Sql/servers/databases/schemas",
-        "--subscription", "knownSubscription"
+        "--resource-type", "Microsoft.Sql/servers/databases/schemas"
         ]);
 
         var response = await _command.ExecuteAsync(_context, args);

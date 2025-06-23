@@ -70,6 +70,7 @@ internal class Program
             new AzureMcp.Areas.Search.SearchSetup(),
             new AzureMcp.Areas.ServiceBus.ServiceBusSetup(),
             new AzureMcp.Areas.Storage.StorageSetup(),
+            new AzureMcp.Areas.BicepSchema.BicepSchemaSetup(),
         ];
     }
 

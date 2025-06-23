@@ -6,13 +6,12 @@ using AzureMcp.Areas.BicepSchema.Services;
 using AzureMcp.Areas.BicepSchema.Services.ResourceProperties.Entities;
 using AzureMcp.Commands.BicepSchema;
 using AzureMcp.Commands.Subscription;
-using AzureMcp.Models.Option;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace AzureMcp.Areas.BicepSchema.Commands
 {
-    public sealed class BicepSchemaGetCommand(ILogger<BicepSchemaGetCommand> logger) : SubscriptionCommand<BicepSchemaOptions>
+    public sealed class BicepSchemaGetCommand(ILogger<BicepSchemaGetCommand> logger) : BaseBicepSchemaCommand<BicepSchemaOptions>
     {
         private const string CommandTitle = "Get Bicep Schema for a resource";
 
@@ -47,7 +46,7 @@ namespace AzureMcp.Areas.BicepSchema.Commands
                 return serviceCollection.BuildServiceProvider();
             });
         }
-
+        /*
         protected override void RegisterOptions(Command command)
         {
             base.RegisterOptions(command);
@@ -59,7 +58,7 @@ namespace AzureMcp.Areas.BicepSchema.Commands
             var options = base.BindOptions(parseResult);
             options.ResourceType = parseResult.GetValueForOption(_getResourceTypeOption);
             return options;
-        }
+        }*/
 
         [McpServerTool(Destructive = false, ReadOnly = true, Title = CommandTitle)]
         public override Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
