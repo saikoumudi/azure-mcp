@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <Version>0.2.3</Version>
+    <Version>0.2.4</Version>
     <OutputType>Exe</OutputType>
     <CliName>azmcp</CliName>
     <AssemblyName>$(CliName)</AssemblyName>
@@ -41,6 +41,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Azure.Bicep.Types" />
+    <PackageReference Include="Azure.Bicep.Types.Az" />
     <PackageReference Include="Azure.Core" />
     <PackageReference Include="Azure.Data.AppConfiguration" />
     <PackageReference Include="Azure.Identity" />
@@ -63,7 +65,6 @@
     <PackageReference Include="Azure.ResourceManager.Storage" />
     <PackageReference Include="Azure.ResourceManager.Datadog" />
     <PackageReference Include="JsonSchema.Net" />
-    <PackageReference Include="Microsoft.Azure.Kusto.Data" />
     <PackageReference Include="Microsoft.Identity.Client.Broker" />
     <PackageReference Include="ModelContextProtocol" />
     <PackageReference Include="ModelContextProtocol.AspNetCore" />
@@ -84,17 +85,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Resources\terraform-best-practices.txt" />
-    <EmbeddedResource Include="Resources\azure-best-practices.txt" />
-    <EmbeddedResource Include="Resources\azd-best-practices.txt" />
+	<EmbeddedResource Include="Areas\TerraformBestPractices\Resources\terraform-best-practices.txt" />
+	<EmbeddedResource Include="Areas\AzureBestPractices\Resources\azure-best-practices.txt" />
+    <EmbeddedResource Include="Areas\Extension\Resources\azd-best-practices.txt" />
+    <EmbeddedResource Include="Areas\Server\Resources\registry.json" />
   </ItemGroup>
-
-  <!-- TODO: Remove after 5/19/25 -->
-  <!-- Runs before every dotnet build -->
-  <Target Name="InstallGitHooks" BeforeTargets="BeforeBuild">
-    <Message Text="To install git hooks, run 'eng/scripts/Install-GitHooks.ps1'" Importance="high" />
-    <Message Text="To remove git hooks, run 'eng/scripts/Remove-GitHooks.ps1'" Importance="high" />
-  </Target>
 
   <!-- Remove Cosmos native files from the build output directory -->
   <Target Name="RemoveCosmosNativeFiles" BeforeTargets="Build">

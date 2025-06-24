@@ -2,8 +2,6 @@
 // Licensed under the MIT License.
 
 using AzureMcp.Commands;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using ModelContextProtocol.Client;
 using Xunit;
 
@@ -14,9 +12,7 @@ namespace AzureMcp.Tests.Commands.Server.Tools
         private readonly CommandFactory _commandFactory;
         public McpCommandGroupTests()
         {
-            var services = new ServiceCollection().AddLogging().BuildServiceProvider();
-            var logger = services.GetRequiredService<ILogger<CommandFactory>>();
-            _commandFactory = new CommandFactory(services, logger);
+            _commandFactory = CommandFactoryHelpers.CreateCommandFactory();
         }
 
         [Fact]
@@ -25,7 +21,7 @@ namespace AzureMcp.Tests.Commands.Server.Tools
             // Arrange
             // For testGroup, CommandFactory does not have it by default, so fallback to direct instantiation
             var commandGroup = new CommandGroup("testGroup", "Test Description");
-            var mcpCommandGroup = new McpCommandGroup(commandGroup);
+            var mcpCommandGroup = new CommandGroupMcpClientProvider(commandGroup);
 
             // Act
             var metadata = mcpCommandGroup.CreateMetadata();
@@ -50,7 +46,8 @@ namespace AzureMcp.Tests.Commands.Server.Tools
             var entryPoint = Path.Combine(testBinDir, exeName);
             Assert.True(File.Exists(entryPoint), $"{exeName} not found at {entryPoint}");
 
-            var mcpCommandGroup = new McpCommandGroup(storageGroup, entryPoint);
+            var mcpCommandGroup = new CommandGroupMcpClientProvider(storageGroup);
+            mcpCommandGroup.EntryPoint = entryPoint;
             var options = new McpClientOptions();
 
             // Act
@@ -58,6 +55,79 @@ namespace AzureMcp.Tests.Commands.Server.Tools
 
             // Assert
             Assert.NotNull(client);
+        }
+
+        [Fact]
+        public void ReadOnly_Property_DefaultsToFalse()
+        {
+            // Arrange
+            var storageGroup = _commandFactory.RootGroup.SubGroup.First(g => g.Name == "storage");
+
+            // Act
+            var mcpCommandGroup = new CommandGroupMcpClientProvider(storageGroup);
+
+            // Assert
+            Assert.False(mcpCommandGroup.ReadOnly);
+        }
+
+        [Fact]
+        public void ReadOnly_Property_CanBeSet()
+        {
+            // Arrange
+            var storageGroup = _commandFactory.RootGroup.SubGroup.First(g => g.Name == "storage");
+            var mcpCommandGroup = new CommandGroupMcpClientProvider(storageGroup);
+
+            // Act
+            mcpCommandGroup.ReadOnly = true;
+
+            // Assert
+            Assert.True(mcpCommandGroup.ReadOnly);
+        }
+
+        [Fact]
+        public void EntryPoint_SetToNull_UsesDefault()
+        {
+            // Arrange
+            var storageGroup = _commandFactory.RootGroup.SubGroup.First(g => g.Name == "storage");
+            var mcpCommandGroup = new CommandGroupMcpClientProvider(storageGroup);
+            var originalEntryPoint = mcpCommandGroup.EntryPoint;
+            // Act
+            mcpCommandGroup.EntryPoint = null!;
+
+            // Assert
+            Assert.Equal(originalEntryPoint, mcpCommandGroup.EntryPoint);
+            Assert.False(string.IsNullOrWhiteSpace(mcpCommandGroup.EntryPoint));
+        }
+
+        [Fact]
+        public void EntryPoint_SetToEmpty_UsesDefault()
+        {
+            // Arrange
+            var storageGroup = _commandFactory.RootGroup.SubGroup.First(g => g.Name == "storage");
+            var mcpCommandGroup = new CommandGroupMcpClientProvider(storageGroup);
+            var originalEntryPoint = mcpCommandGroup.EntryPoint;
+
+            // Act
+            mcpCommandGroup.EntryPoint = "";
+
+            // Assert
+            Assert.Equal(originalEntryPoint, mcpCommandGroup.EntryPoint);
+            Assert.False(string.IsNullOrWhiteSpace(mcpCommandGroup.EntryPoint));
+        }
+
+        [Fact]
+        public void EntryPoint_SetToValidValue_UsesProvidedValue()
+        {
+            // Arrange
+            var storageGroup = _commandFactory.RootGroup.SubGroup.First(g => g.Name == "storage");
+            var mcpCommandGroup = new CommandGroupMcpClientProvider(storageGroup);
+            var customEntryPoint = "/custom/path/to/executable";
+
+            // Act
+            mcpCommandGroup.EntryPoint = customEntryPoint;
+
+            // Assert
+            Assert.Equal(customEntryPoint, mcpCommandGroup.EntryPoint);
         }
     }
 }
