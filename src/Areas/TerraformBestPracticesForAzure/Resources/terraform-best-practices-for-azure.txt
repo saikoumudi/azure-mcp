@@ -1,3 +1,4 @@
+- Ensure the request is for Azure resources. If not, do not call this tool.
 - Check for Terraform installation on the first Terraform-related request in a session
 - Provide the winget installation command if needed: winget install Hashicorp.Terraform
 - Follow the best practices style guide in the link https://developer.hashicorp.com/terraform/language/style before generating the Terraform code.

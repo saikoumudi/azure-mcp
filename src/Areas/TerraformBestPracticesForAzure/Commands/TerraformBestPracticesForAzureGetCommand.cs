@@ -8,11 +8,11 @@ using Microsoft.Extensions.Logging;
 
 namespace AzureMcp.Areas.TerraformBestPractices.Commands;
 
-public sealed class TerraformBestPracticesGetCommand(ILogger<TerraformBestPracticesGetCommand> logger) : BaseCommand()
+public sealed class TerraformBestPracticesForAzureGetCommand(ILogger<TerraformBestPracticesForAzureGetCommand> logger) : BaseCommand()
 {
 
-    private const string CommandTitle = "Get Terraform Best Practices";
-    private readonly ILogger<TerraformBestPracticesGetCommand> _logger = logger;
+    private const string CommandTitle = "Get Terraform Best Practices for Azure";
+    private readonly ILogger<TerraformBestPracticesForAzureGetCommand> _logger = logger;
 
     private static readonly string s_bestPracticesText = LoadBestPracticesText();
 
@@ -21,17 +21,18 @@ public sealed class TerraformBestPracticesGetCommand(ILogger<TerraformBestPracti
     private static string LoadBestPracticesText()
     {
 
-        Assembly assembly = typeof(TerraformBestPracticesGetCommand).Assembly;
-        string resourceName = EmbeddedResourceHelper.FindEmbeddedResource(assembly, "terraform-best-practices.txt");
+        Assembly assembly = typeof(TerraformBestPracticesForAzureGetCommand).Assembly;
+        string resourceName = EmbeddedResourceHelper.FindEmbeddedResource(assembly, "terraform-best-practices-for-azure.txt");
         return EmbeddedResourceHelper.ReadEmbeddedResource(assembly, resourceName);
     }
 
     public override string Name => "get";
 
     public override string Description =>
-        "Returns Terraform best practices. " +
-        "Call this command and follow its guidance before generating or suggesting any Terraform code. " +
+        "Returns Terraform best practices for Azure. " +
+        "Call this command and follow its guidance before generating or suggesting any Terraform code specific to Azure. " +
         "This command returns the content of the markdown file as a string array.";
+
 
     public override string Title => CommandTitle;
 
