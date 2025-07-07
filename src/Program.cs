@@ -9,6 +9,7 @@ using AzureMcp.Services.Azure.Subscription;
 using AzureMcp.Services.Azure.Tenant;
 using AzureMcp.Services.Caching;
 using AzureMcp.Services.ProcessExecution;
+using AzureMcp.Services.Telemetry;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -62,6 +63,7 @@ internal class Program
             new AzureMcp.Areas.Authorization.AuthorizationSetup(),
             new AzureMcp.Areas.AzureIsv.AzureIsvSetup(),
             new AzureMcp.Areas.Cosmos.CosmosSetup(),
+            new AzureMcp.Areas.Foundry.FoundrySetup(),
             new AzureMcp.Areas.KeyVault.KeyVaultSetup(),
             new AzureMcp.Areas.Kusto.KustoSetup(),
             new AzureMcp.Areas.Monitor.MonitorSetup(),
@@ -106,9 +108,11 @@ internal class Program
     {
         Console.WriteLine(JsonSerializer.Serialize(response, ModelsJsonContext.Default.CommandResponse));
     }
+
     internal static void ConfigureServices(IServiceCollection services)
     {
         services.ConfigureOpenTelemetry();
+
         services.AddMemoryCache();
         services.AddSingleton<ICacheService, CacheService>();
         services.AddSingleton<IExternalProcessService, ExternalProcessService>();

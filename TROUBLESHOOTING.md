@@ -11,8 +11,7 @@ When configuring Azure MCP with 'all' toolsets for convenience, you may encounte
 ![128 tools limit error](docs/images/128-tools-limit-error.png)
 
 ### Root Cause
-VS Code Copilot has a limitation of 128 tools maximum per request. When you combine multiple comprehensive toolsets (like GitHub MCP 'all' + Azure MCP 'all'), the total number of available tools exceeds this limit.
-
+  VS Code Copilot has a limitation of 128 tools maximum per request. When you combine multiple comprehensive toolsets (like GitHub MCP 'all' + Azure MCP 'all'), the total number of available tools exceeds this limit.  The solution to this problem is discussed in the VS Code repo [here](https://github.com/microsoft/vscode/issues/248021).
 ### Workarounds
 
 **Option 1: Use VS Code Custom Chat Modes (Recommended)**
@@ -433,6 +432,12 @@ See the [Authentication guide](https://github.com/Azure/azure-mcp/blob/main/docs
 1. Choose the option that best fits your scenario
 2. Complete the authentication setup as described in the [Authentication guide](https://github.com/Azure/azure-mcp/blob/main/docs/Authentication.md)
 3. Verify access by running `az account show` to confirm you're authenticated with the correct account type
+
+## Development in VS Code
+
+### Use your own language model key
+
+Follow the instructions in [Bring your own language model key](https://code.visualstudio.com/docs/copilot/language-models#_bring-your-own-language-model-key) docs to utilize your API Keys for the language model providers you already have in VS Code.
 
 ## Common issues
 

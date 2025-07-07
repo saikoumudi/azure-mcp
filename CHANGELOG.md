@@ -1,11 +1,53 @@
 # Release History
 
-## 0.2.4 (Unreleased)
+## 0.3.1 (Unreleased)
 
 ### Features Added
 
-- Added new command for resource-centric logs query in Azure Monitor with command path `azmcp-monitor-resource-logs-query` - https://github.com/Azure/azure-mcp/pull/413/
+### Breaking Changes
+
+### Bugs Fixed
+
+### Other Changes
+
+## 0.3.0 (2025-07-03)
+
+### Features Added
+
+- Added support for Azure AI Foundry [[#274](https://github.com/Azure/azure-mcp/pull/274)]. The following tools are now available:
+  - `azmcp-foundry-models-list`
+  - `azmcp-foundry-models-deploy`
+  - `azmcp-foundry-models-deployments-list`
+- Added support for telemetry [[#386](https://github.com/Azure/azure-mcp/pull/386)]. Telemetry is enabled by default but can be disabled by setting `AZURE_MCP_COLLECT_TELEMETRY` to `false`.
+
+### Bugs Fixed
+- Fixed a bug where `CallToolResult` was always successful. [[#511](https://github.com/Azure/azure-mcp/pull/511)]
+
+## 0.2.6 (2025-07-01)
+
+### Other Changes
+- Updated the descriptions of the following tools to improve their usage by Agents: [#492](https://github.com/Azure/azure-mcp/pull/492)
+  - `azmcp-datadog-monitoredresources-list`
+  - `azmcp-kusto-cluster-list`
+  - `azmcp-kusto-database-list`
+  - `azmcp-kusto-sample`
+  - `azmcp-kusto-table-list`
+  - `azmcp-kusto-table-schema`
+
+## 0.2.5 (2025-06-26)
+
+### Bugs Fixed
+- Fixed issue where tool listing incorrectly returned resources instead of text. [#465](https://github.com/Azure/azure-mcp/issues/465)
+- Fixed invalid modification to HttpClient in KustoClient. [#433](https://github.com/Azure/azure-mcp/issues/433)
+
+## 0.2.4 (2025-06-24)
+
+### Features Added
+
+- Added new command for resource-centric logs query in Azure Monitor with command path `azmcp-monitor-resource-logs-query` - https://github.com/Azure/azure-mcp/pull/413
+- Added support for starting the server with a subset of services using the `--service` flag - https://github.com/Azure/azure-mcp/pull/424
 - Improved index schema handling in Azure AI Search (index descriptions, facetable fields, etc.) - https://github.com/Azure/azure-mcp/pull/440
+- Added new commands for querying metrics with Azure Monitor with command paths `azmcp-monitor-metrics-query` and `azmcp-monitor-metrics-definitions`. - https://github.com/Azure/azure-mcp/pull/428
 
 ### Breaking Changes
 
@@ -151,7 +193,7 @@
 ### Features Added
 
 - Support for Azure Key Vault keys https://github.com/Azure/azure-mcp/pull/119
-- Support for Kusto (Azure Data Explorer).  https://github.com/Azure/azure-mcp/pull/21
+- Support for Azure Data Explorer  https://github.com/Azure/azure-mcp/pull/21
 
 ## 0.0.13 (2025-05-06)
 

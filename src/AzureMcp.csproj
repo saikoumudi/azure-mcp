@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <Version>0.2.4</Version>
+    <Version>0.3.1</Version>
     <OutputType>Exe</OutputType>
     <CliName>azmcp</CliName>
     <AssemblyName>$(CliName)</AssemblyName>
@@ -41,6 +41,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Azure.AI.Projects" />
     <PackageReference Include="Azure.Bicep.Types" />
     <PackageReference Include="Azure.Bicep.Types.Az" />
     <PackageReference Include="Azure.Core" />
@@ -52,6 +53,7 @@
     <PackageReference Include="Azure.Monitor.Query" />
     <PackageReference Include="Azure.ResourceManager.AppConfiguration" />
     <PackageReference Include="Azure.ResourceManager.Authorization" />
+    <PackageReference Include="Azure.ResourceManager.CognitiveServices" />
     <PackageReference Include="Azure.ResourceManager.Kusto" />
     <PackageReference Include="Azure.ResourceManager.PostgreSql" />
     <PackageReference Include="Azure.ResourceManager.Redis" />
@@ -64,7 +66,6 @@
     <PackageReference Include="Azure.ResourceManager.Search" />
     <PackageReference Include="Azure.ResourceManager.Storage" />
     <PackageReference Include="Azure.ResourceManager.Datadog" />
-    <PackageReference Include="JsonSchema.Net" />
     <PackageReference Include="Microsoft.Identity.Client.Broker" />
     <PackageReference Include="ModelContextProtocol" />
     <PackageReference Include="ModelContextProtocol.AspNetCore" />
