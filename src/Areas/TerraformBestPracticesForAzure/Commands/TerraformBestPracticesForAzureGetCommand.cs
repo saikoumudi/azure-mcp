@@ -6,7 +6,7 @@ using AzureMcp.Commands;
 using AzureMcp.Helpers;
 using Microsoft.Extensions.Logging;
 
-namespace AzureMcp.Areas.TerraformBestPractices.Commands;
+namespace AzureMcp.Areas.TerraformBestPracticesForAzure.Commands;
 
 public sealed class TerraformBestPracticesForAzureGetCommand(ILogger<TerraformBestPracticesForAzureGetCommand> logger) : BaseCommand()
 {
