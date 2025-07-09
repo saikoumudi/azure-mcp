@@ -16,7 +16,7 @@ internal class AzureTerraformBestPracticesSetup : IAreaSetup
 
     public void RegisterCommands(CommandGroup rootGroup, ILoggerFactory loggerFactory)
     {
-        // Register Terraform Best Practices for Azure command at the root level
+        // Register Azure Terraform Best Practices command at the root level
         var azureTerraformBestPractices = new CommandGroup(
             "azureterraformbestpractices",
             "Returns Terraform best practices for Azure. Call this before generating Terraform code for Azure Providers."
