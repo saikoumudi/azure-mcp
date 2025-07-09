@@ -6,22 +6,19 @@ using AzureMcp.Commands;
 using AzureMcp.Helpers;
 using Microsoft.Extensions.Logging;
 
-namespace AzureMcp.Areas.TerraformBestPracticesForAzure.Commands;
+namespace AzureMcp.Areas.AzureTerraformBestPractices.Commands;
 
-public sealed class TerraformBestPracticesForAzureGetCommand(ILogger<TerraformBestPracticesForAzureGetCommand> logger) : BaseCommand()
+public sealed class AzureTerraformBestPracticesGetCommand(ILogger<AzureTerraformBestPracticesGetCommand> logger) : BaseCommand()
 {
-
     private const string CommandTitle = "Get Terraform Best Practices for Azure";
-    private readonly ILogger<TerraformBestPracticesForAzureGetCommand> _logger = logger;
-
+    private readonly ILogger<AzureTerraformBestPracticesGetCommand> _logger = logger;
     private static readonly string s_bestPracticesText = LoadBestPracticesText();
 
     private static string GetBestPracticesText() => s_bestPracticesText;
 
     private static string LoadBestPracticesText()
     {
-
-        Assembly assembly = typeof(TerraformBestPracticesForAzureGetCommand).Assembly;
+        Assembly assembly = typeof(AzureTerraformBestPracticesGetCommand).Assembly;
         string resourceName = EmbeddedResourceHelper.FindEmbeddedResource(assembly, "terraform-best-practices-for-azure.txt");
         return EmbeddedResourceHelper.ReadEmbeddedResource(assembly, resourceName);
     }
@@ -33,9 +30,7 @@ public sealed class TerraformBestPracticesForAzureGetCommand(ILogger<TerraformBe
         "Call this command and follow its guidance before generating or suggesting any Terraform code specific to Azure. " +
         "This command returns the content of the markdown file as a string array.";
 
-
     public override string Title => CommandTitle;
-
 
     [McpServerTool(Destructive = false, ReadOnly = true, Title = CommandTitle)]
     public override Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)

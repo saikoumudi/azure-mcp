@@ -1,16 +1,15 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using AzureMcp.Areas.TerraformBestPracticesForAzure.Commands;
+using AzureMcp.Areas.AzureTerraformBestPractices.Commands;
 using AzureMcp.Commands;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-namespace AzureMcp.Areas.TerraformBestPracticesForAzure;
+namespace AzureMcp.Areas.AzureTerraformBestPractices;
 
-internal class TerraformBestPracticesForAzureSetup : IAreaSetup
+internal class AzureTerraformBestPracticesSetup : IAreaSetup
 {
-
     public void ConfigureServices(IServiceCollection services)
     {
     }
@@ -18,14 +17,14 @@ internal class TerraformBestPracticesForAzureSetup : IAreaSetup
     public void RegisterCommands(CommandGroup rootGroup, ILoggerFactory loggerFactory)
     {
         // Register Terraform Best Practices for Azure command at the root level
-        var terraformBestPracticesForAzure = new CommandGroup(
-            "terraformbestpracticesforazure",
+        var azureTerraformBestPractices = new CommandGroup(
+            "azureterraformbestpractices",
             "Returns Terraform best practices for Azure. Call this before generating Terraform code for Azure Providers."
         );
-        rootGroup.AddSubGroup(terraformBestPracticesForAzure);
-        terraformBestPracticesForAzure.AddCommand(
+        rootGroup.AddSubGroup(azureTerraformBestPractices);
+        azureTerraformBestPractices.AddCommand(
             "get",
-            new TerraformBestPracticesForAzureGetCommand(loggerFactory.CreateLogger<TerraformBestPracticesForAzureGetCommand>())
+            new AzureTerraformBestPracticesGetCommand(loggerFactory.CreateLogger<AzureTerraformBestPracticesGetCommand>())
         );
     }
 }

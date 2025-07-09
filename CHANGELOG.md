@@ -7,6 +7,7 @@
 - Updates support for launching Azure MCP in different tool loading configurations. [#513](https://github.com/Azure/azure-mcp/pull/513)
 
 - Support for Azure SQL Server Entra ID administrator operations - List Microsoft Entra ID administrators for a SQL server. [#529](https://github.com/Azure/azure-mcp/pull/529)
+- Added support for Azure Terraform Best Practices with command path `azmcp-azureterraformbestpractices-get`. [#420](https://github.com/Azure/azure-mcp/pull/420)
 ### Breaking Changes
 
 - `--service` flag deprecated. Use `--namespace` and `--mode` options. [#513](https://github.com/Azure/azure-mcp/pull/513)
